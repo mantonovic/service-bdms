@@ -1,0 +1,6 @@
+psycopg2-binary
+momoko
+jsonschema
+pytest
+dateutils
+tornado
