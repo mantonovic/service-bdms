@@ -31,6 +31,7 @@ class PatchGeom(Action):
                     """, id
                 )
 
+                print(location)
                 # If not complete remove geometry
                 if (
                     location[0] is None or
