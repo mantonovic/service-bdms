@@ -52,6 +52,7 @@ class PatchGeom(Action):
                     elif field == 'location_y':
                         point = point % (location[0], value)
 
+                    print(location)
                     try:
                         if location[2] == '21781':
                             await self.conn.execute("""
@@ -68,8 +69,8 @@ class PatchGeom(Action):
                                 )
                                 WHERE id_bho = $2
                             """ % point, int(location[2]), id)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        print(str(e))
 
             else:
                 raise PatchAttributeException(field)
