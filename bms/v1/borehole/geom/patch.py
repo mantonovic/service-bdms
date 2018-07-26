@@ -40,7 +40,7 @@ class PatchGeom(Action):
                     await self.conn.execute("""
                         UPDATE public.borehole
                         SET geom_bho = NULL
-                        WHERE id_bho = $2
+                        WHERE id_bho = $1
                     """, id)
 
                 else:
