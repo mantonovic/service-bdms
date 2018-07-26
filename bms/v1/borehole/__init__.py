@@ -6,3 +6,4 @@ from bms.v1.borehole.list import ListBorehole
 from bms.v1.borehole.get import GetBorehole
 from bms.v1.borehole.check import CheckBorehole
 from bms.v1.borehole.patch import PatchBorehole
+from bms.v1.borehole.geojson import ListGeojson

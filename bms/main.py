@@ -18,6 +18,8 @@ if __name__ == "__main__":
 
     from bms import (
         BoreholeHandler,
+        StratigraphyHandler,
+        LayerHandler,
         ProjectHandler,
         CodeListHandler,
         MunicipalityHandler,
@@ -34,6 +36,8 @@ if __name__ == "__main__":
 
     application = web.Application([
         (r'/api/v1/borehole', BoreholeHandler),
+        (r'/api/v1/borehole/stratigraphy', StratigraphyHandler),
+        (r'/api/v1/borehole/stratigraphy/layer', LayerHandler),
         (r'/api/v1/borehole/project', ProjectHandler),
         (r'/api/v1/borehole/codes', CodeListHandler),
         (r'/api/v1/geoapi/municipality', MunicipalityHandler),

@@ -3,97 +3,30 @@ from bms.v1.action import Action
 from bms.v1.exceptions import (
     PatchAttributeException
 )
-from bms.v1.borehole.geom.patch import PatchGeom
 
 
-class PatchBorehole(Action):
+class PatchLayer(Action):
 
     async def execute(self, id, field, value, user_id):
         try:
             # Updating character varing field
             if field in [
-                'extended.original_name',
-                'custom.public_name',
-                'custom.project_name',
-                'custom.canton',
-                'custom.city',
-                'custom.address',
-                'location_x',
-                'location_y',
-                'elevation_z',
-                'canton',
-                'address',
-                'drill_diameter',
-                'custom.drill_diameter',
-                'bore_inc',
-                'bore_inc_dir',
-                'length',
-                'extended.top_bedrock',
-                'extended.groundwater'
+                        'depth_from',
+                        'depth_to'
                     ]:
 
                 column = None
 
-                if field == 'extended.original_name':
-                    column = 'original_name_bho'
+                if field == 'depth_from':
+                    column = 'depth_from_lay'
 
-                if field == 'custom.public_name':
-                    column = 'public_name_bho'
-
-                if field == 'custom.project_name':
-                    column = 'project_name_bho'
-
-                if field == 'custom.address':
-                    column = 'address_bho'
-
-                elif field in ['location_x', 'location_y']:
-
-                    geom = PatchGeom(self.conn)
-                    await geom.execute(id, field, value)
-
-                    if field == 'location_x':
-                        column = 'location_x_bho'
-
-                    elif field == 'location_y':
-                        column = 'location_y_bho'
-
-                elif field == 'elevation_z':
-                    column = 'elevation_z_bho'
-
-                if field == 'custom.canton':
-                    column = 'canton_bho'
-
-                if field == 'custom.city':
-                    column = 'city_bho'
-
-                elif field == 'canton':
-                    column = 'canton_num'
-
-                elif field == 'address':
-                    column = 'address_bho'
-
-                elif field == 'custom.drill_diameter':
-                    column = 'drill_diameter_bho'
-
-                elif field == 'bore_inc':
-                    column = 'bore_inc_bho'
-
-                elif field == 'bore_inc_dir':
-                    column = 'bore_inc_dir_bho'
-
-                elif field == 'length':
-                    column = 'length_bho'
-
-                elif field == 'extended.top_bedrock':
-                    column = 'top_bedrock_bho'
-
-                elif field == 'extended.groundwater':
-                    column = 'groundwater_bho'
+                elif field == 'depth_to':
+                    column = 'depth_to_lay'
 
                 await self.conn.execute("""
-                    UPDATE public.borehole
+                    UPDATE public.layer
                     SET %s = $1
-                    WHERE id_bho = $2
+                    WHERE id_lay = $2
                 """ % column, value, id)
 
             # Datetime values

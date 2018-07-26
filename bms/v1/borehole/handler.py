@@ -5,7 +5,8 @@ from bms.v1.borehole import (
     PatchBorehole,
     ListBorehole,
     GetBorehole,
-    CheckBorehole
+    CheckBorehole,
+    ListGeojson
 )
 
 
@@ -18,7 +19,8 @@ class BoreholeHandler(Viewer):
                 'PATCH',
                 'LIST',
                 'GET',
-                'CHECK']:
+                'CHECK',
+                'GEOJSON']:
 
             async with self.pool.acquire() as conn:
 
@@ -40,6 +42,9 @@ class BoreholeHandler(Viewer):
 
                 elif action == 'CHECK':
                     exe = CheckBorehole(conn)
+
+                elif action == 'GEOJSON':
+                    exe = ListGeojson(conn)
 
                 request.pop('lang', None)
 

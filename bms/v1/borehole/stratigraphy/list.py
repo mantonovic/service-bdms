@@ -3,7 +3,7 @@ from bms.v1.action import Action
 import math
 
 
-class ListBorehole(Action):
+class ListStratigraphies(Action):
 
     async def execute(self, limit=None, page=None, filter={}):
 
@@ -11,44 +11,35 @@ class ListBorehole(Action):
         params = []
         where = []
 
-        self.idx = 0
-
-        def getIdx():
-            self.idx += 1
-            return "$%s" % self.idx
-
-        if 'identifier' in filter.keys() and filter['identifier'] != '':
-            params.append("%%%s%%" % filter['identifier'])
+        if 'borehole' in filter.keys() and filter['borehole'] != '':
+            params.append(filter['borehole'])
             where.append("""
-                original_name_bho LIKE %s
-            """ % getIdx())
-
-        if 'project' in filter.keys():
-            params.append(filter['project'])
-            where.append("""
-                project_id = %s
-            """ % getIdx())
+                id_bho_fk = %s
+            """ % self.getIdx())
 
         if limit is not None and page is not None:
             paging = """
                 LIMIT %s
                 OFFSET %s
-            """ % (getIdx(), getIdx())
+            """ % (self.getIdx(), self.getIdx())
             params += [
                 limit, (int(limit) * (int(page) - 1))
             ]
 
         rowsSql = """
             SELECT
-                id_bho as id,
-                original_name_bho as name
+                id_sty as id,
+                id_bho_fk as borehole,
+                kind_id_cli as kind
             FROM
-                borehole
+                stratigraphy
+            LEFT JOIN codelist AS lk
+            ON lk.id_cli = kind_id_cli
         """
 
         cntSql = """
             SELECT count(*) AS cnt
-            FROM borehole
+            FROM stratigraphy
         """
 
         if len(where) > 0:
@@ -71,7 +62,7 @@ class ListBorehole(Action):
                 ), 0)
             FROM (
                 %s
-            ORDER BY id_bho
+            ORDER BY id_sty
                 %s
             ) AS t
         """ % (cntSql, rowsSql, paging)
