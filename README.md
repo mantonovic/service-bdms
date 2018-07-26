@@ -4,14 +4,15 @@ Setup developer environment
 
 ```bash
 python3 -m venv ./venv
-source venv
+source venv/bin/activate
 pip3 install --upgrade pip
 pip3 install psycopg2-binary \
   momoko \
   jsonschema \
   pytest \
   dateutils \
-  tornado
+  tornado \
+  asyncpg
 ```
 
 Activate virtual environment
