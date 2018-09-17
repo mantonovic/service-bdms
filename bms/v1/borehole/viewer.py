@@ -1,29 +1,33 @@
 # -*- coding: utf-8 -*-S
 from bms.v1.handlers import Viewer
-from bms.v1.geoapi import (
-    ListMunicipality,
-    GetMunicipality
+from bms.v1.borehole import (
+    ListBorehole,
+    GetBorehole,
+    ListGeojson
 )
 
 
-class MunicipalityHandler(Viewer):
-
+class BoreholeViewerHandler(Viewer):
     async def execute(self, request):
         action = request.pop('action', None)
 
         if action in [
-                'LIST', 'GET']:
+                'LIST',
+                'GET',
+                'GEOJSON']:
 
             async with self.pool.acquire() as conn:
 
                 exe = None
-                print("Action: %s" % action)
+                
                 if action == 'LIST':
-                    exe = ListMunicipality(conn)
+                    exe = ListBorehole(conn)
 
                 elif action == 'GET':
-                    print("is get!!")
-                    exe = GetMunicipality(conn)
+                    exe = GetBorehole(conn)
+
+                elif action == 'GEOJSON':
+                    exe = ListGeojson(conn)
 
                 request.pop('lang', None)
 

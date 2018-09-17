@@ -3,7 +3,7 @@ from bms.v1.action import Action
 import math
 
 
-class ListBorehole(Action):
+class ListEditingBorehole(Action):
 
     async def execute(self, limit=None, page=None, filter={}):
 
@@ -48,23 +48,6 @@ class ListBorehole(Action):
             where.append("""
                 status_id_cli = %s
             """ % getIdx())
-
-        if 'extent' in filter.keys() and filter['extent'] != None:
-            for coord in filter['extent']:
-                params.append(coord)
-            where.append("""
-                ST_Intersects(
-                    geom_bho,
-                    ST_MakeEnvelope(
-                        %s, %s, %s, %s, 21781
-                    )
-                )
-            """ % (
-                getIdx(),
-                getIdx(),
-                getIdx(),
-                getIdx()
-            ))
 
         if limit is not None and page is not None:
             paging = """

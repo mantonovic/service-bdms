@@ -9,37 +9,23 @@ from bms.v1.borehole.stratigraphy.layer import (
 )
 
 
-class LayerHandler(Viewer):
+class LayerViewerHandler(Viewer):
     async def execute(self, request):
         action = request.pop('action', None)
 
         if action in [
-                'CREATE',
-                'DELETE',
-                'PATCH',
                 'LIST',
-                'GET',
-                'CHECK']:
+                'GET']:
 
             async with self.pool.acquire() as conn:
 
                 exe = None
 
-                if action == 'CREATE':
-                    exe = CreateLayer(conn)
-
-                elif action == 'DELETE':
-                    exe = DeleteLayer(conn)
-
-                elif action == 'GET':
+                if action == 'GET':
                     exe = GetLayer(conn)
 
                 elif action == 'LIST':
                     exe = ListLayers(conn)
-
-                elif action == 'PATCH':
-                    exe = PatchLayer(conn)
-                    request['user_id'] = self.user['id']
 
                 request.pop('lang', None)
 

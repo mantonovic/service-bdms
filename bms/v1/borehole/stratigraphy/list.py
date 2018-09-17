@@ -10,11 +10,18 @@ class ListStratigraphies(Action):
         paging = ''
         params = []
         where = []
+        fkeys = filter.keys()
 
-        if 'borehole' in filter.keys() and filter['borehole'] != '':
+        if 'borehole' in fkeys and filter['borehole'] != '':
             params.append(filter['borehole'])
             where.append("""
                 id_bho_fk = %s
+            """ % self.getIdx())
+
+        if 'kind' in fkeys and filter['kind'] != '':
+            params.append(filter['kind'])
+            where.append("""
+                kind_id_cli = %s
             """ % self.getIdx())
 
         if limit is not None and page is not None:
@@ -33,7 +40,7 @@ class ListStratigraphies(Action):
                 kind_id_cli as kind
             FROM
                 stratigraphy
-            LEFT JOIN codelist AS lk
+            INNER JOIN codelist AS lk
             ON lk.id_cli = kind_id_cli
         """
 
@@ -62,7 +69,7 @@ class ListStratigraphies(Action):
                 ), 0)
             FROM (
                 %s
-            ORDER BY id_sty
+            ORDER BY order_cli
                 %s
             ) AS t
         """ % (cntSql, rowsSql, paging)

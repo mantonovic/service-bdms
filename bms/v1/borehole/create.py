@@ -9,8 +9,8 @@ class CreateBorehole(Action):
             "id": (
                 await self.conn.fetchval("""
                     INSERT INTO public.borehole(
-                        project_id, author_id)
-                    VALUES ($1, $2) RETURNING id_bho
-                """, id, user_id)
+                        project_id, author_id, updater_bho)
+                    VALUES ($1, $2, $3) RETURNING id_bho
+                """, id, user_id, user_id)
             )
         }

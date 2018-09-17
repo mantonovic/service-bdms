@@ -17,9 +17,18 @@ async def get_conn():
 if __name__ == "__main__":
 
     from bms import (
-        BoreholeHandler,
+        # Borehole handlers
+        BoreholeViewerHandler,
+        BoreholeProducerHandler,
+
+        # Stratigraphy handlers
         StratigraphyHandler,
-        LayerHandler,
+
+        # Layer handlers
+        LayerViewerHandler,
+        LayerProducerHandler,
+
+        # Other handlers
         ProjectHandler,
         CodeListHandler,
         MunicipalityHandler,
@@ -35,9 +44,18 @@ if __name__ == "__main__":
     )
 
     application = web.Application([
-        (r'/api/v1/borehole', BoreholeHandler),
+        # Borehole handlers
+        (r'/api/v1/borehole', BoreholeViewerHandler),
+        (r'/api/v1/borehole/edit', BoreholeProducerHandler),
+
+        # Stratigraphy handlers
         (r'/api/v1/borehole/stratigraphy', StratigraphyHandler),
-        (r'/api/v1/borehole/stratigraphy/layer', LayerHandler),
+
+        # Layer handlers
+        (r'/api/v1/borehole/stratigraphy/layer', LayerViewerHandler),
+        (r'/api/v1/borehole/stratigraphy/layer/edit', LayerProducerHandler),
+
+        # Other handlers
         (r'/api/v1/borehole/project', ProjectHandler),
         (r'/api/v1/borehole/codes', CodeListHandler),
         (r'/api/v1/geoapi/municipality', MunicipalityHandler),

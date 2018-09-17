@@ -16,10 +16,26 @@ class ListLayers(Action):
                 SELECT
                     id_lay as id,
                     depth_from_lay as depth_from,
-                    depth_to_lay as depth_to
+                    depth_to_lay as depth_to,
+                    CASE
+                        WHEN elevation_z_bho is NULL THEN NULL
+                        ELSE elevation_z_bho - depth_from_lay
+                    END AS msm_from,
+                    CASE
+                        WHEN elevation_z_bho is NULL THEN NULL
+                        ELSE elevation_z_bho - depth_to_lay
+                    END AS msm_to
+                    /*,
+                    SUM(depth_to_lay)
+                        OVER (ORDER BY depth_from_lay, id_lay ASC) AS depth*/
                 FROM
-                    layer
-                WHERE id_sty_fk = $1
+                    layer, stratigraphy, borehole
+                WHERE
+                    id_sty_fk = $1
+                AND
+                    id_sty = id_sty_fk
+                AND
+                    id_bho_fk = id_bho
                 ORDER BY depth_from_lay, id_lay
             ) AS t
         """, id)

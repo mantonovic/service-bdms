@@ -10,7 +10,7 @@ class PatchBorehole(Action):
 
     async def execute(self, id, field, value, user_id):
         try:
-            # Updating character varing field
+            # Updating character varing, boolean fields
             if field in [
                 'extended.original_name',
                 'custom.public_name',
@@ -29,7 +29,9 @@ class PatchBorehole(Action):
                 'bore_inc_dir',
                 'length',
                 'extended.top_bedrock',
-                'extended.groundwater'
+                'extended.groundwater',
+                'custom.mistakes',
+                'custom.remarks'
                     ]:
 
                 column = None
@@ -90,11 +92,20 @@ class PatchBorehole(Action):
                 elif field == 'extended.groundwater':
                     column = 'groundwater_bho'
 
+                elif field == 'custom.mistakes':
+                    column = 'mistakes_bho'
+
+                elif field == 'custom.remarks':
+                    column = 'remarks_bho'
+
                 await self.conn.execute("""
                     UPDATE public.borehole
-                    SET %s = $1
-                    WHERE id_bho = $2
-                """ % column, value, id)
+                    SET
+                        %s = $1,
+                        update_bho = now(),
+                        updater_bho = $2
+                    WHERE id_bho = $3
+                """ % column, value, user_id, id)
 
             # Datetime values
             elif field in [
@@ -112,9 +123,12 @@ class PatchBorehole(Action):
 
                 await self.conn.execute("""
                     UPDATE public.borehole
-                    SET %s = to_date($1, 'YYYY-MM-DD')
-                    WHERE id_bho = $2
-                """ % column, value, id)
+                    SET
+                        %s = to_date($1, 'YYYY-MM-DD'),
+                        update_bho = now(),
+                        updater_bho = $2
+                    WHERE id_bho = $3
+                """ % column, value, user_id, id)
 
             elif field in [
                         'restriction',
@@ -130,27 +144,13 @@ class PatchBorehole(Action):
                         'extended.status',
                         'custom.qt_bore_inc_dir',
                         'custom.qt_length',
-                        'custom.qt_top_bedrock'
+                        'custom.qt_top_bedrock',
+                        'custom.processing_status',
+                        'custom.national_relevance'
                     ]:
 
                 column = None
-
-                # Check if domain is extracted from the correct schema
-                schema = await self.conn.fetchval("""
-                    SELECT
-                        schema_cli
-                    FROM
-                        codelist
-                    WHERE id_cli = $1
-                """, value)
-
-                if schema != field:
-                    raise Exception(
-                        "Attribute id %s not part of schema %s" %
-                        (
-                            value, field
-                        )
-                    )
+                schema = field
 
                 if field == 'restriction':
                     column = 'restriction_id_cli'
@@ -194,23 +194,56 @@ class PatchBorehole(Action):
                 elif field == 'custom.qt_top_bedrock':
                     column = 'qt_top_bedrock_id_cli'
 
+                elif field == 'custom.processing_status':
+                    column = 'processing_status_id_cli'
+                    schema = 'madm401'
+
+                elif field == 'custom.national_relevance':
+                    column = 'national_relevance_id_cli'
+                    schema = 'madm402'
+
+                # Check if domain is extracted from the correct schema
+                if schema != (await self.conn.fetchval("""
+                            SELECT
+                                schema_cli
+                            FROM
+                                codelist
+                            WHERE
+                                id_cli = $1
+                        """, value)):
+                    raise Exception(
+                        "Attribute id %s not part of schema %s" %
+                        (
+                            value, schema
+                        )
+                    )
+
                 await self.conn.execute("""
                     UPDATE public.borehole
-                    SET %s = $1
-                    WHERE id_bho = $2
-                """ % column, value, id)
+                    SET
+                        %s = $1,
+                        update_bho = now(),
+                        updater_bho = $2
+                    WHERE id_bho = $3
+                """ % column, value, user_id, id)
 
             elif field in [
                         'custom.lit_pet_top_bedrock',
                         'custom.lit_str_top_bedrock',
-                        'custom.chro_str_top_bedrock'
+                        'custom.chro_str_top_bedrock',
+                        'custom.attributes_to_edit'
                     ]:
+
+                schema = field
+
+                if field == 'custom.attributes_to_edit':
+                    schema = 'madm404'
 
                 await self.conn.execute("""
                     DELETE FROM public.borehole_codelist
                     WHERE id_bho_fk = $1
                     AND code_cli = $2
-                """, id, field)
+                """, id, schema)
 
                 if len(value) > 0:
                     # Check if domain is extracted from the correct schema
@@ -226,13 +259,13 @@ class PatchBorehole(Action):
                             AND
                                 schema_cli = $3
                         ) AS c
-                    """, len(value), value, field)
+                    """, len(value), value, schema)
                     if check is False:
                         raise Exception(
                             "One ore more attribute ids %s are "
                             "not part of schema %s" %
                             (
-                                value, field
+                                value, schema
                             )
                         )
 
@@ -241,7 +274,15 @@ class PatchBorehole(Action):
                             public.borehole_codelist (
                                 id_bho_fk, id_cli_fk, code_cli
                             ) VALUES ($1, $2, $3)
-                    """, [(id, v, field) for v in value])
+                    """, [(id, v, schema) for v in value])
+
+                    await self.conn.execute("""
+                        UPDATE public.borehole
+                        SET
+                            update_bho = now(),
+                            updater_bho = $1
+                        WHERE id_bho = $2
+                    """, user_id, id)
 
             else:
                 raise PatchAttributeException(field)

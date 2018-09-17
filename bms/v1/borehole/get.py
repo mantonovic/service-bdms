@@ -11,6 +11,30 @@ class GetBorehole(Action):
             FROM (
                 SELECT
                     id_bho as id,
+                    (
+                        select row_to_json(t)
+                        FROM (
+                            SELECT
+                                updater.id_usr as id,
+                                updater.username as username,
+                                to_char(
+                                    update_bho,
+                                    'YYYY-MM-DD"T"HH24:MI:SS'
+                                ) as date
+                        ) t
+                    ) as updater,
+                    (
+                        select row_to_json(t2)
+                        FROM (
+                            SELECT
+                                author.id_usr as id,
+                                author.username as username,
+                                to_char(
+                                    created_bho,
+                                    'YYYY-MM-DD"T"HH24:MI:SS'
+                                ) as date
+                        ) t2
+                    ) as author,
                     kind_id_cli as kind,
                     restriction_id_cli as restriction,
                     to_char(
@@ -69,11 +93,24 @@ class GetBorehole(Action):
                                 ) AS lit_str_top_bedrock,
                                 COALESCE(
                                     acstb, '{}'::int[]
-                                ) AS chro_str_top_bedrock
+                                ) AS chro_str_top_bedrock,
+                                processing_status_id_cli
+                                    as processing_status,
+                                national_relevance_id_cli
+                                    as national_relevance,
+                                COALESCE(
+                                    ate, '{}'::int[]
+                                ) AS attributes_to_edit,
+                                mistakes_bho as mistakes,
+                                remarks_bho as remarks
                         ) t
                     ) as custom
                 FROM
                     borehole
+                INNER JOIN public.user as updater
+                ON updater_bho = updater.id_usr
+                INNER JOIN public.user as author
+                ON author_id = author.id_usr
                 LEFT JOIN project
                 ON id_pro = project_id
                 LEFT JOIN cantons
@@ -100,6 +137,11 @@ class GetBorehole(Action):
                     GROUP BY id_bho_fk
                 ) lstb
                 ON lstb.id_bho_fk = id_bho
+                /*
+https://jira.swisstopo.ch/browse/BMSWEB-14?focusedCommentId=59676
+&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel
+#comment-59676
+                */
                 LEFT JOIN (
                     SELECT
                         id_bho_fk, array_agg(id_cli_fk) as acstb
@@ -110,9 +152,21 @@ class GetBorehole(Action):
                     GROUP BY id_bho_fk
                 ) cstb
                 ON cstb.id_bho_fk = id_bho
+                LEFT JOIN (
+                    SELECT
+                        id_bho_fk, array_agg(id_cli_fk) as ate
+                    FROM
+                        borehole_codelist
+                    WHERE
+                        code_cli = 'madm404'
+                    GROUP BY id_bho_fk
+                ) tmadm404
+                ON tmadm404.id_bho_fk = id_bho
                 WHERE id_bho = $1
             ) AS t
         """, id)
+
+        print(id, rec)
         return {
             "data": self.decode(rec[0]) if rec[0] is not None else None
         }

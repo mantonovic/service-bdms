@@ -1,26 +1,22 @@
 # -*- coding: utf-8 -*-S
-from bms.v1.handlers import Viewer
+from bms.v1.handlers import Producer
 from bms.v1.borehole import (
     CreateBorehole,
     PatchBorehole,
-    ListBorehole,
-    GetBorehole,
     CheckBorehole,
-    ListGeojson
+    ListEditingBorehole
 )
 
 
-class BoreholeHandler(Viewer):
+class BoreholeProducerHandler(Producer):
     async def execute(self, request):
         action = request.pop('action', None)
 
         if action in [
                 'CREATE',
                 'PATCH',
-                'LIST',
-                'GET',
                 'CHECK',
-                'GEOJSON']:
+                'LIST']:
 
             async with self.pool.acquire() as conn:
 
@@ -34,17 +30,11 @@ class BoreholeHandler(Viewer):
                     exe = PatchBorehole(conn)
                     request['user_id'] = self.user['id']
 
-                elif action == 'LIST':
-                    exe = ListBorehole(conn)
-
-                elif action == 'GET':
-                    exe = GetBorehole(conn)
-
                 elif action == 'CHECK':
                     exe = CheckBorehole(conn)
-
-                elif action == 'GEOJSON':
-                    exe = ListGeojson(conn)
+                
+                if action == 'LIST':
+                    exe = ListEditingBorehole(conn)
 
                 request.pop('lang', None)
 

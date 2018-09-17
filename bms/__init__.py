@@ -3,9 +3,14 @@ from bms.v1.basehandler import BaseHandler
 from bms.v1.exceptions import AuthorizationException
 
 # ACTION Handlers
-from bms.v1.borehole.handler import BoreholeHandler
+from bms.v1.borehole.producer import BoreholeProducerHandler
+from bms.v1.borehole.viewer import BoreholeViewerHandler
 from bms.v1.borehole.stratigraphy.handler import StratigraphyHandler
-from bms.v1.borehole.stratigraphy.layer.handler import LayerHandler
+
+# Stratigraphy's layers handlers
+from bms.v1.borehole.stratigraphy.layer.producer import LayerProducerHandler
+from bms.v1.borehole.stratigraphy.layer.viewer import LayerViewerHandler
+
 from bms.v1.borehole.project.handler import ProjectHandler
 from bms.v1.borehole.codelist.handler import CodeListHandler
 from bms.v1.geoapi.municipality.handler import MunicipalityHandler
