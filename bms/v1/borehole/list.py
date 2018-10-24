@@ -56,7 +56,7 @@ class ListBorehole(Action):
                 ST_Intersects(
                     geom_bho,
                     ST_MakeEnvelope(
-                        %s, %s, %s, %s, 21781
+                        %s, %s, %s, %s, 2056
                     )
                 )
             """ % (

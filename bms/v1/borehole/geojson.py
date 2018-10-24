@@ -20,7 +20,7 @@ class ListGeojson(Action):
                                         SELECT row_to_json(p)
                                         FROM (
                                             SELECT
-                                                'EPSG:21781' AS "name"
+                                                'EPSG:2056' AS "name"
                                         ) AS p
                                     ) AS properties
                             ) c
@@ -46,6 +46,11 @@ class ListGeojson(Action):
                                         ) AS properties
                                     FROM borehole
                                     WHERE geom_bho IS NOT NULL
+                                    AND geom_bho && ST_MakeEnvelope (
+                                        2420000, 1030000,
+                                        2900000, 1350000,
+                                        2056
+                                    )
                                 ) f
                             ), '{}'::json[]
                         ) AS features

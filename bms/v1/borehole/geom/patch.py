@@ -11,6 +11,7 @@ class PatchGeom(Action):
         try:
             # Updating character varing field
             if field in [
+                'location',
                 'location_x',
                 'location_y'
                     ]:
@@ -31,7 +32,6 @@ class PatchGeom(Action):
                     """, id
                 )
 
-                print(location)
                 # If not complete remove geometry
                 if (
                     location[0] is None or
@@ -47,15 +47,18 @@ class PatchGeom(Action):
                 else:
 
                     point = "POINT(%s %s)"
-                    if field == 'location_x':
+
+                    if field == 'location':
+                        point = point % (value[0], value[1])
+
+                    elif field == 'location_x':
                         point = point % (value, location[1])
 
                     elif field == 'location_y':
                         point = point % (location[0], value)
 
-                    print(location)
                     try:
-                        if location[2] == '21781':
+                        if location[2] == '2056':
                             await self.conn.execute("""
                                 UPDATE public.borehole
                                 SET geom_bho = ST_GeomFromText('%s', $1)
@@ -66,7 +69,7 @@ class PatchGeom(Action):
                                 UPDATE public.borehole
                                 SET geom_bho = ST_Transform(
                                     ST_GeomFromText('%s', $1),
-                                    21781
+                                    2056
                                 )
                                 WHERE id_bho = $2
                             """ % point, int(location[2]), id)

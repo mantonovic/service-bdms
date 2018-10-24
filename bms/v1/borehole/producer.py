@@ -2,6 +2,7 @@
 from bms.v1.handlers import Producer
 from bms.v1.borehole import (
     CreateBorehole,
+    DeleteBorehole,
     PatchBorehole,
     CheckBorehole,
     ListEditingBorehole
@@ -14,6 +15,7 @@ class BoreholeProducerHandler(Producer):
 
         if action in [
                 'CREATE',
+                'DELETE',
                 'PATCH',
                 'CHECK',
                 'LIST']:
@@ -25,6 +27,9 @@ class BoreholeProducerHandler(Producer):
                 if action == 'CREATE':
                     exe = CreateBorehole(conn)
                     request['user_id'] = self.user['id']
+
+                if action == 'DELETE':
+                    exe = DeleteBorehole(conn)
 
                 elif action == 'PATCH':
                     exe = PatchBorehole(conn)

@@ -17,19 +17,40 @@ class ListEditingBorehole(Action):
             self.idx += 1
             return "$%s" % self.idx
 
-        if 'identifier' in filter.keys() and filter['identifier'] != '':
-            params.append("%%%s%%" % filter['identifier'])
+        if 'original_name' in filter.keys() and filter['original_name'] != '':
+            params.append("%%%s%%" % filter['original_name'])
             where.append("""
                 original_name_bho LIKE %s
             """ % getIdx())
 
-        if 'project' in filter.keys():
+        if 'completness' in filter.keys() and filter['completness'] != '':
+            if filter['completness'] == 'complete':
+                params.append(100)
+                where.append("""
+                    percentage = %s
+                """ % getIdx())
+            elif filter['completness'] == 'incomplete':
+                params.append(0)
+                where.append("""
+                    percentage > %s
+                """ % getIdx())
+                params.append(100)
+                where.append("""
+                    percentage < %s
+                """ % getIdx())
+            if filter['completness'] == 'empty':
+                params.append(0)
+                where.append("""
+                    percentage = %s
+                """ % getIdx())
+
+        if 'project' in filter.keys() and filter['project'] is not None:
             params.append(filter['project'])
             where.append("""
                 project_id = %s
             """ % getIdx())
 
-        if 'kind' in filter.keys() and filter['kind'] != None:
+        if 'kind' in filter.keys() and filter['kind'] is not None:
             params.append(int(filter['kind']))
             where.append("""
                 kind_id_cli = %s
@@ -60,7 +81,7 @@ class ListEditingBorehole(Action):
 
         rowsSql = """
             SELECT
-                id_bho as id,
+                borehole.id_bho as id,
                 (
                     select row_to_json(t)
                     FROM (
@@ -93,16 +114,52 @@ class ListEditingBorehole(Action):
                         SELECT
                             status_id_cli as status
                     ) t
-                ) as extended
+                ) as extended,
+                stratigraphy as stratigraphy,
+                completness.percentage
             FROM
                 borehole
+            INNER JOIN public.completness
+            ON completness.id_bho = borehole.id_bho
             INNER JOIN public.user as author
-            ON author_id = author.id_usr
+                ON author_id = author.id_usr
+            LEFT JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_to_json(
+                        array_agg(
+                            json_build_object(
+                                'id', id,
+                                'kind', kind,
+                                'layers', layers
+                            )
+                        )
+                    ) AS stratigraphy
+                FROM (
+                    SELECT
+                        id_bho_fk,
+                        id_sty AS id,
+                        kind_id_cli AS kind,
+                        COUNT(id_lay) AS layers
+                    FROM
+                        stratigraphy
+                    INNER JOIN codelist
+                        ON kind_id_cli = id_cli
+                    LEFT JOIN layer
+                        ON id_sty_fk = id_sty
+                    GROUP BY id_bho_fk, id_sty, id_cli
+                    ORDER BY id_bho_fk, order_cli
+                ) t
+                GROUP BY id_bho_fk
+            ) AS strt
+            ON strt.id_bho_fk = borehole.id_bho
         """
 
         cntSql = """
             SELECT count(*) AS cnt
             FROM borehole
+            INNER JOIN public.completness
+            ON completness.id_bho = borehole.id_bho
         """
 
         if len(where) > 0:
@@ -125,7 +182,7 @@ class ListEditingBorehole(Action):
                 ), 0)
             FROM (
                 %s
-            ORDER BY id_bho
+            ORDER BY borehole.id_bho
                 %s
             ) AS t
         """ % (cntSql, rowsSql, paging)

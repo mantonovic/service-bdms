@@ -18,6 +18,7 @@ class PatchBorehole(Action):
                 'custom.canton',
                 'custom.city',
                 'custom.address',
+                'location',
                 'location_x',
                 'location_y',
                 'elevation_z',
@@ -48,16 +49,16 @@ class PatchBorehole(Action):
                 if field == 'custom.address':
                     column = 'address_bho'
 
-                elif field in ['location_x', 'location_y']:
-
-                    geom = PatchGeom(self.conn)
-                    await geom.execute(id, field, value)
+                elif field in ['location_x', 'location_y', 'location']:
 
                     if field == 'location_x':
                         column = 'location_x_bho'
 
                     elif field == 'location_y':
                         column = 'location_y_bho'
+
+                    elif field == 'location':
+                        column = ['location_x_bho', 'location_y_bho']
 
                 elif field == 'elevation_z':
                     column = 'elevation_z_bho'
@@ -98,14 +99,39 @@ class PatchBorehole(Action):
                 elif field == 'custom.remarks':
                     column = 'remarks_bho'
 
-                await self.conn.execute("""
-                    UPDATE public.borehole
-                    SET
-                        %s = $1,
-                        update_bho = now(),
-                        updater_bho = $2
-                    WHERE id_bho = $3
-                """ % column, value, user_id, id)
+                if isinstance(column, list):
+                    sets = []
+                    for col in column:
+                        sets.append("%s = %s" % (col, self.getIdx()))
+                    value.append(user_id)
+                    value.append(id)
+                    await self.conn.execute("""
+                        UPDATE public.borehole
+                        SET
+                            %s,
+                            update_bho = now(),
+                            updater_bho = %s
+                        WHERE id_bho = %s
+                    """ % (
+                        ", ".join(sets),
+                        self.getIdx(),
+                        self.getIdx()
+                    ), *value)
+
+                else:
+                    await self.conn.execute("""
+                        UPDATE public.borehole
+                        SET
+                            %s = $1,
+                            update_bho = now(),
+                            updater_bho = $2
+                        WHERE id_bho = $3
+                    """ % column, value, user_id, id)
+                
+                if field in ['location_x', 'location_y', 'location']:
+
+                    geom = PatchGeom(self.conn)
+                    await geom.execute(id, field, value)
 
             # Datetime values
             elif field in [
@@ -120,6 +146,9 @@ class PatchBorehole(Action):
 
                 elif field == 'drilling_date':
                     column = 'drilling_date_bho'
+
+                if value == '':
+                    value = None
 
                 await self.conn.execute("""
                     UPDATE public.borehole
@@ -287,8 +316,20 @@ class PatchBorehole(Action):
             else:
                 raise PatchAttributeException(field)
 
+            rec = await self.conn.fetchrow("""
+                SELECT
+                    percentage
+                FROM
+                    public.completness
+                WHERE
+                    id_bho = $1
+            """, id)
+            return {
+                "data": int(rec[0]) if rec[0] is not None else 0
+            }
+
         except PatchAttributeException as bmsx:
             raise bmsx
 
-        except Exception as ex:
+        except Exception:
             raise Exception("Error while updating borehole")

@@ -10,7 +10,7 @@ class GetBorehole(Action):
                 row_to_json(t)
             FROM (
                 SELECT
-                    id_bho as id,
+                    borehole.id_bho as id,
                     (
                         select row_to_json(t)
                         FROM (
@@ -104,9 +104,12 @@ class GetBorehole(Action):
                                 mistakes_bho as mistakes,
                                 remarks_bho as remarks
                         ) t
-                    ) as custom
+                    ) as custom,
+                    completness.percentage
                 FROM
                     borehole
+                INNER JOIN public.completness
+                ON completness.id_bho = borehole.id_bho
                 INNER JOIN public.user as updater
                 ON updater_bho = updater.id_usr
                 INNER JOIN public.user as author
@@ -126,7 +129,7 @@ class GetBorehole(Action):
                         code_cli = 'custom.lit_pet_top_bedrock'
                     GROUP BY id_bho_fk
                 ) lptb
-                ON lptb.id_bho_fk = id_bho
+                ON lptb.id_bho_fk = borehole.id_bho
                 LEFT JOIN (
                     SELECT
                         id_bho_fk, array_agg(id_cli_fk) as alstb
@@ -136,7 +139,7 @@ class GetBorehole(Action):
                         code_cli = 'custom.lit_str_top_bedrock'
                     GROUP BY id_bho_fk
                 ) lstb
-                ON lstb.id_bho_fk = id_bho
+                ON lstb.id_bho_fk = borehole.id_bho
                 /*
 https://jira.swisstopo.ch/browse/BMSWEB-14?focusedCommentId=59676
 &page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel
@@ -151,7 +154,7 @@ https://jira.swisstopo.ch/browse/BMSWEB-14?focusedCommentId=59676
                         code_cli = 'custom.chro_str_top_bedrock'
                     GROUP BY id_bho_fk
                 ) cstb
-                ON cstb.id_bho_fk = id_bho
+                ON cstb.id_bho_fk = borehole.id_bho
                 LEFT JOIN (
                     SELECT
                         id_bho_fk, array_agg(id_cli_fk) as ate
@@ -161,12 +164,11 @@ https://jira.swisstopo.ch/browse/BMSWEB-14?focusedCommentId=59676
                         code_cli = 'madm404'
                     GROUP BY id_bho_fk
                 ) tmadm404
-                ON tmadm404.id_bho_fk = id_bho
-                WHERE id_bho = $1
+                ON tmadm404.id_bho_fk = borehole.id_bho
+                WHERE borehole.id_bho = $1
             ) AS t
         """, id)
 
-        print(id, rec)
         return {
             "data": self.decode(rec[0]) if rec[0] is not None else None
         }
