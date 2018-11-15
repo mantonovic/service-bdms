@@ -94,9 +94,9 @@ class GetLayer(Action):
                     notes_lay AS notes
                 FROM
                     layer
-                INNER JOIN public.user as creator
+                INNER JOIN public.users as creator
                 ON creator_lay = creator.id_usr
-                INNER JOIN public.user as updater
+                INNER JOIN public.users as updater
                 ON updater_lay = updater.id_usr
                 LEFT JOIN (
                     SELECT

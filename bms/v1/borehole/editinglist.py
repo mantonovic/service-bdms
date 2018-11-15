@@ -121,7 +121,7 @@ class ListEditingBorehole(Action):
                 borehole
             INNER JOIN public.completness
             ON completness.id_bho = borehole.id_bho
-            INNER JOIN public.user as author
+            INNER JOIN public.users as author
                 ON author_id = author.id_usr
             LEFT JOIN (
                 SELECT

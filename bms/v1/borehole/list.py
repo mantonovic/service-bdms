@@ -113,7 +113,7 @@ class ListBorehole(Action):
                 ) as extended
             FROM
                 borehole
-            INNER JOIN public.user as author
+            INNER JOIN public.users as author
             ON author_id = author.id_usr
         """
 

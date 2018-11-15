@@ -85,15 +85,9 @@ class GetBorehole(Action):
                                 qt_bore_inc_dir_id_cli as qt_bore_inc_dir,
                                 qt_length_id_cli as qt_length,
                                 qt_top_bedrock_id_cli as qt_top_bedrock,
-                                COALESCE(
-                                    alptb, '{}'::int[]
-                                ) AS lit_pet_top_bedrock,
-                                COALESCE(
-                                    alstb, '{}'::int[]
-                                ) AS lit_str_top_bedrock,
-                                COALESCE(
-                                    acstb, '{}'::int[]
-                                ) AS chro_str_top_bedrock,
+                                lithology_id_cli as lit_pet_top_bedrock,
+                                lithostrat_id_cli as lit_str_top_bedrock,
+                                chronostrat_id_cli AS chro_str_top_bedrock,
                                 processing_status_id_cli
                                     as processing_status,
                                 national_relevance_id_cli
@@ -110,9 +104,9 @@ class GetBorehole(Action):
                     borehole
                 INNER JOIN public.completness
                 ON completness.id_bho = borehole.id_bho
-                INNER JOIN public.user as updater
+                INNER JOIN public.users as updater
                 ON updater_bho = updater.id_usr
-                INNER JOIN public.user as author
+                INNER JOIN public.users as author
                 ON author_id = author.id_usr
                 LEFT JOIN project
                 ON id_pro = project_id
@@ -120,41 +114,6 @@ class GetBorehole(Action):
                 ON kantonsnum = canton_bho
                 LEFT JOIN municipalities
                 ON municipalities.gid = city_bho
-                LEFT JOIN (
-                    SELECT
-                        id_bho_fk, array_agg(id_cli_fk) as alptb
-                    FROM
-                        borehole_codelist
-                    WHERE
-                        code_cli = 'custom.lit_pet_top_bedrock'
-                    GROUP BY id_bho_fk
-                ) lptb
-                ON lptb.id_bho_fk = borehole.id_bho
-                LEFT JOIN (
-                    SELECT
-                        id_bho_fk, array_agg(id_cli_fk) as alstb
-                    FROM
-                        borehole_codelist
-                    WHERE
-                        code_cli = 'custom.lit_str_top_bedrock'
-                    GROUP BY id_bho_fk
-                ) lstb
-                ON lstb.id_bho_fk = borehole.id_bho
-                /*
-https://jira.swisstopo.ch/browse/BMSWEB-14?focusedCommentId=59676
-&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel
-#comment-59676
-                */
-                LEFT JOIN (
-                    SELECT
-                        id_bho_fk, array_agg(id_cli_fk) as acstb
-                    FROM
-                        borehole_codelist
-                    WHERE
-                        code_cli = 'custom.chro_str_top_bedrock'
-                    GROUP BY id_bho_fk
-                ) cstb
-                ON cstb.id_bho_fk = borehole.id_bho
                 LEFT JOIN (
                     SELECT
                         id_bho_fk, array_agg(id_cli_fk) as ate

@@ -15,6 +15,8 @@ class PatchBorehole(Action):
                 'extended.original_name',
                 'custom.public_name',
                 'custom.project_name',
+                'address',
+                'geocoding',
                 'custom.canton',
                 'custom.city',
                 'custom.address',
@@ -49,6 +51,9 @@ class PatchBorehole(Action):
                 if field == 'custom.address':
                     column = 'address_bho'
 
+                if field == 'custom.address':
+                    column = 'address_bho'
+
                 elif field in ['location_x', 'location_y', 'location']:
 
                     if field == 'location_x':
@@ -58,10 +63,31 @@ class PatchBorehole(Action):
                         column = 'location_y_bho'
 
                     elif field == 'location':
-                        column = ['location_x_bho', 'location_y_bho']
+                        if value[3] is None:
+                            column = [
+                                'location_x_bho',
+                                'location_y_bho',
+                                'canton_bho',
+                                'city_bho'
+                            ]
+                            value = value[:-1]
+                        else:
+                            column = [
+                                'location_x_bho',
+                                'location_y_bho',
+                                'canton_bho',
+                                'city_bho',
+                                'elevation_z_bho'
+                            ]
 
                 elif field == 'elevation_z':
                     column = 'elevation_z_bho'
+
+                if field == 'geocoding':
+                    column = [
+                        'canton_bho',
+                        'city_bho'
+                    ]
 
                 if field == 'custom.canton':
                     column = 'canton_bho'
@@ -105,6 +131,7 @@ class PatchBorehole(Action):
                         sets.append("%s = %s" % (col, self.getIdx()))
                     value.append(user_id)
                     value.append(id)
+                    print(value)
                     await self.conn.execute("""
                         UPDATE public.borehole
                         SET
@@ -160,22 +187,25 @@ class PatchBorehole(Action):
                 """ % column, value, user_id, id)
 
             elif field in [
-                        'restriction',
-                        'kind',
-                        'srs',
-                        'qt_location',
-                        'qt_elevation',
-                        'hrs',
-                        'custom.landuse',
-                        'extended.method',
-                        'custom.cuttings',
-                        'extended.purpose',
-                        'extended.status',
-                        'custom.qt_bore_inc_dir',
-                        'custom.qt_length',
-                        'custom.qt_top_bedrock',
-                        'custom.processing_status',
-                        'custom.national_relevance'
+                'restriction',
+                'kind',
+                'srs',
+                'qt_location',
+                'qt_elevation',
+                'hrs',
+                'custom.landuse',
+                'extended.method',
+                'custom.cuttings',
+                'extended.purpose',
+                'extended.status',
+                'custom.qt_bore_inc_dir',
+                'custom.qt_length',
+                'custom.qt_top_bedrock',
+                'custom.processing_status',
+                'custom.national_relevance',
+                'custom.lit_pet_top_bedrock',
+                'custom.lit_str_top_bedrock',
+                'custom.chro_str_top_bedrock'
                     ]:
 
                 column = None
@@ -231,8 +261,20 @@ class PatchBorehole(Action):
                     column = 'national_relevance_id_cli'
                     schema = 'madm402'
 
+                elif field == 'custom.lit_pet_top_bedrock':
+                    column = 'lithology_id_cli'
+                    schema = 'custom.lit_pet_top_bedrock'
+
+                elif field == 'custom.lit_str_top_bedrock':
+                    column = 'lithostrat_id_cli'
+                    schema = 'custom.lit_str_top_bedrock'
+
+                elif field == 'custom.chro_str_top_bedrock':
+                    column = 'chronostrat_id_cli'
+                    schema = 'custom.chro_str_top_bedrock'
+
                 # Check if domain is extracted from the correct schema
-                if schema != (await self.conn.fetchval("""
+                if value is not None and schema != (await self.conn.fetchval("""
                             SELECT
                                 schema_cli
                             FROM
@@ -257,9 +299,6 @@ class PatchBorehole(Action):
                 """ % column, value, user_id, id)
 
             elif field in [
-                        'custom.lit_pet_top_bedrock',
-                        'custom.lit_str_top_bedrock',
-                        'custom.chro_str_top_bedrock',
                         'custom.attributes_to_edit'
                     ]:
 

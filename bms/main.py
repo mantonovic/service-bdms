@@ -17,6 +17,9 @@ async def get_conn():
 if __name__ == "__main__":
 
     from bms import (
+        # user handlers
+        SettingHandler,
+
         # Borehole handlers
         BoreholeViewerHandler,
         BoreholeProducerHandler,
@@ -29,6 +32,7 @@ if __name__ == "__main__":
         LayerProducerHandler,
 
         # Other handlers
+        GeoapiHandler,
         ProjectHandler,
         CodeListHandler,
         MunicipalityHandler,
@@ -45,6 +49,9 @@ if __name__ == "__main__":
 
     application = web.Application([
         # Borehole handlers
+        (r'/api/v1/setting', SettingHandler),
+
+        # Borehole handlers
         (r'/api/v1/borehole', BoreholeViewerHandler),
         (r'/api/v1/borehole/edit', BoreholeProducerHandler),
 
@@ -59,7 +66,8 @@ if __name__ == "__main__":
         (r'/api/v1/borehole/project', ProjectHandler),
         (r'/api/v1/borehole/codes', CodeListHandler),
         (r'/api/v1/geoapi/municipality', MunicipalityHandler),
-        (r'/api/v1/geoapi/canton', CantonHandler)
+        (r'/api/v1/geoapi/canton', CantonHandler),
+        (r'/api/v1/geoapi/location', GeoapiHandler)
     ], **settings)
 
     application.pool = ioloop.run_until_complete(get_conn())

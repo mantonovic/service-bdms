@@ -11,8 +11,11 @@ from bms.v1.borehole.stratigraphy.handler import StratigraphyHandler
 from bms.v1.borehole.stratigraphy.layer.producer import LayerProducerHandler
 from bms.v1.borehole.stratigraphy.layer.viewer import LayerViewerHandler
 
+from bms.v1.setting.handler import SettingHandler
+
 from bms.v1.borehole.project.handler import ProjectHandler
 from bms.v1.borehole.codelist.handler import CodeListHandler
+from bms.v1.geoapi.handler import GeoapiHandler
 from bms.v1.geoapi.municipality.handler import MunicipalityHandler
 from bms.v1.geoapi.canton.handler import CantonHandler
 

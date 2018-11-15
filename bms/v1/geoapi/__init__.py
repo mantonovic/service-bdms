@@ -4,3 +4,4 @@
 from bms.v1.geoapi.municipality.list import ListMunicipality
 from bms.v1.geoapi.municipality.get import GetMunicipality
 from bms.v1.geoapi.canton.list import ListCanton
+from bms.v1.geoapi.location import GetLocation
