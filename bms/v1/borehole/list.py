@@ -20,7 +20,7 @@ class ListBorehole(Action):
         if 'identifier' in filter.keys() and filter['identifier'] != '':
             params.append("%%%s%%" % filter['identifier'])
             where.append("""
-                original_name_bho LIKE %s
+                original_name_bho ILIKE %s
             """ % getIdx())
 
         if 'project' in filter.keys():
