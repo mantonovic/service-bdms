@@ -8,69 +8,14 @@ class ListBorehole(Action):
     async def execute(self, limit=None, page=None, filter={}):
 
         paging = ''
-        params = []
-        where = []
 
-        self.idx = 0
-
-        def getIdx():
-            self.idx += 1
-            return "$%s" % self.idx
-
-        if 'identifier' in filter.keys() and filter['identifier'] != '':
-            params.append("%%%s%%" % filter['identifier'])
-            where.append("""
-                original_name_bho ILIKE %s
-            """ % getIdx())
-
-        if 'project' in filter.keys():
-            params.append(filter['project'])
-            where.append("""
-                project_id = %s
-            """ % getIdx())
-
-        if 'kind' in filter.keys() and filter['kind'] != None:
-            params.append(int(filter['kind']))
-            where.append("""
-                kind_id_cli = %s
-            """ % getIdx())
-
-        if 'restriction' in filter.keys() and filter[
-                'restriction'] != None:
-            params.append(int(filter['restriction']))
-            where.append("""
-                restriction_id_cli = %s
-            """ % getIdx())
-
-        if 'status' in filter.keys() and filter[
-                'status'] != None:
-            params.append(int(filter['status']))
-            where.append("""
-                status_id_cli = %s
-            """ % getIdx())
-
-        if 'extent' in filter.keys() and filter['extent'] != None:
-            for coord in filter['extent']:
-                params.append(coord)
-            where.append("""
-                ST_Intersects(
-                    geom_bho,
-                    ST_MakeEnvelope(
-                        %s, %s, %s, %s, 2056
-                    )
-                )
-            """ % (
-                getIdx(),
-                getIdx(),
-                getIdx(),
-                getIdx()
-            ))
+        where, params = self.filterBorehole(filter)
 
         if limit is not None and page is not None:
             paging = """
                 LIMIT %s
                 OFFSET %s
-            """ % (getIdx(), getIdx())
+            """ % (self.getIdx(), self.getIdx())
             params += [
                 limit, (int(limit) * (int(page) - 1))
             ]
