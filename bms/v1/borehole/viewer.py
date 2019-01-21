@@ -5,6 +5,9 @@ from bms.v1.borehole import (
     GetBorehole,
     ListGeojson
 )
+from bms.v1.setting import (
+    PatchSetting
+)
 
 
 class BoreholeViewerHandler(Viewer):
@@ -22,6 +25,41 @@ class BoreholeViewerHandler(Viewer):
                 
                 if action == 'LIST':
                     exe = ListBorehole(conn)
+
+                    # update only if ordering changed
+                    if 'orderby' in request and (
+                        request['orderby'] is not None
+                    ) and (
+                        self.user[
+                            'setting'
+                        ]['boreholetable']['orderby'] != request['orderby']
+                    ):
+                        await (PatchSetting(conn)).execute(
+                            self.user['id'],
+                            'boreholetable.orderby',
+                            request['orderby']
+                        )
+                    else:
+                        request['orderby'] = self.user[
+                            'setting'
+                        ]['boreholetable']['orderby']
+
+                    if 'direction' in request and (
+                        request['direction'] is not None
+                    ) and (
+                        self.user[
+                            'setting'
+                        ]['boreholetable']['direction'] != request['direction']
+                    ):
+                        await (PatchSetting(conn)).execute(
+                            self.user['id'],
+                            'boreholetable.direction',
+                            request['direction']
+                        )
+                    else:
+                        request['direction'] = self.user[
+                            'setting'
+                        ]['boreholetable']['direction']
 
                 elif action == 'GET':
                     exe = GetBorehole(conn)

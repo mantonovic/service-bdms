@@ -5,76 +5,20 @@ import math
 
 class ListEditingBorehole(Action):
 
-    async def execute(self, limit=None, page=None, filter={}):
+    async def execute(
+            self, limit=None, page=None,
+            filter={}, orderby=None, direction=None
+        ):
 
         paging = ''
-        params = []
-        where = []
 
-        self.idx = 0
-
-        def getIdx():
-            self.idx += 1
-            return "$%s" % self.idx
-
-        if 'original_name' in filter.keys() and filter['original_name'] != '':
-            params.append("%%%s%%" % filter['original_name'])
-            where.append("""
-                original_name_bho LIKE %s
-            """ % getIdx())
-
-        if 'completness' in filter.keys() and filter['completness'] != '':
-            if filter['completness'] == 'complete':
-                params.append(100)
-                where.append("""
-                    percentage = %s
-                """ % getIdx())
-            elif filter['completness'] == 'incomplete':
-                params.append(0)
-                where.append("""
-                    percentage > %s
-                """ % getIdx())
-                params.append(100)
-                where.append("""
-                    percentage < %s
-                """ % getIdx())
-            if filter['completness'] == 'empty':
-                params.append(0)
-                where.append("""
-                    percentage = %s
-                """ % getIdx())
-
-        if 'project' in filter.keys() and filter['project'] is not None:
-            params.append(filter['project'])
-            where.append("""
-                project_id = %s
-            """ % getIdx())
-
-        if 'kind' in filter.keys() and filter['kind'] is not None:
-            params.append(int(filter['kind']))
-            where.append("""
-                kind_id_cli = %s
-            """ % getIdx())
-
-        if 'restriction' in filter.keys() and filter[
-                'restriction'] != None:
-            params.append(int(filter['restriction']))
-            where.append("""
-                restriction_id_cli = %s
-            """ % getIdx())
-
-        if 'status' in filter.keys() and filter[
-                'status'] != None:
-            params.append(int(filter['status']))
-            where.append("""
-                status_id_cli = %s
-            """ % getIdx())
+        where, params = self.filterBorehole(filter)
 
         if limit is not None and page is not None:
             paging = """
                 LIMIT %s
                 OFFSET %s
-            """ % (getIdx(), getIdx())
+            """ % (self.getIdx(), self.getIdx())
             params += [
                 limit, (int(limit) * (int(page) - 1))
             ]
@@ -170,6 +114,8 @@ class ListEditingBorehole(Action):
                 WHERE %s
             """ % " AND ".join(where)
 
+        _orderby, direction = self.getordering(orderby, direction)
+
         sql = """
             SELECT
                 array_to_json(
@@ -182,16 +128,26 @@ class ListEditingBorehole(Action):
                 ), 0)
             FROM (
                 %s
-            ORDER BY borehole.id_bho
+            ORDER BY %s %s NULLS LAST
                 %s
             ) AS t
-        """ % (cntSql, rowsSql, paging)
+        """ % (
+            cntSql,
+            rowsSql,
+            _orderby,
+            direction,
+            paging
+        )
+
+        # print (sql, params)
 
         rec = await self.conn.fetchrow(
             sql, *(params)
         )
         return {
             "data": self.decode(rec[0]) if rec[0] is not None else [],
+            "orderby": orderby,
+            "direction": direction,
             "page": page if page is not None else 1,
             "pages": math.ceil(rec[1]/limit) if limit is not None else 1,
             "rows": rec[1]

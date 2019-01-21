@@ -5,7 +5,10 @@ import math
 
 class ListBorehole(Action):
 
-    async def execute(self, limit=None, page=None, filter={}):
+    async def execute(
+            self, limit=None, page=None,
+            filter={}, orderby=None, direction=None
+        ):
 
         paging = ''
 
@@ -75,6 +78,8 @@ class ListBorehole(Action):
                 WHERE %s
             """ % " AND ".join(where)
 
+        _orderby, direction = self.getordering(orderby, direction)
+
         sql = """
             SELECT
                 array_to_json(
@@ -87,16 +92,24 @@ class ListBorehole(Action):
                 ), 0)
             FROM (
                 %s
-            ORDER BY id_bho
+            ORDER BY %s %s NULLS LAST
                 %s
             ) AS t
-        """ % (cntSql, rowsSql, paging)
+        """ % (
+            cntSql,
+            rowsSql,
+            _orderby,
+            direction,
+            paging
+        )
 
         rec = await self.conn.fetchrow(
             sql, *(params)
         )
         return {
             "data": self.decode(rec[0]) if rec[0] is not None else [],
+            "orderby": orderby,
+            "direction": direction,
             "page": page if page is not None else 1,
             "pages": math.ceil(rec[1]/limit) if limit is not None else 1,
             "rows": rec[1]

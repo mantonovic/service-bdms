@@ -73,7 +73,8 @@ class ListCodeList(Action):
                                         description_cli_en
                                     ) as descr
                             ) t
-                        ) as it
+                        ) as it,
+					    conf_cli as conf
                     FROM
                         public.codelist
                     WHERE

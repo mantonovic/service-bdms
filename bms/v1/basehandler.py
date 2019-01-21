@@ -12,12 +12,44 @@ from bms.v1.exceptions import (
 
 
 class BaseHandler(web.RequestHandler):
+
+    def __init__(self, *args, **kwargs):
+        super(BaseHandler, self).__init__(*args, **kwargs)
+        self.user = {
+            'id': 0,
+            'username': 'anonymous',
+            'roles': [
+                'viewer',
+                'producer'
+            ],
+            'name': 'anonymous',
+            'setting': {}
+        }
+
+    async def prepare(self):
+        async with self.pool.acquire() as conn:
+            rec = await conn.fetchrow("""
+                SELECT
+                    id_usr,
+                    username,
+                    settings_usr
+                FROM
+                    users
+                WHERE id_usr = $1
+            """, 1)
+            self.user['id'] = rec[0]
+            self.user['username'] = rec[1]
+            self.user['name'] = rec[1]
+            self.user['setting'] = (
+                json.loads(rec[2]) if rec[2] is not None else {}
+            )
+
     @property
     def pool(self):
         return self.application.pool
 
     @property
-    def user(self):
+    def _user(self):
         auth_header = self.request.headers.get('Authorization')
         if auth_header is None or not auth_header.startswith('Basic '):
             return {
