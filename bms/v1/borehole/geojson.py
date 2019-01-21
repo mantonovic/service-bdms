@@ -53,6 +53,10 @@ class ListGeojson(Action):
                                                         as public_name,
                                                     kind_id_cli
                                                         as kind,
+                                                    kd.code_cli
+                                                        as kind_code,
+                                                    rs.code_cli
+                                                        as restriction_code,
                                                     original_name_bho
                                                         as original_name,
                                                     length_bho
@@ -60,6 +64,10 @@ class ListGeojson(Action):
                                             ) AS p
                                         ) AS properties
                                     FROM borehole
+                                    LEFT JOIN codelist kd
+                                    ON kind_id_cli = kd.id_cli
+                                    LEFT JOIN codelist rs
+                                    ON restriction_id_cli = rs.id_cli
                                     WHERE geom_bho IS NOT NULL
                                     AND geom_bho && ST_MakeEnvelope (
                                         2420000, 1030000,
