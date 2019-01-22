@@ -5,6 +5,7 @@ from bms.v1.exceptions import AuthorizationException
 # ACTION Handlers
 from bms.v1.borehole.producer import BoreholeProducerHandler
 from bms.v1.borehole.viewer import BoreholeViewerHandler
+from bms.v1.borehole.exporter import BoreholeExporterHandler
 from bms.v1.borehole.stratigraphy.handler import StratigraphyHandler
 
 # Stratigraphy's layers handlers
