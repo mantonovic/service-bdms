@@ -23,6 +23,7 @@ if __name__ == "__main__":
         # Borehole handlers
         BoreholeViewerHandler,
         BoreholeProducerHandler,
+        BoreholeExporterHandler,
 
         # Stratigraphy handlers
         StratigraphyHandler,
@@ -53,6 +54,7 @@ if __name__ == "__main__":
 
         # Borehole handlers
         (r'/api/v1/borehole', BoreholeViewerHandler),
+        (r'/api/v1/borehole/export', BoreholeExporterHandler),
         (r'/api/v1/borehole/edit', BoreholeProducerHandler),
 
         # Stratigraphy handlers
