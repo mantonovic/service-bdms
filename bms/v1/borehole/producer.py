@@ -4,9 +4,11 @@ from bms.v1.borehole import (
     CheckBorehole,
     CreateBorehole,
     DeleteBorehole,
+    DeleteBoreholes,
     ListEditingBorehole,
     MultiPatchBorehole,
-    PatchBorehole
+    PatchBorehole,
+    BoreholeIds
 )
 from bms.v1.setting import (
     PatchSetting
@@ -20,10 +22,12 @@ class BoreholeProducerHandler(Producer):
         if action in [
                 'CREATE',
                 'DELETE',
+                'DELETELIST',
                 'PATCH',
                 'MULTIPATCH',
                 'CHECK',
-                'LIST']:
+                'LIST',
+                'IDS']:
 
             async with self.pool.acquire() as conn:
 
@@ -36,6 +40,9 @@ class BoreholeProducerHandler(Producer):
                 if action == 'DELETE':
                     exe = DeleteBorehole(conn)
 
+                if action == 'DELETELIST':
+                    exe = DeleteBoreholes(conn)
+
                 elif action == 'PATCH':
                     exe = PatchBorehole(conn)
                     request['user_id'] = self.user['id']
@@ -46,6 +53,9 @@ class BoreholeProducerHandler(Producer):
 
                 elif action == 'CHECK':
                     exe = CheckBorehole(conn)
+
+                elif action == 'IDS':
+                    exe = BoreholeIds(conn)
                 
                 if action == 'LIST':
                     exe = ListEditingBorehole(conn)

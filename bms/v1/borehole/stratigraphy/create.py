@@ -4,26 +4,24 @@ from bms.v1.action import Action
 
 class CreateStratigraphy(Action):
 
-    async def execute(self, id, kind):
+    async def execute(self, id):
         # Check if domain is extracted from the correct schema
-        schema = await self.conn.fetchval("""
+        id_cli = await self.conn.fetchval("""
             SELECT
-                schema_cli
+                id_cli
             FROM
                 codelist
-            WHERE id_cli = $1
-        """, kind)
-
-        if schema != 'layer_kind':
-            raise Exception(
-                "Attribute id %s not part of schema layer_kind" % kind
-            )
+            WHERE
+                schema_cli = 'layer_kind'
+            AND
+                default_cli IS TRUE
+        """)
 
         return {
             "id": (
                 await self.conn.fetchval("""
                     INSERT INTO public.stratigraphy(id_bho_fk, kind_id_cli)
                     VALUES ($1, $2) RETURNING id_sty
-                """, id, kind)
+                """, id, id_cli)
             )
         }

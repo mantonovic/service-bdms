@@ -36,8 +36,12 @@ class GetLayer(Action):
                     ) as updater,
                     depth_from_lay AS depth_from,
                     depth_to_lay AS depth_to,
-                    description_lay AS description,
-                    geology_lay AS geology,
+                    COALESCE(
+                        description_lay, ''
+                    ) AS description,
+                    COALESCE(
+                        geology_lay, ''
+                    ) AS geology,
                     last_lay AS last,
                     qt_description_id_cli AS qt_description,
                     lithology_id_cli AS lithology,
@@ -78,7 +82,9 @@ class GetLayer(Action):
                     COALESCE(
                         mcla101, '{}'::int[]
                     ) AS uscs_3,
-                    uscs_original_lay AS uscs_original,
+                    COALESCE(
+                        uscs_original_lay, ''
+                    ) AS uscs_original,
                     COALESCE(
                         mcla104, '{}'::int[]
                     ) AS uscs_determination,
@@ -91,7 +97,10 @@ class GetLayer(Action):
                     ) AS lit_pet_deb,
                     lithok_id_cli AS lithok,
                     kirost_id_cli AS kirost,
-                    notes_lay AS notes
+                    unconrocks_id_cli AS unconrocks,
+                    COALESCE(
+                        notes_lay, ''
+                    ) AS notes
                 FROM
                     layer
                 INNER JOIN public.users as creator

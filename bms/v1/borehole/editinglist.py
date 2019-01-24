@@ -75,7 +75,8 @@ class ListEditingBorehole(Action):
                             json_build_object(
                                 'id', id,
                                 'kind', kind,
-                                'layers', layers
+                                'layers', layers,
+                                'date', date
                             )
                         )
                     ) AS stratigraphy
@@ -83,7 +84,10 @@ class ListEditingBorehole(Action):
                     SELECT
                         id_bho_fk,
                         id_sty AS id,
-                        kind_id_cli AS kind,
+                        id_cli AS kind,
+                        to_char(
+                            date_sty, 'YYYY-MM-DD'
+                        ) AS date,
                         COUNT(id_lay) AS layers
                     FROM
                         stratigraphy
@@ -91,8 +95,8 @@ class ListEditingBorehole(Action):
                         ON kind_id_cli = id_cli
                     LEFT JOIN layer
                         ON id_sty_fk = id_sty
-                    GROUP BY id_bho_fk, id_sty, id_cli
-                    ORDER BY id_bho_fk, order_cli
+                    GROUP BY id_bho_fk, id_sty, id_cli, date_sty
+                    ORDER BY date_sty DESC, id_sty DESC
                 ) t
                 GROUP BY id_bho_fk
             ) AS strt

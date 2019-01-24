@@ -3,7 +3,9 @@ from bms.v1.handlers import Viewer
 from bms.v1.borehole.stratigraphy import (
     ListStratigraphies,
     CreateStratigraphy,
-    GetStratigraphy
+    GetStratigraphy,
+    PatchStartigraphy,
+    DeleteStratigraphy
 )
 
 
@@ -14,9 +16,11 @@ class StratigraphyHandler(Viewer):
         if action in [
                 'CREATE',
                 'PATCH',
+                'DELETE',
                 'LIST',
                 'GET',
-                'CHECK']:
+                'CHECK',
+                'PATCH']:
 
             async with self.pool.acquire() as conn:
 
@@ -25,8 +29,15 @@ class StratigraphyHandler(Viewer):
                 if action == 'GET':
                     exe = GetStratigraphy(conn)
 
-                if action == 'CREATE':
+                elif action == 'CREATE':
                     exe = CreateStratigraphy(conn)
+
+                elif action == 'DELETE':
+                    exe = DeleteStratigraphy(conn)
+
+                elif action == 'PATCH':
+                    exe = PatchStartigraphy(conn)
+                    request['user_id'] = self.user['id']
 
                 elif action == 'LIST':
                     exe = ListStratigraphies(conn)

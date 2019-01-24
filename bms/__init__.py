@@ -23,6 +23,7 @@ from bms.v1.geoapi.canton.handler import CantonHandler
 # Actions
 from bms.v1.borehole import CreateBorehole
 from bms.v1.borehole import ListBorehole
+from bms.v1.borehole import BoreholeIds
 from bms.v1.borehole import GetBorehole
 from bms.v1.borehole import CheckBorehole
 from bms.v1.borehole import PatchBorehole

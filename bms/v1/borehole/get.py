@@ -99,21 +99,22 @@ class GetBorehole(Action):
                                 remarks_bho as remarks
                         ) t
                     ) as custom,
+                    stratigraphy as stratigraphy,
                     completness.percentage
                 FROM
                     borehole
                 INNER JOIN public.completness
-                ON completness.id_bho = borehole.id_bho
+                    ON completness.id_bho = borehole.id_bho
                 INNER JOIN public.users as updater
-                ON updater_bho = updater.id_usr
+                    ON updater_bho = updater.id_usr
                 INNER JOIN public.users as author
-                ON author_id = author.id_usr
+                    ON author_id = author.id_usr
                 LEFT JOIN project
-                ON id_pro = project_id
+                    ON id_pro = project_id
                 LEFT JOIN cantons
-                ON kantonsnum = canton_bho
+                    ON kantonsnum = canton_bho
                 LEFT JOIN municipalities
-                ON municipalities.gid = city_bho
+                    ON municipalities.gid = city_bho
                 LEFT JOIN (
                     SELECT
                         id_bho_fk, array_agg(id_cli_fk) as ate
@@ -123,7 +124,41 @@ class GetBorehole(Action):
                         code_cli = 'madm404'
                     GROUP BY id_bho_fk
                 ) tmadm404
-                ON tmadm404.id_bho_fk = borehole.id_bho
+                    ON tmadm404.id_bho_fk = borehole.id_bho
+                LEFT JOIN (
+                    SELECT
+                        id_bho_fk,
+                        array_to_json(
+                            array_agg(
+                                json_build_object(
+                                    'id', id,
+                                    'kind', kind,
+                                    'layers', layers,
+                                    'date', date
+                                )
+                            )
+                        ) AS stratigraphy
+                    FROM (
+                        SELECT
+                            id_bho_fk,
+                            id_sty AS id,
+                            id_cli AS kind,
+                            to_char(
+                                date_sty, 'YYYY-MM-DD'
+                            ) AS date,
+                            COUNT(id_lay) AS layers
+                        FROM
+                            stratigraphy
+                        INNER JOIN codelist
+                            ON kind_id_cli = id_cli
+                        LEFT JOIN layer
+                            ON id_sty_fk = id_sty
+                        GROUP BY id_bho_fk, id_sty, id_cli, date_sty
+                        ORDER BY date_sty DESC, id_sty DESC
+                    ) t
+                    GROUP BY id_bho_fk
+                ) AS strt
+                    ON strt.id_bho_fk = borehole.id_bho
                 WHERE borehole.id_bho = $1
             ) AS t
         """, id)

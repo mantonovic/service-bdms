@@ -81,16 +81,26 @@ class Action():
                 """ % self.getIdx())
 
         if 'identifier' in filter.keys() and filter['identifier'] != '':
-            params.append("%%%s%%" % filter['identifier'])
-            where.append("""
-                original_name_bho ILIKE %s
-            """ % self.getIdx())
+            if filter['identifier'] == '$null':
+                where.append("""
+                    original_name_bho IS NULL
+                """)
+            else:
+                params.append("%%%s%%" % filter['identifier'])
+                where.append("""
+                    original_name_bho ILIKE %s
+                """ % self.getIdx())
 
         if 'original_name' in filter.keys() and filter['original_name'] != '':
-            params.append("%%%s%%" % filter['original_name'])
-            where.append("""
-                original_name_bho ILIKE %s
-            """ % self.getIdx())
+            if filter['original_name'] == '$null':
+                where.append("""
+                    original_name_bho IS NULL
+                """)
+            else:
+                params.append("%%%s%%" % filter['original_name'])
+                where.append("""
+                    original_name_bho ILIKE %s
+                """ % self.getIdx())
 
         if 'project' in filter.keys() and filter['project'] is not None:
             params.append(filter['project'])
