@@ -59,7 +59,9 @@ class Action():
         params = []
         where = []
 
-        if 'completness' in filter.keys() and filter['completness'] != '':
+        keys = filter.keys()
+
+        if 'completness' in keys and filter['completness'] != '':
             if filter['completness'] == 'complete':
                 params.append(100)
                 where.append("""
@@ -80,7 +82,7 @@ class Action():
                     percentage = %s
                 """ % self.getIdx())
 
-        if 'identifier' in filter.keys() and filter['identifier'] != '':
+        if 'identifier' in keys and filter['identifier'] != '':
             if filter['identifier'] == '$null':
                 where.append("""
                     original_name_bho IS NULL
@@ -91,7 +93,7 @@ class Action():
                     original_name_bho ILIKE %s
                 """ % self.getIdx())
 
-        if 'original_name' in filter.keys() and filter['original_name'] != '':
+        if 'original_name' in keys and filter['original_name'] != '':
             if filter['original_name'] == '$null':
                 where.append("""
                     original_name_bho IS NULL
@@ -102,33 +104,33 @@ class Action():
                     original_name_bho ILIKE %s
                 """ % self.getIdx())
 
-        if 'project' in filter.keys() and filter['project'] is not None:
+        if 'project' in keys and filter['project'] is not None:
             params.append(filter['project'])
             where.append("""
                 project_id = %s
             """ % self.getIdx())
 
-        if 'kind' in filter.keys() and filter['kind'] is not None:
+        if 'kind' in keys and filter['kind'] is not None:
             params.append(int(filter['kind']))
             where.append("""
                 kind_id_cli = %s
             """ % self.getIdx())
 
-        if 'restriction' in filter.keys() and filter[
+        if 'restriction' in keys and filter[
                 'restriction'] is not None:
             params.append(int(filter['restriction']))
             where.append("""
                 restriction_id_cli = %s
             """ % self.getIdx())
 
-        if 'status' in filter.keys() and filter[
+        if 'status' in keys and filter[
                 'status'] is not None:
             params.append(int(filter['status']))
             where.append("""
                 status_id_cli = %s
             """ % self.getIdx())
 
-        if 'extent' in filter.keys() and filter['extent'] is not None:
+        if 'extent' in keys and filter['extent'] is not None:
             for coord in filter['extent']:
                 params.append(coord)
             where.append("""
@@ -144,5 +146,65 @@ class Action():
                 self.getIdx(),
                 self.getIdx()
             ))
+
+        if 'canton' in keys and filter['canton'] is not None:
+            params.append(int(filter['canton']))
+            where.append("""
+                canton_bho = %s
+            """ % self.getIdx())
+
+        if 'municipality' in keys and filter['municipality'] is not None:
+            params.append(int(filter['municipality']))
+            where.append("""
+                city_bho = %s
+            """ % self.getIdx())
+
+        if 'restriction_until_from' in keys and filter['restriction_until_from'] != '':
+            params.append(filter['restriction_until_from'])
+            where.append("""
+                restriction_until_bho >= to_date(%s, 'YYYY-MM-DD')
+            """ % self.getIdx())
+
+        if 'restriction_until_to' in keys and filter['restriction_until_to'] != '':
+            params.append(filter['restriction_until_to'])
+            where.append("""
+                restriction_until_bho <= to_date(%s, 'YYYY-MM-DD')
+            """ % self.getIdx())
+
+        if 'drilling_date_from' in keys and filter['drilling_date_from'] != '':
+            params.append(filter['drilling_date_from'])
+            where.append("""
+                drilling_date_bho >= to_date(%s, 'YYYY-MM-DD')
+            """ % self.getIdx())
+
+        if 'drilling_date_to' in keys and filter['drilling_date_to'] != '':
+            params.append(filter['drilling_date_to'])
+            where.append("""
+                drilling_date_bho <= to_date(%s, 'YYYY-MM-DD')
+            """ % self.getIdx())
+
+        if 'elevation_z_from' in keys and filter['elevation_z_from'] != '':
+            params.append(float(filter['elevation_z_from']))
+            where.append("""
+                elevation_z_bho >= %s
+            """ % self.getIdx())
+
+        if 'elevation_z_to' in keys and filter['elevation_z_to'] != '':
+            params.append(float(filter['elevation_z_to']))
+            where.append("""
+                elevation_z_bho <= %s
+            """ % self.getIdx())
+
+        if 'length_from' in keys and filter['length_from'] != '':
+            params.append(float(filter['length_from']))
+            where.append("""
+                length_bho >= %s
+            """ % self.getIdx())
+
+        if 'length_to' in keys and filter['length_to'] != '':
+            params.append(float(filter['length_to']))
+            where.append("""
+                length_bho <= %s
+            """ % self.getIdx())
 
         return where, params
