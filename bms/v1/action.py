@@ -47,6 +47,12 @@ class Action():
         elif orderby == 'completness':
             _orderby = 'percentage'
 
+        elif orderby == 'author':
+            _orderby = 'author_id'
+
+        elif orderby == 'creation':
+            _orderby = 'created_bho'
+
         else:
             orderby = 'original_name'
 
@@ -157,6 +163,12 @@ class Action():
             params.append(int(filter['municipality']))
             where.append("""
                 city_bho = %s
+            """ % self.getIdx())
+
+        if 'creation' in keys and filter['creation'] != '':
+            params.append(filter['creation'])
+            where.append("""
+                created_bho::date = to_date(%s, 'YYYY-MM-DD')
             """ % self.getIdx())
 
         if 'restriction_until_from' in keys and filter['restriction_until_from'] != '':
