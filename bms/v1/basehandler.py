@@ -64,8 +64,6 @@ class BaseHandler(web.RequestHandler):
             auth_decoded = base64.decodestring(auth_header[6:].encode('utf-8'))
             username, password = auth_decoded.decode('utf-8').split(':', 2)
 
-            print("username, password", username, password)
-
             async with self.pool.acquire() as conn:
                 rec = await conn.fetchrow("""
                     SELECT
@@ -79,6 +77,10 @@ class BaseHandler(web.RequestHandler):
                     WHERE username = $1
                     AND password = $2
                 """, username, password)
+
+                if rec is None:
+                    raise AuthenticationException()
+
                 self.user['id'] = rec[0]
                 self.user['username'] = rec[1]
                 self.user['name'] = "%s %s" % (rec[3], rec[4])
