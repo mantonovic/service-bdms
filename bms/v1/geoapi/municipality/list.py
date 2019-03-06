@@ -13,7 +13,14 @@ class ListMunicipality(Action):
                     cantons.kantonsnum AS cid,
                     cantons.name AS cname,
                     ST_AsGeoJSON(
-                        ST_Envelope(municipalities.geom), 2, 2
+                        ST_Envelope(
+                            ST_Transform(
+                                ST_SetSRID(
+                                    municipalities.geom,
+                                    21781
+                                ), 2056
+                            )
+                        ), 2, 2
                     )::json as geom
                 FROM
                     municipalities, (

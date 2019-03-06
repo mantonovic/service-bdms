@@ -11,7 +11,13 @@ class ListCanton(Action):
                     kantonsnum as id,
                     name as name,
                     ST_AsGeoJSON(
-                        ST_Envelope(ST_Union(geom)), 2, 2
+                        ST_Envelope(
+                            ST_Union(
+                                ST_Transform(
+                                    ST_SetSRID(geom, 21781), 2056
+                                )
+                            )
+                        ), 2, 2
                     )::json as geom
                 FROM
                     cantons
