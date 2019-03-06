@@ -19,6 +19,7 @@ if __name__ == "__main__":
     from bms import (
         # user handlers
         SettingHandler,
+        UserHandler,
 
         # Borehole handlers
         BoreholeViewerHandler,
@@ -51,6 +52,7 @@ if __name__ == "__main__":
     application = web.Application([
         # Borehole handlers
         (r'/api/v1/setting', SettingHandler),
+        (r'/api/v1/user', UserHandler),
 
         # Borehole handlers
         (r'/api/v1/borehole', BoreholeViewerHandler),

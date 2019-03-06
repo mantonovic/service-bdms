@@ -19,59 +19,73 @@ class BaseHandler(web.RequestHandler):
             'id': 0,
             'username': 'anonymous',
             'roles': [
-                'viewer',
-                'producer'
+                'viewer', 'producer'
             ],
-            'name': 'anonymous',
-            'setting': {}
+            'name': 'Pinco Pallina',
+            'setting': {
+                "filter": {
+                    "custom": {
+                        "project_name": True,
+                        "landuse": True,
+                        "public_name": True,
+                        "canton": True,
+                        "city": True
+                    },
+                    "restriction": True,
+                    "mapfilter": True,
+                    "restriction_until": True,
+                    "extended": {
+                        "original_name": True,
+                        "method": True,
+                        "status": True
+                    },
+                    "kind": True,
+                    "elevation_z": True,
+                    "length": True,
+                    "drilling_date": True
+                },
+                "boreholetable": {
+                    "orderby": "original_name",
+                    "direction": "ASC"
+                },
+                "eboreholetable": {
+                    "orderby": "creation",
+                    "direction": "DESC"
+                }
+            }
         }
 
     async def prepare(self):
         async with self.pool.acquire() as conn:
-            rec = await conn.fetchrow("""
-                SELECT
-                    id_usr,
-                    username,
-                    settings_usr
-                FROM
-                    users
-                WHERE id_usr = $1
-            """, 1)
-            self.user['id'] = rec[0]
-            self.user['username'] = rec[1]
-            self.user['name'] = rec[1]
-            self.user['setting'] = (
-                json.loads(rec[2]) if rec[2] is not None else {}
-            )
+            auth_header = self.request.headers.get('Authorization')
+            if auth_header is None or not auth_header.startswith('Basic '):
+                return self.user
+
+            auth_decoded = base64.decodestring(auth_header[6:].encode('utf-8'))
+            username, password = auth_decoded.decode('utf-8').split(':', 2)
+
+            async with self.pool.acquire() as conn:
+                rec = await conn.fetchrow("""
+                    SELECT
+                        id_usr,
+                        username,
+                        settings_usr
+                    FROM
+                        users
+                    WHERE username = $1
+                    AND password = $2
+                """, username, password)
+                self.user['id'] = rec[0]
+                self.user['username'] = rec[1]
+                self.user['name'] = rec[1]
+                self.user['roles'] = ['viewer', 'producer']
+                self.user['setting'] = (
+                    json.loads(rec[2]) if rec[2] is not None else {}
+                )
 
     @property
     def pool(self):
         return self.application.pool
-
-    @property
-    def _user(self):
-        auth_header = self.request.headers.get('Authorization')
-        if auth_header is None or not auth_header.startswith('Basic '):
-            return {
-                'id': 1,
-                'username': 'anonymous',
-                'roles': [
-                    'viewer',
-                    'producer'
-                ],
-                'name': 'anonymous'
-            }
-        auth_decoded = base64.decodestring(auth_header[6:].encode('utf-8'))
-        username, password = auth_decoded.decode('utf-8').split(':', 2)
-        return {
-            'id': 1,
-            'username': username,
-            'roles': [
-                'viewer',
-                'producer'
-            ],
-            'name': username
-        }
 
     async def post(self, *args, **kwargs):
         try:

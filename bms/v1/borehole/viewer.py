@@ -44,7 +44,7 @@ class BoreholeViewerHandler(Viewer):
                             'setting'
                         ]['boreholetable']['orderby']
 
-                    if 'direction' in request and (
+                    if self.user['id'] != 0 and 'direction' in request and (
                         request['direction'] is not None
                     ) and (
                         self.user[

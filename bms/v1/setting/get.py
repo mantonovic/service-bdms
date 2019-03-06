@@ -5,6 +5,7 @@ from bms.v1.action import Action
 class GetSetting(Action):
 
     async def execute(self, user_id):
+        print("Fetching user: %s" % user_id)
         rec = await self.conn.fetchrow("""
             SELECT
                 settings_usr
