@@ -64,12 +64,16 @@ class BaseHandler(web.RequestHandler):
             auth_decoded = base64.decodestring(auth_header[6:].encode('utf-8'))
             username, password = auth_decoded.decode('utf-8').split(':', 2)
 
+            print("username, password", username, password)
+
             async with self.pool.acquire() as conn:
                 rec = await conn.fetchrow("""
                     SELECT
                         id_usr,
                         username,
-                        settings_usr
+                        settings_usr,
+                        firstname,
+                        lastname
                     FROM
                         users
                     WHERE username = $1
@@ -77,7 +81,7 @@ class BaseHandler(web.RequestHandler):
                 """, username, password)
                 self.user['id'] = rec[0]
                 self.user['username'] = rec[1]
-                self.user['name'] = rec[1]
+                self.user['name'] = "%s %s" % (rec[3], rec[4])
                 self.user['roles'] = ['viewer', 'producer']
                 self.user['setting'] = (
                     json.loads(rec[2]) if rec[2] is not None else {}
