@@ -37,6 +37,7 @@ class StratigraphyHandler(Viewer):
 
                 elif action == 'DELETE':
                     exe = DeleteStratigraphy(conn)
+                    request['user_id'] = self.user['id']
 
                 elif action == 'PATCH':
                     exe = PatchStartigraphy(conn)
