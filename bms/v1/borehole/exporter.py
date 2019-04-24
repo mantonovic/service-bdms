@@ -56,8 +56,6 @@ class BoreholeExporterHandler(Viewer):
                     else:
                         arguments[key] = self.get_argument(key)
 
-            print('request', arguments)
-
             async with self.pool.acquire() as conn:
                 action = ExportBorehole(conn)
                 if arguments is None:

@@ -9,11 +9,15 @@ import json
 
 class PatchSetting(Action):
 
-    async def execute(self, user_id, field, value):
+    async def execute(self, user_id, tree, value, key=None):
         try:
             # Updating character varing, boolean fields
-            path = field.split('.')
-            l = len(path)
+            pathList = tree.split('.')
+            l = len(pathList)
+
+            if key is not None:
+                l += 1
+                pathList.append(key)
 
             rec = await self.conn.fetchrow("""
                 SELECT
@@ -28,21 +32,29 @@ class PatchSetting(Action):
 
             if tmp is not None:
                 for idx in range(0, l):
-                    if idx < (l-1) and path[idx] not in tmp:
-                        tmp[path[idx]] = {}
+                    if idx < (l-1) and pathList[idx] not in tmp:
+                        tmp[pathList[idx]] = {}
                     elif idx == (l-1):
-                        tmp[path[idx]] = value
-                    tmp = tmp[path[idx]]
+                        if value is None:
+                            del tmp[pathList[idx]]
+                            break
+                        else:
+                            tmp[pathList[idx]] = value
+                    tmp = tmp[pathList[idx]]
 
             else:
                 setting = {}
                 tmp = setting
                 for idx in range(0, l):
                     if idx < (l-1):
-                        tmp[path[idx]] = {}
+                        tmp[pathList[idx]] = {}
                     else:
-                        tmp[path[idx]] = value
-                    tmp = tmp[path[idx]]
+                        if value is None:
+                            del tmp[pathList[idx]]
+                            break
+                        else:
+                            tmp[pathList[idx]] = value
+                    tmp = tmp[pathList[idx]]
 
             await self.conn.execute("""
                 UPDATE public.users

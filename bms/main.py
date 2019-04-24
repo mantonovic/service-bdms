@@ -24,7 +24,8 @@ if __name__ == "__main__":
         # Borehole handlers
         BoreholeViewerHandler,
         BoreholeProducerHandler,
-        BoreholeExporterHandler,
+        # BoreholeExporterHandler,
+        ExportHandler,
 
         # Stratigraphy handlers
         StratigraphyHandler,
@@ -38,7 +39,8 @@ if __name__ == "__main__":
         ProjectHandler,
         CodeListHandler,
         MunicipalityHandler,
-        CantonHandler
+        CantonHandler,
+        Wmts
     )
 
     AsyncIOMainLoop().install()
@@ -50,14 +52,16 @@ if __name__ == "__main__":
     )
 
     application = web.Application([
+
         # Borehole handlers
         (r'/api/v1/setting', SettingHandler),
         (r'/api/v1/user', UserHandler),
 
         # Borehole handlers
         (r'/api/v1/borehole', BoreholeViewerHandler),
-        (r'/api/v1/borehole/export', BoreholeExporterHandler),
+        # (r'/api/v1/borehole/export', BoreholeExporterHandler),
         (r'/api/v1/borehole/edit', BoreholeProducerHandler),
+        (r'/api/v1/borehole/download', ExportHandler),
 
         # Stratigraphy handlers
         (r'/api/v1/borehole/stratigraphy', StratigraphyHandler),
@@ -71,7 +75,8 @@ if __name__ == "__main__":
         (r'/api/v1/borehole/codes', CodeListHandler),
         (r'/api/v1/geoapi/municipality', MunicipalityHandler),
         (r'/api/v1/geoapi/canton', CantonHandler),
-        (r'/api/v1/geoapi/location', GeoapiHandler)
+        (r'/api/v1/geoapi/location', GeoapiHandler),
+        (r"/api/v1/geoapi/wmts", Wmts)
     ], **settings)
 
     application.pool = ioloop.run_until_complete(get_conn())

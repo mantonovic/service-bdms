@@ -125,7 +125,8 @@ class BaseHandler(web.RequestHandler):
             self.write({
                 "success": False,
                 "message": str(bex),
-                "error": bex.code
+                "error": bex.code,
+                "data": bex.data
             })
         except Exception as ex:
             print(traceback.print_exc())

@@ -100,9 +100,12 @@ class GetLayer(Action):
                     unconrocks_id_cli AS unconrocks,
                     COALESCE(
                         notes_lay, ''
-                    ) AS notes
+                    ) AS notes,
+                    kind_id_cli AS kind
                 FROM
                     layer
+                INNER JOIN public.stratigraphy as stratigraphy
+                ON id_sty_fk = stratigraphy.id_sty
                 INNER JOIN public.users as creator
                 ON creator_lay = creator.id_usr
                 INNER JOIN public.users as updater

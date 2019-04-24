@@ -5,7 +5,8 @@ from bms.v1.borehole.stratigraphy import (
     CreateStratigraphy,
     GetStratigraphy,
     PatchStartigraphy,
-    DeleteStratigraphy
+    DeleteStratigraphy,
+    CloneStratigraphy
 )
 
 
@@ -20,7 +21,9 @@ class StratigraphyHandler(Viewer):
                 'LIST',
                 'GET',
                 'CHECK',
-                'PATCH']:
+                'PATCH',
+                'CLONE'
+                ]:
 
             async with self.pool.acquire() as conn:
 
@@ -41,6 +44,10 @@ class StratigraphyHandler(Viewer):
 
                 elif action == 'LIST':
                     exe = ListStratigraphies(conn)
+
+                elif action == 'CLONE':
+                    exe = CloneStratigraphy(conn)
+                    request['user_id'] = self.user['id']
 
                 request.pop('lang', None)
 

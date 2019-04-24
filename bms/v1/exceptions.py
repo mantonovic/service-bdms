@@ -2,26 +2,40 @@
 
 
 class BmsException(Exception):
-    def __init__(self, message, code):
+    def __init__(self, message, code, data = None):
         super().__init__(message)
         self.code = code
+        self.data = data
 
 
 class ActionEmpty(BmsException):
     def __init__(self):
-        super().__init__("Action empty", 200)
+        super().__init__("Action empty", 'E-200')
 
 
 class AuthenticationException(BmsException):
     def __init__(self):
-        super().__init__("Authentication error", 102)
+        super().__init__("Authentication error", 'E-102')
 
 
 class AuthorizationException(BmsException):
     def __init__(self):
-        super().__init__("Authorization error", 101)
+        super().__init__("Authorization error", 'E-101')
 
 
 class PatchAttributeException(BmsException):
     def __init__(self, attribute):
-        super().__init__("Attribute \"%s\" unknown" % attribute, 201)
+        super().__init__(f"Attribute \"{attribute}\" unknown", 'E-201')
+
+
+class MissingParameter(BmsException):
+    def __init__(self, parameter):
+        super().__init__(f"Missing parameter {parameter}", 'E-203')
+
+
+class Locked(BmsException):
+    def __init__(self, id, data):
+        super().__init__(
+            f"Borehole: '{id}' locked.",
+            'E-900', data
+        )

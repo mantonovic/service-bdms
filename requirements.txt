@@ -1,6 +1,8 @@
-psycopg2-binary
-momoko
-jsonschema
 pytest
+pylint
+asyncpg
 dateutils
 tornado
+PyPdf2
+reportlab
+pyshp

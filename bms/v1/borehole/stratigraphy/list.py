@@ -37,7 +37,11 @@ class ListStratigraphies(Action):
             SELECT
                 id_sty as id,
                 id_bho_fk as borehole,
-                kind_id_cli as kind
+                kind_id_cli as kind,
+                to_char(
+                    date_sty,
+                    'YYYY-MM-DD'
+                ) as date
             FROM
                 stratigraphy
             INNER JOIN codelist AS lk

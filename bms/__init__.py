@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from bms.v1.basehandler import BaseHandler
 from bms.v1.exceptions import AuthorizationException
+from bms.v1.exceptions import Locked
 
 # ACTION Handlers
 from bms.v1.borehole.producer import BoreholeProducerHandler
 from bms.v1.borehole.viewer import BoreholeViewerHandler
-from bms.v1.borehole.exporter import BoreholeExporterHandler
 from bms.v1.borehole.stratigraphy.handler import StratigraphyHandler
+
+# ACTION Handlers exports
+from bms.v1.borehole.export.exporter import ExportHandler
 
 # Stratigraphy's layers handlers
 from bms.v1.borehole.stratigraphy.layer.producer import LayerProducerHandler
@@ -32,3 +35,4 @@ from bms.v1.borehole import PatchBorehole
 # GeoApi actions
 from bms.v1.geoapi import ListMunicipality
 from bms.v1.geoapi import ListCanton
+from bms.v1.geoapi import Wmts

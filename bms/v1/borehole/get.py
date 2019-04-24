@@ -4,8 +4,30 @@ from bms.v1.action import Action
 
 class GetBorehole(Action):
 
-    async def execute(self, id):
-        rec = await self.conn.fetchrow("""
+    async def execute(self, id, with_lock = True):
+
+        sql_lock = ""
+        if with_lock is True:
+            sql_lock = """
+                CASE
+                    WHEN borehole.locked_by is NULL THEN NULL
+                    ELSE (
+                        select row_to_json(t2)
+                        FROM (
+                            SELECT
+                                borehole.locked_by as id,
+                                locker.username as username,
+                                locker.firstname || ' ' || locker.lastname
+                                    as fullname,
+                                to_char(
+                                    borehole.locked_at,
+                                    'YYYY-MM-DD"T"HH24:MI:SS'
+                                ) as date
+                        ) t2
+                    )
+                END AS lock,
+            """
+        rec = await self.conn.fetchrow(f"""
             SELECT
                 row_to_json(t)
             FROM (
@@ -17,6 +39,8 @@ class GetBorehole(Action):
                             SELECT
                                 updater.id_usr as id,
                                 updater.username as username,
+                                updater.firstname || ' ' || updater.lastname
+                                    as fullname,
                                 to_char(
                                     update_bho,
                                     'YYYY-MM-DD"T"HH24:MI:SS'
@@ -35,6 +59,14 @@ class GetBorehole(Action):
                                 ) as date
                         ) t2
                     ) as author,
+                    (
+                        select row_to_json(t2)
+                        FROM (
+                            SELECT
+                                version_id_cli as code
+                        ) t2
+                    ) as version,
+                    {sql_lock}
                     kind_id_cli as kind,
                     restriction_id_cli as restriction,
                     to_char(
@@ -71,7 +103,7 @@ class GetBorehole(Action):
                         FROM (
                             SELECT
                                 COALESCE(
-                                    name_pro, ''
+                                    project_name_bho, ''
                                 ) as project_name,
                                 COALESCE(
                                     public_name_bho, ''
@@ -93,7 +125,7 @@ class GetBorehole(Action):
                                 national_relevance_id_cli
                                     as national_relevance,
                                 COALESCE(
-                                    ate, '{}'::int[]
+                                    ate, '{{}}'::int[]
                                 ) AS attributes_to_edit,
                                 mistakes_bho as mistakes,
                                 remarks_bho as remarks
@@ -109,6 +141,8 @@ class GetBorehole(Action):
                     ON updater_bho = updater.id_usr
                 INNER JOIN public.users as author
                     ON author_id = author.id_usr
+                LEFT JOIN public.users as locker
+                    ON locked_by = locker.id_usr
                 LEFT JOIN project
                     ON id_pro = project_id
                 LEFT JOIN cantons

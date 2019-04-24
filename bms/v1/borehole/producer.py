@@ -2,6 +2,8 @@
 from bms.v1.handlers import Producer
 from bms.v1.borehole import (
     CheckBorehole,
+    StartEditing,
+    Lock,
     CreateBorehole,
     DeleteBorehole,
     DeleteBoreholes,
@@ -21,6 +23,8 @@ class BoreholeProducerHandler(Producer):
 
         if action in [
                 'CREATE',
+                'LOCK',
+                'EDIT',
                 'DELETE',
                 'DELETELIST',
                 'PATCH',
@@ -37,10 +41,18 @@ class BoreholeProducerHandler(Producer):
                     exe = CreateBorehole(conn)
                     request['user_id'] = self.user['id']
 
-                if action == 'DELETE':
+                if action == 'LOCK':
+                    exe = Lock(conn)
+                    request['user_id'] = self.user['id']
+
+                if action == 'EDIT':
+                    exe = StartEditing(conn)
+                    request['user_id'] = self.user['id']
+
+                elif action == 'DELETE':
                     exe = DeleteBorehole(conn)
 
-                if action == 'DELETELIST':
+                elif action == 'DELETELIST':
                     exe = DeleteBoreholes(conn)
 
                 elif action == 'PATCH':
@@ -57,7 +69,7 @@ class BoreholeProducerHandler(Producer):
                 elif action == 'IDS':
                     exe = BoreholeIds(conn)
                 
-                if action == 'LIST':
+                elif action == 'LIST':
                     exe = ListEditingBorehole(conn)
 
                     # update only if ordering changed
