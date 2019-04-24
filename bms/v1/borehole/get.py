@@ -10,7 +10,13 @@ class GetBorehole(Action):
         if with_lock is True:
             sql_lock = """
                 CASE
-                    WHEN borehole.locked_by is NULL THEN NULL
+                    WHEN (
+                        borehole.locked_by is NULL
+                        OR (
+                            borehole.locked_at < NOW()
+                                - INTERVAL '10 minutes'
+                        )
+                    ) THEN NULL
                     ELSE (
                         select row_to_json(t2)
                         FROM (

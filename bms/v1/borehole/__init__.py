@@ -4,6 +4,7 @@
 from bms.v1.borehole.create import CreateBorehole
 from bms.v1.borehole.start import StartEditing
 from bms.v1.borehole.lock import Lock
+from bms.v1.borehole.unlock import Unlock
 from bms.v1.borehole.delete import DeleteBorehole
 from bms.v1.borehole.deletelist import DeleteBoreholes
 from bms.v1.borehole.list import ListBorehole

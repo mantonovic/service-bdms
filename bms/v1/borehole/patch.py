@@ -39,17 +39,20 @@ class PatchBorehole(Action):
                 locked_by_name = rec[2]
 
                 # Check if not locked
-                if (
-                    locked_at is not None and  # Locked by someone
-                    locked_by != user_id and   # Someone is not the current user
-                    (now - locked_at) < (td)   # Timeout not finished
-                ):
+                if locked_by is None:
                     raise Locked(
-                        id,
-                        {
-                            "user": locked_by_name
-                        }
+                        id, None
                     )
+
+                # Check if not locked
+                else:
+                    if (
+                        locked_by != user_id
+                        or (now - locked_at) > (td)
+                    ):
+                        raise Locked(
+                            id, None
+                        )
 
                 # Lock row for current user
                 await self.conn.execute("""
@@ -423,13 +426,29 @@ class PatchBorehole(Action):
                                         'YYYY-MM-DD"T"HH24:MI:SS'
                                     ) as date
                             ) AS t
-                        ) as lock
+                        ) as lock,
+                        (
+                            select row_to_json(t)
+                            FROM (
+                                SELECT
+                                    updater.id_usr as id,
+                                    updater.username as username,
+                                    updater.firstname || ' ' || updater.lastname
+                                        as fullname,
+                                    to_char(
+                                        update_bho,
+                                        'YYYY-MM-DD"T"HH24:MI:SS'
+                                    ) as date
+                            ) t
+                        ) as updater
                     FROM
                         borehole
                     INNER JOIN public.users as locker
                         ON locked_by = locker.id_usr
                     INNER JOIN public.completness
                         ON completness.id_bho = borehole.id_bho
+                    INNER JOIN public.users as updater
+                        ON updater_bho = updater.id_usr
                     WHERE borehole.id_bho = $1
                 ) t2
             """, id)
@@ -438,6 +457,9 @@ class PatchBorehole(Action):
 
         except PatchAttributeException as bmsx:
             raise bmsx
+
+        except Locked as lkd:
+            raise lkd
 
         except Exception:
             raise Exception("Error while updating borehole")

@@ -38,6 +38,29 @@ class ListEditingBorehole(Action):
                             ) as date
                     ) t
                 ) as author,
+                CASE
+                    WHEN (
+                        borehole.locked_by is NULL
+                        OR (
+                            borehole.locked_at < NOW()
+                                - INTERVAL '10 minutes'
+                        )
+                    ) THEN NULL
+                    ELSE (
+                        select row_to_json(t2)
+                        FROM (
+                            SELECT
+                                borehole.locked_by as id,
+                                locker.username as username,
+                                locker.firstname || ' ' || locker.lastname
+                                    as fullname,
+                                to_char(
+                                    borehole.locked_at,
+                                    'YYYY-MM-DD"T"HH24:MI:SS'
+                                ) as date
+                        ) t2
+                    )
+                END AS lock,
                 original_name_bho as original_name,
                 kind_id_cli as kind,
                 restriction_id_cli as restriction,
@@ -65,6 +88,8 @@ class ListEditingBorehole(Action):
                 borehole
             INNER JOIN public.completness
             ON completness.id_bho = borehole.id_bho
+            LEFT JOIN public.users as locker
+                ON locked_by = locker.id_usr
             INNER JOIN public.users as author
                 ON author_id = author.id_usr
             LEFT JOIN (

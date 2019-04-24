@@ -4,6 +4,7 @@ from bms.v1.borehole import (
     CheckBorehole,
     StartEditing,
     Lock,
+    Unlock,
     CreateBorehole,
     DeleteBorehole,
     DeleteBoreholes,
@@ -24,6 +25,7 @@ class BoreholeProducerHandler(Producer):
         if action in [
                 'CREATE',
                 'LOCK',
+                'UNLOCK',
                 'EDIT',
                 'DELETE',
                 'DELETELIST',
@@ -43,6 +45,10 @@ class BoreholeProducerHandler(Producer):
 
                 if action == 'LOCK':
                     exe = Lock(conn)
+                    request['user_id'] = self.user['id']
+
+                if action == 'UNLOCK':
+                    exe = Unlock(conn)
                     request['user_id'] = self.user['id']
 
                 if action == 'EDIT':
