@@ -39,7 +39,7 @@ class ExportShapefile(Action):
 
         if len(where) > 0:
             sql += """
-                WHERE %s
+                AND %s
             """ % " AND ".join(where)
 
         recs = await self.conn.fetch(sql, *(params))
