@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from tornado import web
+from tornado.options import define, options
 from tornado.platform.asyncio import AsyncIOMainLoop
 import asyncio
 import asyncpg
@@ -8,13 +9,19 @@ import sys
 
 sys.path.append('.')
 
+define("port", default=8888, help="Tornado Web port", type=int)
+define("pg_host", default="localhost", help="PostgrSQL database host")
+define("pg_port", default="5432", help="PostgrSQL database port")
+define("pg_database", default="bms", help="PostgrSQL database name")
 
 async def get_conn():
     return await asyncpg.create_pool(
         user='postgres', password='postgres',
-        database='bms', host='localhost')
+        database=options.pg_database, host=options.pg_host)
 
 if __name__ == "__main__":
+
+    options.parse_command_line()
 
     from bms import (
         # user handlers
@@ -82,5 +89,5 @@ if __name__ == "__main__":
     application.pool = ioloop.run_until_complete(get_conn())
 
     http_server = HTTPServer(application)
-    http_server.listen(8888, 'localhost')
+    http_server.listen(options.port, 'localhost')
     ioloop.run_forever()
