@@ -299,5 +299,5 @@ class PatchLayer(Action):
         except PatchAttributeException as bmsx:
             raise bmsx
 
-        except Exception:
-            raise Exception("Error while updating layer")
+        except Exception as ex:
+            raise Exception("A server error occured while updating the layer")

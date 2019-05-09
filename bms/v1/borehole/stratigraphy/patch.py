@@ -3,7 +3,6 @@ from bms.v1.action import Action
 from bms.v1.exceptions import (
     PatchAttributeException
 )
-from bms.v1.borehole.geom.patch import PatchGeom
 
 
 class PatchStartigraphy(Action):
@@ -30,9 +29,7 @@ class PatchStartigraphy(Action):
                     WHERE id_sty = $3
                 """ % column, value, user_id, id)
 
-            elif field in [
-                'kind'
-                    ]:
+            elif field in ['kind']:
 
                 column = None
                 schema = field

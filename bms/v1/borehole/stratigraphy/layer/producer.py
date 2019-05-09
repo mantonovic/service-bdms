@@ -3,7 +3,8 @@ from bms.v1.handlers import Producer
 from bms.v1.borehole.stratigraphy.layer import (
     CreateLayer,
     PatchLayer,
-    DeleteLayer
+    DeleteLayer,
+    GapLayer
 )
 
 
@@ -14,29 +15,36 @@ class LayerProducerHandler(Producer):
         if action in [
                 'CREATE',
                 'DELETE',
+                'GAP',
                 'PATCH',
                 'CHECK']:
 
             async with self.pool.acquire() as conn:
+                async with conn.transaction():
 
-                exe = None
+                    exe = None
 
-                if action == 'CREATE':
-                    exe = CreateLayer(conn)
-                    request['user_id'] = self.user['id']
+                    if action == 'CREATE':
+                        exe = CreateLayer(conn)
+                        request['user_id'] = self.user['id']
 
-                elif action == 'DELETE':
-                    exe = DeleteLayer(conn)
+                    elif action == 'DELETE':
+                        exe = DeleteLayer(conn)
+                        request['user_id'] = self.user['id']
 
-                elif action == 'PATCH':
-                    exe = PatchLayer(conn)
-                    request['user_id'] = self.user['id']
+                    elif action == 'GAP':
+                        exe = GapLayer(conn)
+                        request['user_id'] = self.user['id']
 
-                request.pop('lang', None)
+                    elif action == 'PATCH':
+                        exe = PatchLayer(conn)
+                        request['user_id'] = self.user['id']
 
-                if exe is not None:
-                    return (
-                        await exe.execute(**request)
-                    )
+                    request.pop('lang', None)
+
+                    if exe is not None:
+                        return (
+                            await exe.execute(**request)
+                        )
 
         raise Exception("Layer action '%s' unknown" % action)

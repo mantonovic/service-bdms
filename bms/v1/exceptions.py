@@ -8,6 +8,16 @@ class BmsException(Exception):
         self.data = data
 
 
+class ActionWrong(BmsException):
+    def __init__(self):
+        super().__init__("Server error", 'E-000')
+
+
+class NotFound(BmsException):
+    def __init__(self):
+        super().__init__("Not found", 'E-050')
+
+
 class ActionEmpty(BmsException):
     def __init__(self):
         super().__init__("Action empty", 'E-200')
