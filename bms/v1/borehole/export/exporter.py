@@ -27,7 +27,6 @@ class ExportHandler(Viewer):
 
             arguments = {}
             for key in self.request.query_arguments.keys():
-                print("key: '%s'" % key)
                 if self.request.query_arguments[key][0] != b'null':
                     if key == 'extent':
                         coords = self.get_argument(key).split(',')
@@ -36,7 +35,6 @@ class ExportHandler(Viewer):
                         arguments[key] = coords
                     else:                        
                         if key == 'format':
-                            print(" > Splitting..")
                             arguments[key] = self.get_argument(key).split(',')
                         else:
                             arguments[key] = self.get_argument(key)
@@ -167,11 +165,9 @@ class ExportHandler(Viewer):
                     shpA = ExportShapefile(conn)
 
                     if arguments is None:
-                        shp, shx, dbf = await shpA.execute()
+                        shp, shx, dbf, prj = await shpA.execute()
                     else:
-                        shp, shx, dbf = await shpA.execute(filter=arguments)
-
-                    print("Done..")
+                        shp, shx, dbf, prj = await shpA.execute(filter=arguments)
 
                     if output_stream is None:
                         self.set_header(
@@ -209,6 +205,12 @@ class ExportHandler(Viewer):
                         ),
                         dbf.getvalue()
                     )
+                    output_stream.writestr(
+                        'export-%s.prj' % now.strftime(
+                                "%Y%m%d%H%M%S"
+                        ),
+                        prj.getvalue()
+                    )
 
             if output_stream is not None:
                 output_stream.close()
@@ -228,54 +230,3 @@ class ExportHandler(Viewer):
                 "message": str(ex)
             })
         self.finish()
-
-    # async def post(self, *args, **kwargs):
-    #     try:
-    #         self.set_header("Content-Type", "text/csv")
-    #         if self.user is None:
-    #             raise AuthenticationException()
-
-    #         self.authorize()
-    #         body = self.request.body.decode('utf-8')
-    #         if body is None or body == '':
-    #             raise ActionEmpty()
-
-    #         async with self.pool.acquire() as conn:
-    #             action = ExportBorehole(conn)
-    #             result = await action.execute(**json.loads(body))
-    #             data = result['data']
-    #             if len(data) > 0:
-    #                 csvfile = StringIO()
-    #                 cw = csv.writer(
-    #                     csvfile,
-    #                     delimiter=';',
-    #                     quotechar='"'
-    #                 )
-    #                 cols = data[0].keys()
-    #                 cw.writerow(cols)
-
-    #                 for row in data:
-    #                     r = []
-    #                     for col in cols:
-    #                         r.append(row[col])
-    #                     cw.writerow(r)
-
-    #                 self.write(csvfile.getvalue())
-
-    #             else:
-    #                 self.write("no data")
-
-    #     except BmsException as bex:
-    #         print(traceback.print_exc())
-    #         self.write({
-    #             "success": False,
-    #             "message": str(bex),
-    #             "error": bex.code
-    #         })
-    #     except Exception as ex:
-    #         print(traceback.print_exc())
-    #         self.write({
-    #             "success": False,
-    #             "message": str(ex)
-    #         })
-    #     self.finish()

@@ -62,6 +62,18 @@ class ExportShapefile(Action):
                 w.point(rec[3], rec[4]) 
                 w.record(rec[1], rec[2])
 
-            w.close()
+            prj = BytesIO(
+                b'PROJCS["CH1903+_LV95",GEOGCS["GCS_CH1903+",' \
+                b'DATUM["D_CH1903+",SPHEROID["Bessel_1841",' \
+                b'6377397.155,299.1528128]],PRIMEM["Greenwich",0],' \
+                b'UNIT["Degree",0.017453292519943295]],PROJECTION' \
+                b'["Hotine_Oblique_Mercator_Azimuth_Center"],PARAMETER' \
+                b'["latitude_of_center",46.95240555555556],' \
+                b'PARAMETER["longitude_of_center",7.439583333333333],' \
+                b'PARAMETER["azimuth",90],PARAMETER["scale_factor",1],' \
+                b'PARAMETER["false_easting",2600000],' \
+                b'PARAMETER["false_northing",1200000],UNIT["Meter",1]]'
+                
+            )
 
-        return shp, shx, dbf
+        return shp, shx, dbf, prj
