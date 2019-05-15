@@ -38,6 +38,8 @@ class ListStratigraphies(Action):
                 id_sty as id,
                 id_bho_fk as borehole,
                 kind_id_cli as kind,
+                name_sty as name,
+                primary_sty as primary,
                 to_char(
                     date_sty,
                     'YYYY-MM-DD'
@@ -73,7 +75,7 @@ class ListStratigraphies(Action):
                 ), 0)
             FROM (
                 %s
-            ORDER BY order_cli
+            ORDER BY order_cli, date_sty desc
                 %s
             ) AS t
         """ % (cntSql, rowsSql, paging)

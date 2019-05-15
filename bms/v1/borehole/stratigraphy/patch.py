@@ -29,6 +29,66 @@ class PatchStartigraphy(Action):
                     WHERE id_sty = $3
                 """ % column, value, user_id, id)
 
+            elif field in ['primary']:
+                # Boolean values
+
+                column = None
+
+                if field == 'primary':
+                    column = 'primary_sty'
+
+                if value not in [True, False]:
+                    raise Exception(
+                        f"Value of field {field} is not a boolean"
+                    )
+
+                if value is True:
+                    # Reset all others stratigraphy to false
+
+                    id_bho = await self.conn.fetchval("""
+                        SELECT
+                            id_bho_fk
+                        FROM
+                            public.stratigraphy
+                        WHERE
+                            id_sty = $1
+                    """, id)
+
+                    await self.conn.execute("""
+                        UPDATE public.stratigraphy
+                        SET
+                            %s = FALSE,
+                            update_sty = now(),
+                            updater_sty = $1
+                        WHERE id_bho_fk = $2
+                    """ % column, user_id, id_bho)
+
+                await self.conn.execute("""
+                    UPDATE public.stratigraphy
+                    SET
+                        %s = $1,
+                        update_sty = now(),
+                        updater_sty = $2
+                    WHERE id_sty = $3
+                """ % column, value, user_id, id)
+
+            elif field in ['name']:
+                # Text values
+
+                column = None
+
+                if field == 'name':
+                    column = 'name_sty'
+
+                await self.conn.execute("""
+                    UPDATE public.stratigraphy
+                    SET
+                        %s = $1,
+                        update_sty = now(),
+                        updater_sty = $2
+                    WHERE id_sty = $3
+                """ % column, value, user_id, id)
+
             elif field in ['kind']:
 
                 column = None

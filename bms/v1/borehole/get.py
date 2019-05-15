@@ -173,6 +173,8 @@ class GetBorehole(Action):
                                 json_build_object(
                                     'id', id,
                                     'kind', kind,
+                                    'name', "name",
+                                    'primary', "primary",
                                     'layers', layers,
                                     'date', date
                                 )
@@ -183,6 +185,8 @@ class GetBorehole(Action):
                             id_bho_fk,
                             id_sty AS id,
                             id_cli AS kind,
+                            name_sty AS "name",
+                            primary_sty as "primary",
                             to_char(
                                 date_sty, 'YYYY-MM-DD'
                             ) AS date,
