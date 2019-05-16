@@ -23,7 +23,7 @@ class ListEditingBorehole(Action):
                 limit, (int(limit) * (int(page) - 1))
             ]
 
-        rowsSql = """
+        rowsSql = f"""
             SELECT
                 borehole.id_bho as id,
                 (
@@ -43,7 +43,7 @@ class ListEditingBorehole(Action):
                         borehole.locked_by is NULL
                         OR (
                             borehole.locked_at < NOW()
-                                - INTERVAL '10 minutes'
+                                - INTERVAL '{self.lock_timeout} minutes'
                         )
                     ) THEN NULL
                     ELSE (

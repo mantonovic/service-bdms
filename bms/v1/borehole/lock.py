@@ -30,8 +30,8 @@ class Lock(GetBorehole):
         locked_by = rec[1]
         locked_by_name = rec[2]
 
-        minutes = 10
-        td = timedelta(minutes=minutes)
+        
+        td = timedelta(minutes=self.lock_timeout)
 
         # Check if not locked
         if (

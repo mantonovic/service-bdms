@@ -25,8 +25,7 @@ class DeleteStratigraphy(Action):
         if rec is not None:
             
             now = datetime.now()
-            minutes = 10
-            td = timedelta(minutes=minutes)
+            td = timedelta(minutes=self.lock_timeout)
 
             locked_at = rec[0]
             locked_by = rec[1]

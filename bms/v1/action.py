@@ -3,6 +3,9 @@ import json
 
 
 class Action():
+
+    lock_timeout = 10
+
     def __init__(self, conn=None, pool=None):
         self.conn = conn
         self.pool = pool

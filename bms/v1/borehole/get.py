@@ -8,13 +8,13 @@ class GetBorehole(Action):
 
         sql_lock = ""
         if with_lock is True:
-            sql_lock = """
+            sql_lock = f"""
                 CASE
                     WHEN (
                         borehole.locked_by is NULL
                         OR (
                             borehole.locked_at < NOW()
-                                - INTERVAL '10 minutes'
+                                - INTERVAL '{self.lock_timeout} minutes'
                         )
                     ) THEN NULL
                     ELSE (
