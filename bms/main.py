@@ -84,6 +84,7 @@ if __name__ == "__main__":
         (r'/api/v1/geoapi/canton', CantonHandler),
         (r'/api/v1/geoapi/location', GeoapiHandler),
         (r"/api/v1/geoapi/wmts", Wmts)
+
     ], **settings)
 
     application.pool = ioloop.run_until_complete(get_conn())

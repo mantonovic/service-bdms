@@ -12,7 +12,7 @@ class GetStratigraphy(Action):
                 SELECT
                     id_sty as id,
                     kind_id_cli as kind,
-                    name_sty as name,
+                    COALESCE(name_sty, '') as name,
                     primary_sty as primary,
                     to_char(
                         date_sty,

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-S
 from bms.v1.handlers import Viewer
-from bms.v1.borehole.codelist.listcodelist import ListCodeList
+from bms.v1.borehole.codelist import (
+    ListCodeList,
+    PatchCode
+)
 
 
 class CodeListHandler(Viewer):
@@ -8,16 +11,32 @@ class CodeListHandler(Viewer):
         action = request.pop('action', None)
 
         if action in [
-                'CREATE',
-                'LIST',
-                'GET',
-                'CHECK']:
+            'PATCH',
+            'LIST'
+        ]:
 
             async with self.pool.acquire() as conn:
+
                 if action == 'LIST':
                     action = ListCodeList(conn=conn)
 
+                elif action == 'PATCH':
+                    # Temporary workaround waiting for multiple
+                    # stratigraphy type creation
+                    request['code_id'] =  await conn.fetchval("""
+                        SELECT
+                            id_cli
+                        FROM
+                            codelist
+                        WHERE
+                            schema_cli = 'layer_kind'
+                        AND
+                            default_cli IS TRUE
+                    """)
+                    action = PatchCode(conn=conn)
+
                 request.pop('lang', None)  # removing lang
+
                 if action is not None:
                     return (
                         await action.execute(**request)
