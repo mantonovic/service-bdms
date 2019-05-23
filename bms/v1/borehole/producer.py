@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-S
+from bms import Locked
 from bms.v1.handlers import Producer
 from bms.v1.borehole import (
     CheckBorehole,
@@ -16,9 +17,60 @@ from bms.v1.borehole import (
 from bms.v1.setting import (
     PatchSetting
 )
+from datetime import datetime
+from datetime import timedelta
 
 
 class BoreholeProducerHandler(Producer):
+
+    async def check_lock(self, id, user_id, conn):
+        rec = await conn.fetchrow("""
+            SELECT
+                locked_at,
+                locked_by,
+                firstname || ' ' || lastname
+            FROM
+                borehole
+            LEFT JOIN users
+            ON users.id_usr = borehole.locked_by
+            WHERE
+                id_bho = $1
+        """, id)
+
+        if rec is None:
+            raise Exception(f"Borehole with id: '{id}' not exists")
+
+        if rec is not None:
+
+            now = datetime.now()
+
+            td = timedelta(minutes=Lock.lock_timeout)
+
+            locked_at = rec[0]
+            locked_by = rec[1]
+            locked_by_name = rec[2]
+
+            if (
+                locked_at is not None and  # Locked by someone
+                locked_by != user_id and   # Someone is not the current user
+                (now - locked_at) < (td)   # Timeout not finished
+            ):
+                raise Locked(
+                    id, 
+                    {
+                        "user": locked_by_name,
+                        "datetime": locked_at.isoformat()
+                    }
+                )
+
+        # Lock row for current user
+        await conn.execute("""
+            UPDATE borehole SET
+                locked_at = $1,
+                locked_by = $2
+            WHERE id_bho = $3;
+        """, now, user_id, id)
+
     async def execute(self, request):
         action = request.pop('action', None)
 
@@ -38,6 +90,18 @@ class BoreholeProducerHandler(Producer):
             async with self.pool.acquire() as conn:
 
                 exe = None
+
+                if action in [
+                    'LOCK',
+                    'UNLOCK',
+                    'EDIT',
+                    'DELETE',
+                    'PATCH',
+                ]:
+                    # Lock check
+                    await self.check_lock(
+                        request['id'], self.user['id'], conn
+                    )
 
                 if action == 'CREATE':
                     exe = CreateBorehole(conn)

@@ -13,55 +13,7 @@ class PatchBorehole(Action):
 
     async def execute(self, id, field, value, user_id):
         try:
-
-            # First chehck if user has a lock on row
-            rec = await self.conn.fetchrow("""
-                SELECT
-                    locked_at,
-                    locked_by,
-                    firstname || ' ' || lastname
-                FROM
-                    borehole
-                LEFT JOIN users
-                ON users.id_usr = borehole.locked_by
-                WHERE
-                    id_bho = $1
-            """, id)
-
-            if rec is not None:
-                
-                now = datetime.now()
-                
-                td = timedelta(minutes=self.lock_timeout)
-
-                locked_at = rec[0]
-                locked_by = rec[1]
-                locked_by_name = rec[2]
-
-                # Check if not locked
-                if locked_by is None:
-                    raise Locked(
-                        id, None
-                    )
-
-                # Check if not locked
-                else:
-                    if (
-                        locked_by != user_id
-                        or (now - locked_at) > (td)
-                    ):
-                        raise Locked(
-                            id, None
-                        )
-
-                # Lock row for current user
-                await self.conn.execute("""
-                    UPDATE borehole SET
-                        locked_at = $1,
-                        locked_by = $2
-                    WHERE id_bho = $3;
-                """, now, user_id, id)
-
+            
             # Updating character varing, boolean fields
             if field in [
                 'extended.original_name',

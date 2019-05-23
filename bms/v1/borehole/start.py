@@ -9,42 +9,6 @@ class StartEditing(GetBorehole):
 
     async def execute(self, id, user_id):
 
-        now = datetime.now()
-        rec = await self.conn.fetchrow("""
-            SELECT
-                locked_at,
-                locked_by,
-                firstname || ' ' || lastname
-            FROM
-                borehole
-            LEFT JOIN users
-              ON users.id_usr = borehole.locked_by
-            WHERE
-                id_bho = $1
-        """, id)
-
-        if rec is None:
-            raise Exception(f"Borehole with id: '{id}' not exists")
-
-        locked_at = rec[0]
-        locked_by = rec[1]
-        locked_by_name = rec[2]
-
-        td = timedelta(minutes=self.lock_timeout)
-
-        # Check if not locked
-        if (
-            locked_at is not None and  # Locked by someone
-            locked_by != user_id and   # Someone is not the current user
-            (now - locked_at) < (td)   # Timeout not finished
-        ):
-            raise Locked(
-                id,
-                {
-                    "user": locked_by_name
-                }
-            )
-
         # Lock row for current user
         await self.conn.execute("""
             UPDATE borehole SET
