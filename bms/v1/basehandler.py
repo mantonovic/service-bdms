@@ -19,9 +19,13 @@ class BaseHandler(web.RequestHandler):
             'id': 0,
             'username': 'anonymous',
             'roles': [
-                'viewer', 'producer'
+                'VIEW', 'EDIT'
             ],
-            'name': 'Pinco Pallina',
+            'group': {
+                'id': 0,
+                'name': 'SUPSI'
+            },
+            'name': 'IST SUPSI',
             'setting': {
                 "filter": {
                     "custom": {
@@ -56,38 +60,92 @@ class BaseHandler(web.RequestHandler):
         }
 
     async def prepare(self):
+
+        auth_header = self.request.headers.get('Authorization')
+
+        # print(f'Authorization: {auth_header}')
+
+        if auth_header is None or not auth_header.startswith('Basic '):
+            self.set_header('WWW-Authenticate', 'Basic realm=BasicAuthSample')
+            self.set_status(401)
+            self.finish()
+            return # self.user
+
         async with self.pool.acquire() as conn:
-            auth_header = self.request.headers.get('Authorization')
-            if auth_header is None or not auth_header.startswith('Basic '):
-                return self.user
 
             auth_decoded = base64.decodestring(auth_header[6:].encode('utf-8'))
             username, password = auth_decoded.decode('utf-8').split(':', 2)
 
             async with self.pool.acquire() as conn:
-                rec = await conn.fetchrow("""
-                    SELECT
-                        id_usr,
-                        username,
-                        settings_usr,
-                        firstname,
-                        lastname
-                    FROM
-                        users
-                    WHERE username = $1
-                    AND password = $2
+                val = await conn.fetchval("""
+                    SELECT row_to_json(t)
+                        FROM (
+                        SELECT
+                            id_usr as "id",
+                            username,
+                            COALESCE(
+                                admin_usr, FALSE
+                            ) as admin,
+                            firstname || ' ' || lastname as "name",
+                            COALESCE(
+                                settings_usr::json,
+                                '{'
+                                '   "filter": {},'
+                                '   "boreholetable": {'
+                                '        "orderby": "original_name",'
+                                '        "direction": "ASC"'
+                                '    },'
+                                '    "eboreholetable": {'
+                                '        "orderby": "creation",'
+                                '        "direction": "DESC"'
+                                '    },'
+                                '   "map": {'
+                                '       "explorer": {},'
+                                '       "editor": {}'
+                                '   },'
+                                '   "appearance": {'
+                                '       "explorer": 1'
+                                '   }'
+                                '}'::json
+                            ) as setting,
+                            COALESCE(
+                                r.name_rol,
+                                '{}'::text[]
+                            ) as roles,
+                            (
+                                select row_to_json(t)
+                                FROM (
+                                    SELECT
+                                        id_grp as id,
+                                        name_grp as name
+                                ) t
+                            ) as group
+                        FROM
+                            users
+                        INNER JOIN public.groups
+                        ON id_grp = id_grp_fk
+                        LEFT JOIN (
+                            SELECT
+                                id_usr_fk,
+                                array_agg(name_rol) AS name_rol
+                            FROM
+                                users_roles,
+                                roles
+                            WHERE
+                                id_rol = id_rol_fk
+                            GROUP BY
+                                id_usr_fk
+                        ) as r
+                        ON r.id_usr_fk = id_usr
+                        WHERE username = $1
+                        AND password = $2
+                    ) as t
                 """, username, password)
 
-                if rec is None:
+                if val is None:
                     raise AuthenticationException()
 
-                self.user['id'] = rec[0]
-                self.user['username'] = rec[1]
-                self.user['name'] = "%s %s" % (rec[3], rec[4])
-                self.user['roles'] = ['viewer', 'producer']
-                self.user['setting'] = (
-                    json.loads(rec[2]) if rec[2] is not None else {}
-                )
+                self.user = json.loads(val)
 
     @property
     def pool(self):
