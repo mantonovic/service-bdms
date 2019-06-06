@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
-from bms.v1.borehole.get import GetBorehole
-from bms import Locked
+from bms.v1.action import Action
+from bms import (
+    AuthorizationException,
+    Locked,
+    NotFound
+)
 from datetime import datetime
 from datetime import timedelta
 
 
-class Lock(GetBorehole):
+class Lock(Action):
 
-    async def execute(self, id, user_id):
+    async def execute(self, id, user):
 
         now = datetime.now()
 
@@ -17,7 +21,7 @@ class Lock(GetBorehole):
                 locked_at = $1,
                 locked_by = $2
             WHERE id_bho = $3;
-        """, now, user_id, id)
+        """, now, user['id'], id)
 
         res = await self.conn.fetchval("""
             SELECT row_to_json(t2)

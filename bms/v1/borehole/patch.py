@@ -11,7 +11,7 @@ from datetime import timedelta
 
 class PatchBorehole(Action):
 
-    async def execute(self, id, field, value, user_id):
+    async def execute(self, id, field, value, user):
         try:
             
             # Updating character varing, boolean fields
@@ -133,9 +133,8 @@ class PatchBorehole(Action):
                     sets = []
                     for col in column:
                         sets.append("%s = %s" % (col, self.getIdx()))
-                    value.append(user_id)
+                    value.append(user['id'])
                     value.append(id)
-                    print(value)
                     await self.conn.execute("""
                         UPDATE public.borehole
                         SET
@@ -157,7 +156,7 @@ class PatchBorehole(Action):
                             update_bho = now(),
                             updater_bho = $2
                         WHERE id_bho = $3
-                    """ % column, value, user_id, id)
+                    """ % column, value, user['id'], id)
                 
                 if field in ['location_x', 'location_y', 'location']:
 
@@ -188,7 +187,7 @@ class PatchBorehole(Action):
                         update_bho = now(),
                         updater_bho = $2
                     WHERE id_bho = $3
-                """ % column, value, user_id, id)
+                """ % column, value, user['id'], id)
 
             elif field in [
                 'restriction',
@@ -300,7 +299,7 @@ class PatchBorehole(Action):
                         update_bho = now(),
                         updater_bho = $2
                     WHERE id_bho = $3
-                """ % column, value, user_id, id)
+                """ % column, value, user['id'], id)
 
             elif field in [
                         'custom.attributes_to_edit'
@@ -354,7 +353,7 @@ class PatchBorehole(Action):
                             update_bho = now(),
                             updater_bho = $1
                         WHERE id_bho = $2
-                    """, user_id, id)
+                    """, user['id'], id)
 
             else:
                 raise PatchAttributeException(field)

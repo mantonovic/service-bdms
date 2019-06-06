@@ -108,10 +108,6 @@ class BaseHandler(web.RequestHandler):
                                 '   }'
                                 '}'::json
                             ) as setting,
-                            COALESCE(
-                                r.name_rol,
-                                '{}'::text[]
-                            ) as roles,
                             (
                                 select row_to_json(t)
                                 FROM (
@@ -119,24 +115,62 @@ class BaseHandler(web.RequestHandler):
                                         id_grp as id,
                                         name_grp as name
                                 ) t
-                            ) as group
+                            ) as group,
+                            w.ws as workgroups,
+                            rl.roles as roles
                         FROM
                             users
+
                         INNER JOIN public.groups
-                        ON id_grp = id_grp_fk
+                            ON id_grp = id_grp_fk
+
+                        LEFT JOIN (
+                            SELECT
+                                r.id_usr_fk,
+                                array_agg(r.name_rol) AS roles
+                            FROM
+                            (
+                                SELECT distinct
+                                    id_usr_fk,
+                                    name_rol
+                                FROM
+                                    users_roles,
+                                    roles
+                                WHERE
+                                    id_rol = id_rol_fk
+                            ) r
+                            GROUP BY id_usr_fk
+                        ) as rl
+                        ON rl.id_usr_fk = id_usr
+
                         LEFT JOIN (
                             SELECT
                                 id_usr_fk,
-                                array_agg(name_rol) AS name_rol
+                                array_to_json(array_agg(j)) as ws
                             FROM
-                                users_roles,
-                                roles
-                            WHERE
-                                id_rol = id_rol_fk
-                            GROUP BY
-                                id_usr_fk
-                        ) as r
-                        ON r.id_usr_fk = id_usr
+                            (
+                                SELECT
+                                    id_usr_fk,
+                                    json_build_object(
+                                        'id', id_wgp,
+                                        'workgroup', name_wgp,
+                                        'roles', array_agg(name_rol)
+                                    ) as j
+                                FROM
+                                    users_roles,
+                                    workgroups,
+                                    roles
+                                WHERE
+                                    id_rol = id_rol_fk
+                                AND
+                                    id_wgp_fk = id_wgp
+                                GROUP BY
+                                    id_usr_fk,
+                                    id_wgp
+                            ) AS t
+                            GROUP BY id_usr_fk
+                        ) as w
+                        ON w.id_usr_fk = id_usr
                         WHERE username = $1
                         AND password = $2
                     ) as t

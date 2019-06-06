@@ -7,5 +7,9 @@ from bms import (
 
 class Viewer(BaseHandler):
     def authorize(self):
-        if 'viewer' not in self.user['roles']:
-            raise AuthorizationException()
+        pass
+        # if (
+        #     'VIEW' not in self.user['roles'] or
+        #     'EDIT' not in self.user['roles']
+        # ):
+        #     raise AuthorizationException()

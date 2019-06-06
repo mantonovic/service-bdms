@@ -22,6 +22,8 @@ class BoreholeViewerHandler(Viewer):
             async with self.pool.acquire() as conn:
 
                 exe = None
+
+                request['user'] = self.user
                 
                 if action == 'LIST':
                     exe = ListBorehole(conn)
@@ -39,6 +41,7 @@ class BoreholeViewerHandler(Viewer):
                             'boreholetable.orderby',
                             request['orderby']
                         )
+
                     else:
                         request['orderby'] = self.user[
                             'setting'
@@ -56,6 +59,7 @@ class BoreholeViewerHandler(Viewer):
                             'boreholetable.direction',
                             request['direction']
                         )
+
                     else:
                         request['direction'] = self.user[
                             'setting'

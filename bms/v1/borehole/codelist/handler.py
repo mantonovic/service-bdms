@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-S
+from bms import (
+    AuthorizationException
+)
 from bms.v1.handlers import Viewer
 from bms.v1.borehole.codelist import (
     ListCodeList,
@@ -23,6 +26,9 @@ class CodeListHandler(Viewer):
                 elif action == 'PATCH':
                     # Temporary workaround waiting for multiple
                     # stratigraphy type creation
+                    if self.user['admin'] is False:
+                        raise AuthorizationException()
+
                     request['code_id'] =  await conn.fetchval("""
                         SELECT
                             id_cli

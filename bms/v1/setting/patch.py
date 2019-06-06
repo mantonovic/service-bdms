@@ -43,7 +43,24 @@ class PatchSetting(Action):
                     tmp = tmp[pathList[idx]]
 
             else:
-                setting = {}
+                setting = {
+                    "filter": {},
+                    "boreholetable": {
+                        "orderby": "original_name",
+                        "direction": "ASC"
+                    },
+                    "eboreholetable": {
+                        "orderby": "creation",
+                        "direction": "DESC"
+                    },
+                    "map": {
+                        "explorer": {},
+                        "editor": {}
+                    },
+                    "appearance": {
+                        "explorer": 1
+                    }
+                }
                 tmp = setting
                 for idx in range(0, l):
                     if idx < (l-1):

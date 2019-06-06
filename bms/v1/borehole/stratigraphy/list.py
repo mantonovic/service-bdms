@@ -5,23 +5,27 @@ import math
 
 class ListStratigraphies(Action):
 
-    async def execute(self, limit=None, page=None, filter={}):
+    async def execute(self, limit=None, page=None, filter={}, user=None):
 
         paging = ''
         params = []
         where = []
         fkeys = filter.keys()
 
+        permissions = None
+        if user is not None:
+            permissions = self.filterPermission(user)
+
         if 'borehole' in fkeys and filter['borehole'] != '':
             params.append(filter['borehole'])
             where.append("""
-                id_bho_fk = %s
+                stratigraphy.id_bho_fk = %s
             """ % self.getIdx())
 
         if 'kind' in fkeys and filter['kind'] != '':
             params.append(filter['kind'])
             where.append("""
-                kind_id_cli = %s
+                stratigraphy.kind_id_cli = %s
             """ % self.getIdx())
 
         if limit is not None and page is not None:
@@ -35,9 +39,16 @@ class ListStratigraphies(Action):
 
         rowsSql = """
             SELECT
+                /*(
+                    select row_to_json(t)
+                    FROM (
+                        SELECT
+                            id_bho as id
+                    ) t
+                ) as borehole,*/
                 id_sty as id,
-                id_bho_fk as borehole,
-                kind_id_cli as kind,
+                stratigraphy.id_bho_fk as borehole,
+                stratigraphy.kind_id_cli as kind,
                 name_sty as name,
                 primary_sty as primary,
                 to_char(
@@ -46,13 +57,20 @@ class ListStratigraphies(Action):
                 ) as date
             FROM
                 stratigraphy
+
+            INNER JOIN borehole
+            ON stratigraphy.id_bho_fk = id_bho
+
             INNER JOIN codelist AS lk
-            ON lk.id_cli = kind_id_cli
+            ON lk.id_cli = stratigraphy.kind_id_cli
         """
 
         cntSql = """
             SELECT count(*) AS cnt
             FROM stratigraphy
+
+            INNER JOIN borehole
+            ON id_bho_fk = id_bho
         """
 
         if len(where) > 0:
@@ -62,6 +80,20 @@ class ListStratigraphies(Action):
             cntSql += """
                 WHERE %s
             """ % " AND ".join(where)
+
+
+        if permissions is not None:
+            operator = 'AND' if len(where) > 0 else 'WHERE'
+            rowsSql += """
+                {} {}
+            """.format(
+                operator, permissions
+            )
+            cntSql += """
+                {} {}
+            """.format(
+                operator, permissions
+            )
 
         sql = """
             SELECT

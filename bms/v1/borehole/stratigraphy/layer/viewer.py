@@ -21,6 +21,8 @@ class LayerViewerHandler(Viewer):
 
                 exe = None
 
+                request['user'] = self.user
+
                 if action == 'GET':
                     exe = GetLayer(conn)
 

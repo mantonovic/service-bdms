@@ -4,8 +4,18 @@ from bms.v1.action import Action
 
 class GetLayer(Action):
 
-    async def execute(self, id):
-        rec = await self.conn.fetchrow("""
+    async def execute(self, id, user=None):
+
+        permission = ''
+
+        if user is not None:
+            permission = """
+                AND {}
+            """.format(
+                self.filterPermission(user)
+            )
+
+        rec = await self.conn.fetchrow(f"""
             SELECT row_to_json(t)
             FROM (
                 SELECT
@@ -43,57 +53,57 @@ class GetLayer(Action):
                         geology_lay, ''
                     ) AS geology,
                     last_lay AS last,
-                    qt_description_id_cli AS qt_description,
-                    lithology_id_cli AS lithology,
-                    lithostratigraphy_id_cli AS lithostratigraphy,
-                    chronostratigraphy_id_cli AS chronostratigraphy,
-                    tectonic_unit_id_cli AS tectonic_unit,
-                    symbol_id_cli AS symbol,
+                    layer.qt_description_id_cli AS qt_description,
+                    layer.lithology_id_cli AS lithology,
+                    layer.lithostratigraphy_id_cli AS lithostratigraphy,
+                    layer.chronostratigraphy_id_cli AS chronostratigraphy,
+                    layer.tectonic_unit_id_cli AS tectonic_unit,
+                    layer.symbol_id_cli AS symbol,
                     COALESCE(
-                        mlpr112, '{}'::int[]
+                        mlpr112, '{{}}'::int[]
                     ) AS color,
-                    plasticity_id_cli AS plasticity,
-                    humidity_id_cli AS humidity,
-                    consistance_id_cli AS consistance,
-                    alteration_id_cli AS alteration,
-                    compactness_id_cli AS compactness,
+                    layer.plasticity_id_cli AS plasticity,
+                    layer.humidity_id_cli AS humidity,
+                    layer.consistance_id_cli AS consistance,
+                    layer.alteration_id_cli AS alteration,
+                    layer.compactness_id_cli AS compactness,
                     COALESCE(
-                        mlpr113, '{}'::int[]
+                        mlpr113, '{{}}'::int[]
                     ) AS jointing,
-                    soil_state_id_cli AS soil_state,
+                    layer.soil_state_id_cli AS soil_state,
                     COALESCE(
-                        mlpr108, '{}'::int[]
+                        mlpr108, '{{}}'::int[]
                     ) AS organic_component,
                     striae_lay AS striae,
-                    grain_size_1_id_cli AS grain_size_1,
-                    grain_size_2_id_cli AS grain_size_2,
+                    layer.grain_size_1_id_cli AS grain_size_1,
+                    layer.grain_size_2_id_cli AS grain_size_2,
                     COALESCE(
-                        mlpr110, '{}'::int[]
+                        mlpr110, '{{}}'::int[]
                     ) AS grain_shape,
                     COALESCE(
-                        mlpr115, '{}'::int[]
+                        mlpr115, '{{}}'::int[]
                     ) AS grain_granularity,
-                    cohesion_id_cli AS cohesion,
+                    layer.cohesion_id_cli AS cohesion,
                     COALESCE(
-                        mlpr117, '{}'::int[]
+                        mlpr117, '{{}}'::int[]
                     ) AS further_properties,
-                    uscs_1_id_cli AS uscs_1,
-                    uscs_2_id_cli AS uscs_2,
+                    layer.uscs_1_id_cli AS uscs_1,
+                    layer.uscs_2_id_cli AS uscs_2,
                     COALESCE(
-                        mcla101, '{}'::int[]
+                        mcla101, '{{}}'::int[]
                     ) AS uscs_3,
                     COALESCE(
                         uscs_original_lay, ''
                     ) AS uscs_original,
                     COALESCE(
-                        mcla104, '{}'::int[]
+                        mcla104, '{{}}'::int[]
                     ) AS uscs_determination,
-                    unconrocks_id_cli AS unconrocks,
+                    layer.unconrocks_id_cli AS unconrocks,
                     COALESCE(
-                        mcla107, '{}'::int[]
+                        mcla107, '{{}}'::int[]
                     ) AS debris,
                     COALESCE(
-                        vlit401, '{}'::int[]
+                        vlit401, '{{}}'::int[]
                     ) AS lit_pet_deb,
                     lithok_id_cli AS lithok,
                     kirost_id_cli AS kirost,
@@ -101,15 +111,22 @@ class GetLayer(Action):
                     COALESCE(
                         notes_lay, ''
                     ) AS notes,
-                    kind_id_cli AS kind
+                    stratigraphy.kind_id_cli AS kind
                 FROM
                     layer
+
                 INNER JOIN public.stratigraphy as stratigraphy
                 ON id_sty_fk = stratigraphy.id_sty
+
+                INNER JOIN borehole
+                ON stratigraphy.id_bho_fk = id_bho
+
                 INNER JOIN public.users as creator
                 ON creator_lay = creator.id_usr
+
                 INNER JOIN public.users as updater
                 ON updater_lay = updater.id_usr
+
                 LEFT JOIN (
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mlpr112
@@ -120,6 +137,7 @@ class GetLayer(Action):
                     GROUP BY id_lay_fk
                 ) clr
                 ON clr.id_lay_fk = id_lay
+
                 LEFT JOIN (
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mlpr113
@@ -130,6 +148,7 @@ class GetLayer(Action):
                     GROUP BY id_lay_fk
                 ) jng
                 ON jng.id_lay_fk = id_lay
+
                 LEFT JOIN (
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mlpr108
@@ -140,6 +159,7 @@ class GetLayer(Action):
                     GROUP BY id_lay_fk
                 ) oco
                 ON oco.id_lay_fk = id_lay
+
                 LEFT JOIN (
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mlpr110
@@ -150,6 +170,7 @@ class GetLayer(Action):
                     GROUP BY id_lay_fk
                 ) gsh
                 ON gsh.id_lay_fk = id_lay
+
                 LEFT JOIN (
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mlpr115
@@ -160,6 +181,7 @@ class GetLayer(Action):
                     GROUP BY id_lay_fk
                 ) ggr
                 ON ggr.id_lay_fk = id_lay
+
                 LEFT JOIN (
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mlpr117
@@ -170,6 +192,7 @@ class GetLayer(Action):
                     GROUP BY id_lay_fk
                 ) ftp
                 ON ftp.id_lay_fk = id_lay
+
                 LEFT JOIN (
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mcla101
@@ -180,6 +203,7 @@ class GetLayer(Action):
                     GROUP BY id_lay_fk
                 ) us3
                 ON us3.id_lay_fk = id_lay
+
                 LEFT JOIN (
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mcla104
@@ -190,6 +214,7 @@ class GetLayer(Action):
                     GROUP BY id_lay_fk
                 ) usd
                 ON usd.id_lay_fk = id_lay
+
                 LEFT JOIN (
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mcla107
@@ -200,6 +225,7 @@ class GetLayer(Action):
                     GROUP BY id_lay_fk
                 ) dbr
                 ON dbr.id_lay_fk = id_lay
+
                 LEFT JOIN (
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as vlit401
@@ -210,7 +236,9 @@ class GetLayer(Action):
                     GROUP BY id_lay_fk
                 ) lpd
                 ON lpd.id_lay_fk = id_lay
+
                 WHERE id_lay = $1
+                {permission}
             ) AS t
         """, id)
         return {

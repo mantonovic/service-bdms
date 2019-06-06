@@ -7,8 +7,13 @@ class ListEditingBorehole(Action):
 
     async def execute(
             self, limit=None, page=None,
-            filter={}, orderby=None, direction=None
+            filter={}, orderby=None, direction=None, user=None
         ):
+
+        permissions = None
+        if user is not None:
+            # Exclude VIEW role to filter out published boreholes
+            permissions = self.filterPermission(user, ['VIEW'])
 
         paging = ''
 
@@ -142,6 +147,19 @@ class ListEditingBorehole(Action):
             cntSql += """
                 WHERE %s
             """ % " AND ".join(where)
+
+        if permissions is not None:
+            operator = 'AND' if len(where) > 0 else 'WHERE'
+            rowsSql += """
+                {} {}
+            """.format(
+                operator, permissions
+            )
+            cntSql += """
+                {} {}
+            """.format(
+                operator, permissions
+            )
 
         _orderby, direction = self.getordering(orderby, direction)
 

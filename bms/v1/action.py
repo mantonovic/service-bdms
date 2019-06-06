@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
+from bms import (
+    PUBLIC,
+    EDIT
+)
 
 
 class Action():
@@ -64,6 +68,37 @@ class Action():
 
         return _orderby, direction
 
+    def filterPermission(self, user, exclude = []):
+        return ''
+        
+        where = []
+
+        roles = user['roles'].copy()
+        if len(exclude) > 0:
+            for role in exclude:
+                if role in roles:
+                    roles.pop(
+                        roles.index(role)
+                    )
+
+        # If user is a viewer then he/she can see all published boreholes
+        if 'VIEW' in roles:
+            where.append(f"""
+                borehole.id_rol_fk = {PUBLIC}
+            """)
+
+        # Il the user is an EDITOR then he/she can see all boreholes that
+        # belongs to his/hers group and that are in EDIT role
+        if 'EDIT' in roles:
+            where.append(f"""
+                borehole.id_rol_fk = {EDIT}
+                AND borehole.id_grp_fk = {user['group']['id']}
+            """)
+
+        return '({})'.format(
+            ' OR '.join(where)
+        )
+
     def filterBorehole(self, filter={}):
         params = []
         where = []
@@ -78,7 +113,7 @@ class Action():
                     borehole.id_bho = %s
                 """ % self.getIdx())
             where.append("(%s)" % " OR ".join(_or))
-            print(where)
+            # print(where)
 
         else:
 

@@ -4,7 +4,16 @@ from bms.v1.action import Action
 
 class GetBorehole(Action):
 
-    async def execute(self, id, with_lock = True):
+    async def execute(self, id, with_lock = True, user=None):
+
+        permission = ''
+
+        if user is not None:
+            permission = """
+                AND {}
+            """.format(
+                self.filterPermission(user)
+            )
 
         sql_lock = ""
         if with_lock is True:
@@ -33,14 +42,15 @@ class GetBorehole(Action):
                     )
                 END AS lock,
             """
-        rec = await self.conn.fetchrow(f"""
+
+        val = await self.conn.fetchval(f"""
             SELECT
                 row_to_json(t)
             FROM (
                 SELECT
                     borehole.id_bho as id,
                     (
-                        select row_to_json(t)
+                        SELECT row_to_json(t)
                         FROM (
                             SELECT
                                 updater.id_usr as id,
@@ -65,13 +75,13 @@ class GetBorehole(Action):
                                 ) as date
                         ) t2
                     ) as author,
-                    (
-                        select row_to_json(t2)
+                    /*(
+                        SELECT row_to_json(t2)
                         FROM (
                             SELECT
-                                version_id_cli as code
+                                ('' || id_rol_fk) as code
                         ) t2
-                    ) as version,
+                    ) as version,*/
                     {sql_lock}
                     kind_id_cli as kind,
                     restriction_id_cli as restriction,
@@ -91,7 +101,7 @@ class GetBorehole(Action):
                     bore_inc_dir_bho as bore_inc_dir,
                     length_bho as length,
                     (
-                        select row_to_json(t)
+                        SELECT row_to_json(t)
                         FROM (
                             SELECT
                                 COALESCE(
@@ -105,7 +115,7 @@ class GetBorehole(Action):
                         ) t
                     ) as extended,
                     (
-                        select row_to_json(t)
+                        SELECT row_to_json(t)
                         FROM (
                             SELECT
                                 COALESCE(
@@ -141,20 +151,28 @@ class GetBorehole(Action):
                     completness.percentage
                 FROM
                     borehole
+
                 INNER JOIN public.completness
                     ON completness.id_bho = borehole.id_bho
+
                 INNER JOIN public.users as updater
                     ON updater_bho = updater.id_usr
+
                 INNER JOIN public.users as author
                     ON author_id = author.id_usr
+
                 LEFT JOIN public.users as locker
                     ON locked_by = locker.id_usr
+
                 LEFT JOIN project
                     ON id_pro = project_id
+
                 LEFT JOIN cantons
                     ON kantonsnum = canton_bho
+
                 LEFT JOIN municipalities
                     ON municipalities.gid = city_bho
+
                 LEFT JOIN (
                     SELECT
                         id_bho_fk, array_agg(id_cli_fk) as ate
@@ -165,6 +183,7 @@ class GetBorehole(Action):
                     GROUP BY id_bho_fk
                 ) tmadm404
                     ON tmadm404.id_bho_fk = borehole.id_bho
+
                 LEFT JOIN (
                     SELECT
                         id_bho_fk,
@@ -203,10 +222,12 @@ class GetBorehole(Action):
                     GROUP BY id_bho_fk
                 ) AS strt
                     ON strt.id_bho_fk = borehole.id_bho
+
                 WHERE borehole.id_bho = $1
+                {permission}
             ) AS t
         """, id)
 
         return {
-            "data": self.decode(rec[0]) if rec[0] is not None else None
+            "data": self.decode(val) if val is not None else None
         }

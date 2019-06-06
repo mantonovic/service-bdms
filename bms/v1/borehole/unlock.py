@@ -5,7 +5,7 @@ from bms import Locked
 
 class Unlock(GetBorehole):
 
-    async def execute(self, id, user_id):
+    async def execute(self, id):
 
         # Lock row for current user
         await self.conn.execute("""

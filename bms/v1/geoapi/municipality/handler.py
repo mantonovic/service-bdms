@@ -17,12 +17,10 @@ class MunicipalityHandler(Viewer):
             async with self.pool.acquire() as conn:
 
                 exe = None
-                print("Action: %s" % action)
                 if action == 'LIST':
                     exe = ListMunicipality(conn)
 
                 elif action == 'GET':
-                    print("is get!!")
                     exe = GetMunicipality(conn)
 
                 request.pop('lang', None)

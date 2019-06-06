@@ -1,12 +1,23 @@
 # -*- coding: utf-8 -*-
+
+VIEW = 0
+EDIT = 1
+CONTROL = 2
+VALID = 3
+PUBLIC = 4
+
 from bms.v1.basehandler import BaseHandler
 from bms.v1.exceptions import AuthorizationException
 from bms.v1.exceptions import Locked
+from bms.v1.exceptions import NotFound
 
-# ACTION Handlers
+# Borehole's ACTION Handlers
 from bms.v1.borehole.producer import BoreholeProducerHandler
 from bms.v1.borehole.viewer import BoreholeViewerHandler
-from bms.v1.borehole.stratigraphy.handler import StratigraphyHandler
+
+# Stratigraphy's ACTION Handlers
+from bms.v1.borehole.stratigraphy.viewer import StratigraphyViewerHandler
+from bms.v1.borehole.stratigraphy.producer import StratigraphyProducerHandler
 
 # ACTION Handlers exports
 from bms.v1.borehole.export.exporter import ExportHandler
@@ -23,6 +34,9 @@ from bms.v1.borehole.codelist.handler import CodeListHandler
 from bms.v1.geoapi.handler import GeoapiHandler
 from bms.v1.geoapi.municipality.handler import MunicipalityHandler
 from bms.v1.geoapi.canton.handler import CantonHandler
+
+# Workflows's handlers
+from bms.v1.workflow.producer import WorkflowProducerHandler
 
 # Actions
 from bms.v1.borehole import CreateBorehole

@@ -4,8 +4,17 @@ from bms.v1.action import Action
 
 class ListLayers(Action):
 
-    async def execute(self, id):
-        rec = await self.conn.fetchrow("""
+    async def execute(self, id, user=None):
+
+        permissions = ''
+        if user is not None:
+            permissions = """
+                AND {}
+            """.format(
+                self.filterPermission(user)
+            )
+
+        rec = await self.conn.fetchrow(f"""
             SELECT
                 array_to_json(
                     array_agg(
@@ -31,16 +40,26 @@ class ListLayers(Action):
                     SUM(depth_to_lay)
                         OVER (ORDER BY depth_from_lay, id_lay ASC) AS depth*/
                 FROM
-                    layer, stratigraphy, borehole
+                    layer
+
+                INNER JOIN stratigraphy
+                ON id_sty = id_sty_fk
+                
+                INNER JOIN borehole
+                ON id_bho_fk = id_bho
+
                 WHERE
                     id_sty_fk = $1
-                AND
-                    id_sty = id_sty_fk
-                AND
-                    id_bho_fk = id_bho
-                ORDER BY depth_from_lay, id_lay
+
+                {permissions}
+
+                ORDER BY
+                    depth_from_lay,
+                    id_lay
+
             ) AS t
         """, id)
+
         return {
             "data": self.decode(rec[0]) if rec[0] is not None else []
         }

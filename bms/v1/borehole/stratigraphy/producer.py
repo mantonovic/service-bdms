@@ -1,38 +1,35 @@
 # -*- coding: utf-8 -*-S
-from bms.v1.handlers import Viewer
+from bms.v1.handlers import Producer
 from bms.v1.borehole.stratigraphy import (
-    ListStratigraphies,
     CreateStratigraphy,
-    GetStratigraphy,
     PatchStartigraphy,
     DeleteStratigraphy,
     CloneStratigraphy
 )
 
 
-class StratigraphyHandler(Viewer):
+class StratigraphyProducerHandler(Producer):
     async def execute(self, request):
         action = request.pop('action', None)
 
         if action in [
-                'CREATE',
-                'PATCH',
-                'DELETE',
-                'LIST',
-                'GET',
-                'CHECK',
-                'PATCH',
-                'CLONE'
-                ]:
+            'CREATE',
+            'PATCH',
+            'DELETE',
+            'CHECK',
+            'CLONE'
+        ]:
 
             async with self.pool.acquire() as conn:
 
                 exe = None
 
-                if action == 'GET':
-                    exe = GetStratigraphy(conn)
+                # Lock check
+                await self.check_lock(
+                    request['id'], self.user, conn
+                )
 
-                elif action == 'CREATE':
+                if action == 'CREATE':
                     exe = CreateStratigraphy(conn)
 
                 elif action == 'DELETE':
@@ -42,9 +39,6 @@ class StratigraphyHandler(Viewer):
                 elif action == 'PATCH':
                     exe = PatchStartigraphy(conn)
                     request['user_id'] = self.user['id']
-
-                elif action == 'LIST':
-                    exe = ListStratigraphies(conn)
 
                 elif action == 'CLONE':
                     exe = CloneStratigraphy(conn)

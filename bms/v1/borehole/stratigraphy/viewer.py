@@ -1,30 +1,31 @@
 # -*- coding: utf-8 -*-S
 from bms.v1.handlers import Viewer
-from bms.v1.setting import (
-    PatchSetting
+from bms.v1.borehole.stratigraphy import (
+    ListStratigraphies,
+    GetStratigraphy
 )
 
 
-class SettingHandler(Viewer):
+class StratigraphyViewerHandler(Viewer):
     async def execute(self, request):
         action = request.pop('action', None)
 
         if action in [
-                'GET',
-                'PATCH']:
+            'LIST',
+            'GET'
+        ]:
 
             async with self.pool.acquire() as conn:
 
                 exe = None
-                request['user_id'] = self.user['id']
 
+                request['user'] = self.user
+                
                 if action == 'GET':
-                    return {
-                        "data": self.user['setting']
-                    }
+                    exe = GetStratigraphy(conn)
 
-                elif action == 'PATCH':
-                    exe = PatchSetting(conn)
+                elif action == 'LIST':
+                    exe = ListStratigraphies(conn)
 
                 request.pop('lang', None)
 

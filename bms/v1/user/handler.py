@@ -12,8 +12,10 @@ class UserHandler(Viewer):
             if action == 'GET':
                 return {
                     "data": {
+                        "admin": self.user['admin'],
                         "username": self.user['username'],
                         "roles": self.user['roles'],
+                        "workgroups": self.user['workgroups'],
                         "name": self.user['name']
                     }
                 }

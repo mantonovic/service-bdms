@@ -10,6 +10,8 @@ import sys
 sys.path.append('.')
 
 define("port", default=8888, help="Tornado Web port", type=int)
+define("pg_user", default="postgres", help="PostgrSQL database user")
+define("pg_password", default="postgres", help="PostgrSQL user password")
 define("pg_host", default="localhost", help="PostgrSQL database host")
 define("pg_port", default="5432", help="PostgrSQL database port")
 define("pg_database", default="bms", help="PostgrSQL database name")
@@ -35,11 +37,15 @@ if __name__ == "__main__":
         ExportHandler,
 
         # Stratigraphy handlers
-        StratigraphyHandler,
+        StratigraphyViewerHandler,
+        StratigraphyProducerHandler,
 
         # Layer handlers
         LayerViewerHandler,
         LayerProducerHandler,
+
+        # Workflow handlers
+        WorkflowProducerHandler,
 
         # Other handlers
         GeoapiHandler,
@@ -66,19 +72,22 @@ if __name__ == "__main__":
 
         # Borehole handlers
         (r'/api/v1/borehole', BoreholeViewerHandler),
-        # (r'/api/v1/borehole/export', BoreholeExporterHandler),
         (r'/api/v1/borehole/edit', BoreholeProducerHandler),
         (r'/api/v1/borehole/download', ExportHandler),
 
+        # Workflow handlers
+        (r'/api/v1/workflow/edit', WorkflowProducerHandler),
+
         # Stratigraphy handlers
-        (r'/api/v1/borehole/stratigraphy', StratigraphyHandler),
+        (r'/api/v1/borehole/stratigraphy', StratigraphyViewerHandler),
+        (r'/api/v1/borehole/stratigraphy/edit', StratigraphyProducerHandler),
 
         # Layer handlers
         (r'/api/v1/borehole/stratigraphy/layer', LayerViewerHandler),
         (r'/api/v1/borehole/stratigraphy/layer/edit', LayerProducerHandler),
 
         # Other handlers
-        (r'/api/v1/borehole/project', ProjectHandler),
+        # (r'/api/v1/borehole/project', ProjectHandler),
         (r'/api/v1/borehole/codes', CodeListHandler),
         (r'/api/v1/geoapi/municipality', MunicipalityHandler),
         (r'/api/v1/geoapi/canton', CantonHandler),

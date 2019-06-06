@@ -8,7 +8,11 @@ import csv
 
 class ExportCsv(Action):
 
-    async def execute(self, filter={}):
+    async def execute(self, filter={}, user=None):
+
+        permissions = None
+        if user is not None:
+            permissions = self.filterPermission(user)
 
         where, params = self.filterBorehole(filter)
 
@@ -59,6 +63,12 @@ class ExportCsv(Action):
             sql += """
                 WHERE %s
             """ % " AND ".join(where)
+
+        if permissions is not None:
+            operator = 'AND' if len(where) > 0 else 'WHERE'
+            sql += f"""
+                {operator} {permissions}
+            """
 
         rec = await self.conn.fetchval(
             """

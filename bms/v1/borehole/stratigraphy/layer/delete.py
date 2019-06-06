@@ -26,8 +26,6 @@ class DeleteLayer(Action):
                     id_lay = $1
             """, id)
 
-            print(f'id_sty_fk: {id_sty}')
-
             # Get all layers
             layers = await (
                 ListLayers(self.conn)

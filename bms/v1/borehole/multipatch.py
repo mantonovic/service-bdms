@@ -9,17 +9,17 @@ from bms.v1.borehole.patch import PatchBorehole
 
 class MultiPatchBorehole(Action):
 
-    async def execute(self, ids, fields, user_id):
+    async def execute(self, ids, fields, user):
         try:
             patch = PatchBorehole(self.conn)
-            tasks = []
+            # tasks = []
             await self.conn.execute("BEGIN;")
             for id in ids:
                 for field in fields:
-                    await patch.execute(id, field[0], field[1], user_id)
+                    await patch.execute(id, field[0], field[1], user['id'])
                     # tasks.append(
                     #     asyncio.ensure_future(
-                    #         patch.execute(id, field[0], field[1], user_id)
+                    #         patch.execute(id, field[0], field[1], user['id'])
                     #     )
                     # )
             # await asyncio.gather(*tasks)

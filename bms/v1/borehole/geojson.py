@@ -4,7 +4,11 @@ from bms.v1.action import Action
 
 class ListGeojson(Action):
 
-    async def execute(self, filter={}):
+    async def execute(self, filter={}, user=None):
+
+        permissions = None
+        if user is not None:
+            permissions = self.filterPermission(user)
 
         where, params = self.filterBorehole(filter)
 
@@ -13,6 +17,13 @@ class ListGeojson(Action):
             wr = """
                 AND %s
             """ % " AND ".join(where)
+
+        if permissions is not None:
+            wr += """
+                AND {}
+            """.format(
+                permissions
+            )
 
         rec = await self.conn.fetchrow("""
             SELECT

@@ -7,8 +7,12 @@ class ListBorehole(Action):
 
     async def execute(
             self, limit=None, page=None,
-            filter={}, orderby=None, direction=None
+            filter={}, orderby=None, direction=None, user=None
         ):
+
+        permissions = None
+        if user is not None:
+            permissions = self.filterPermission(user)
 
         paging = ''
 
@@ -72,11 +76,28 @@ class ListBorehole(Action):
 
         if len(where) > 0:
             rowsSql += """
-                WHERE %s
-            """ % " AND ".join(where)
+                WHERE {}
+            """.format(
+                " AND ".join(where)
+            )
             cntSql += """
-                WHERE %s
-            """ % " AND ".join(where)
+                WHERE {}
+            """.format(
+                " AND ".join(where)
+            )
+
+        if permissions is not None:
+            operator = 'AND' if len(where) > 0 else 'WHERE'
+            rowsSql += """
+                {} {}
+            """.format(
+                operator, permissions
+            )
+            cntSql += """
+                {} {}
+            """.format(
+                operator, permissions
+            )
 
         _orderby, direction = self.getordering(orderby, direction)
 

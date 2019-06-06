@@ -13,16 +13,51 @@ class LayerProducerHandler(Producer):
         action = request.pop('action', None)
 
         if action in [
-                'CREATE',
-                'DELETE',
-                'GAP',
-                'PATCH',
-                'CHECK']:
+            'CREATE',
+            'DELETE',
+            'GAP',
+            'PATCH'
+        ]:
 
             async with self.pool.acquire() as conn:
                 async with conn.transaction():
 
                     exe = None
+
+                    # Lock check
+                    if action in [
+                        'CREATE'
+                    ]:
+                        sql = """
+                            SELECT
+                                id_bho_fk
+                            FROM
+                                stratigraphy
+                            WHERE
+                                id_sty = $1
+                        """
+
+                    elif action in [
+                        'DELETE',
+                        'GAP',
+                        'PATCH'
+                    ]:
+                        sql = """
+                            SELECT
+                                id_bho_fk
+                            FROM
+                                layer
+                            INNER JOIN stratigraphy
+                            ON id_sty_fk = id_sty
+                            WHERE
+                                id_lay = $1
+                        """
+
+                    bid = await conn.fetchval(sql, request['id'])
+
+                    await self.check_lock(
+                        bid, self.user, conn
+                    )
 
                     if action == 'CREATE':
                         exe = CreateLayer(conn)

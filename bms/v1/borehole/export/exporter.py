@@ -84,9 +84,15 @@ class ExportHandler(Viewer):
 
                     action = ExportCsv(conn)
                     if arguments is None:
-                        csvfile = await action.execute()
+                        csvfile = await action.execute(
+                            user=self.user
+                        )
+
                     else:
-                        csvfile = await action.execute(filter=arguments)
+                        csvfile = await action.execute(
+                            filter=arguments,
+                            user=self.user
+                        )
 
                     if output_stream is not None:
                         output_stream.writestr(
@@ -165,9 +171,14 @@ class ExportHandler(Viewer):
                     shpA = ExportShapefile(conn)
 
                     if arguments is None:
-                        shp, shx, dbf, prj = await shpA.execute()
+                        shp, shx, dbf, prj = await shpA.execute(
+                            user=self.user
+                        )
                     else:
-                        shp, shx, dbf, prj = await shpA.execute(filter=arguments)
+                        shp, shx, dbf, prj = await shpA.execute(
+                            filter=arguments,
+                            user=self.user
+                        )
 
                     if output_stream is None:
                         self.set_header(

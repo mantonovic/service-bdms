@@ -8,7 +8,11 @@ import shapefile
 
 class ExportShapefile(Action):
 
-    async def execute(self, filter={}):
+    async def execute(self, filter={}, user=None):
+
+        permissions = None
+        if user is not None:
+            permissions = self.filterPermission(user)
 
         where, params = self.filterBorehole(filter)
         sql = """
@@ -41,6 +45,11 @@ class ExportShapefile(Action):
             sql += """
                 AND %s
             """ % " AND ".join(where)
+
+        if permissions is not None:
+            sql += f"""
+                AND {permissions}
+            """
 
         recs = await self.conn.fetch(sql, *(params))
 

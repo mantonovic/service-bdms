@@ -7,7 +7,7 @@ from datetime import timedelta
 
 class StartEditing(GetBorehole):
 
-    async def execute(self, id, user_id):
+    async def execute(self, id, user):
 
         # Lock row for current user
         await self.conn.execute("""
@@ -15,7 +15,7 @@ class StartEditing(GetBorehole):
                 locked_at = current_timestamp,
                 locked_by = $1
             WHERE id_bho = $2;
-        """, user_id, id)
+        """, user['id'], id)
 
         # return borehole data
         return await super().execute(id, True)
