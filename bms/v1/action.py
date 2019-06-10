@@ -69,7 +69,6 @@ class Action():
         return _orderby, direction
 
     def filterPermission(self, user, exclude = []):
-        return ''
         
         where = []
 
@@ -82,17 +81,30 @@ class Action():
                     )
 
         # If user is a viewer then he/she can see all published boreholes
-        if 'VIEW' in roles:
+        if 'VIEW' not in exclude and user['viewer'] == True:
             where.append(f"""
-                borehole.id_rol_fk = {PUBLIC}
+                borehole.public_bho IS TRUE
             """)
 
-        # Il the user is an EDITOR then he/she can see all boreholes that
-        # belongs to his/hers group and that are in EDIT role
-        if 'EDIT' in roles:
+        # If the user belongs to a workgroups then he can see all
+        # the belonging boreholes with his role active
+        for workgroup in user['workgroups']:
+
+            role_filter = ""
+            if len(workgroup['roles']) == 1:
+                role_filter = f" = '{workgroup['roles'][0]}'"
+            else:
+                role_filter = f"""
+                    IN ('{ "', '".join(workgroup['roles'])}')
+                """
+
             where.append(f"""
-                borehole.id_rol_fk = {EDIT}
-                AND borehole.id_grp_fk = {user['group']['id']}
+                id_wgp_fk = {workgroup['id']}
+                AND (
+                    status[
+                        array_length(status, 1)
+                    ]  ->> 'role'
+                ) {role_filter}
             """)
 
         return '({})'.format(

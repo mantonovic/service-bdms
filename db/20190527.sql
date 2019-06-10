@@ -455,13 +455,36 @@ INSERT INTO public.workgroups(
     VALUES (0, 'default', '{}');
 
 UPDATE public.borehole
-    SET id_wgp_fk=0;
+    SET
+        id_wgp_fk=0,
+        qt_top_bedrock_id_cli=NULL,
+        lithology_id_cli=NULL;
+
+UPDATE public.layer
+    SET
+        lithology_id_cli=NULL;
 
 UPDATE public.users_roles
     SET id_wgp_fk=0;
 
 UPDATE public.users_roles
     SET id_wgp_fk=0;
+
+ALTER TABLE public.users
+    ADD COLUMN viewer_usr boolean DEFAULT FALSE;
+
+ALTER TABLE public.borehole
+    ADD COLUMN published_bho timestamp without time zone;
+
+ALTER TABLE public.borehole
+    ADD COLUMN public_bho boolean DEFAULT FALSE;
+
+INSERT INTO public.workflow(
+	id_bho_fk, id_usr_fk, started_wkf, id_rol_fk)
+
+select 
+	id_bho, 5, now(), 1
+from borehole;
 
 COMMENT ON SCHEMA public
   IS 'v1.190527';

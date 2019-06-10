@@ -20,12 +20,54 @@ class Producer(BaseHandler):
                 locked_at,
                 locked_by,
                 firstname || ' ' || lastname,
-                borehole.id_rol_fk,
-                borehole.id_grp_fk
+                status[array_length(status, 1)]  ->> 'role' as "role",
+                borehole.id_wgp_fk
+
             FROM
                 borehole
-            LEFT JOIN users
-            ON users.id_usr = borehole.locked_by
+
+            INNER JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_agg(
+                        json_build_object(
+                            'workflow', id_wkf,
+                            'role', name_rol,
+                            'username', username,
+                            'started', started,
+                            'finished', finished
+                        )
+                    ) as status
+                FROM (
+                    SELECT
+                        id_bho_fk,
+                        name_rol,
+                        id_wkf,
+                        username,
+                        started_wkf as started,
+                        finished_wkf as finished
+                    FROM
+                        workflow,
+                        roles,
+                        users
+                    WHERE
+                        id_rol = id_rol_fk
+                    AND
+                        id_usr = id_usr_fk
+                    ORDER BY
+                        id_wkf
+                ) t
+                GROUP BY
+                    id_bho_fk
+            ) as v
+            ON
+                v.id_bho_fk = id_bho
+
+            LEFT JOIN
+                users
+            ON
+                users.id_usr = borehole.locked_by
+
             WHERE
                 id_bho = $1
         """, id)
@@ -35,12 +77,13 @@ class Producer(BaseHandler):
 
         # Lockable by editors if borehole belong to user
         # group and borehole role is same as user's
-        if (
-            rec[3] == EDIT and (
-                rec[4] != user['group']['id'] or
-                'EDIT' not in user['roles']
-            )
-        ):
+
+        workgroup = None
+        for wg in user['workgroups']:
+            if wg['id'] == rec[4]:
+                workgroup = wg
+
+        if workgroup is None or rec[3] not in workgroup['roles']:
             raise AuthorizationException()
 
         now = datetime.now()

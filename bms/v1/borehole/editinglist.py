@@ -88,15 +88,66 @@ class ListEditingBorehole(Action):
                     ) t
                 ) as extended,
                 stratigraphy as stratigraphy,
-                completness.percentage
+                completness.percentage,
+                array_to_json(status) as workflows,
+                -- status[array_length(status, 1)] as workflow,
+                status[array_length(status, 1)]  ->> 'role' as "role"
+
             FROM
                 borehole
-            INNER JOIN public.completness
-            ON completness.id_bho = borehole.id_bho
-            LEFT JOIN public.users as locker
-                ON locked_by = locker.id_usr
-            INNER JOIN public.users as author
-                ON author_id = author.id_usr
+
+            INNER JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_agg(
+                        json_build_object(
+                            'workflow', id_wkf,
+                            'role', name_rol,
+                            'username', username,
+                            'started', started,
+                            'finished', finished
+                        )
+                    ) as status
+                FROM (
+                    SELECT
+                        id_bho_fk,
+                        name_rol,
+                        id_wkf,
+                        username,
+                        started_wkf as started,
+                        finished_wkf as finished
+                    FROM
+                        workflow,
+                        roles,
+                        users
+                    WHERE
+                        id_rol = id_rol_fk
+                    AND
+                        id_usr = id_usr_fk
+                    ORDER BY
+                        id_wkf
+                ) t
+                GROUP BY
+                    id_bho_fk
+            ) as v
+            ON
+                v.id_bho_fk = id_bho
+
+            INNER JOIN
+                public.completness
+            ON
+                completness.id_bho = borehole.id_bho
+
+            LEFT JOIN
+                public.users as locker
+            ON
+                locked_by = locker.id_usr
+
+            INNER JOIN
+                public.users as author
+            ON
+                author_id = author.id_usr
+
             LEFT JOIN (
                 SELECT
                     id_bho_fk,
@@ -130,14 +181,57 @@ class ListEditingBorehole(Action):
                 ) t
                 GROUP BY id_bho_fk
             ) AS strt
-            ON strt.id_bho_fk = borehole.id_bho
+            ON
+                strt.id_bho_fk = borehole.id_bho
         """
 
         cntSql = """
-            SELECT count(*) AS cnt
-            FROM borehole
-            INNER JOIN public.completness
-            ON completness.id_bho = borehole.id_bho
+            SELECT
+                count(*) AS cnt
+            FROM
+                borehole
+
+            INNER JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_agg(
+                        json_build_object(
+                            'workflow', id_wkf,
+                            'role', name_rol,
+                            'username', username,
+                            'started', started,
+                            'finished', finished
+                        )
+                    ) as status
+                FROM (
+                    SELECT
+                        id_bho_fk,
+                        name_rol,
+                        id_wkf,
+                        username,
+                        started_wkf as started,
+                        finished_wkf as finished
+                    FROM
+                        workflow,
+                        roles,
+                        users
+                    WHERE
+                        id_rol = id_rol_fk
+                    AND
+                        id_usr = id_usr_fk
+                    ORDER BY
+                        id_wkf
+                ) t
+                GROUP BY
+                    id_bho_fk
+            ) as v
+            ON
+                v.id_bho_fk = id_bho
+
+            INNER JOIN
+                public.completness
+            ON
+                completness.id_bho = borehole.id_bho
         """
 
         if len(where) > 0:

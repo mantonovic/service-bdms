@@ -19,10 +19,53 @@ class BoreholeIds(Action):
                 array_agg(borehole.id_bho)
             FROM
                 borehole
-            INNER JOIN public.users as author
-            ON author_id = author.id_usr
-            INNER JOIN public.completness
-            ON completness.id_bho = borehole.id_bho
+
+            INNER JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_agg(
+                        json_build_object(
+                            'workflow', id_wkf,
+                            'role', name_rol,
+                            'username', username,
+                            'started', started,
+                            'finished', finished
+                        )
+                    ) as status
+                FROM (
+                    SELECT
+                        id_bho_fk,
+                        name_rol,
+                        id_wkf,
+                        username,
+                        started_wkf as started,
+                        finished_wkf as finished
+                    FROM
+                        workflow,
+                        roles,
+                        users
+                    WHERE
+                        id_rol = id_rol_fk
+                    AND
+                        id_usr = id_usr_fk
+                    ORDER BY
+                        id_wkf
+                ) t
+                GROUP BY
+                    id_bho_fk
+            ) as v
+            ON
+                v.id_bho_fk = id_bho
+
+            INNER JOIN
+                public.users as author
+            ON
+                author_id = author.id_usr
+
+            INNER JOIN
+                public.completness
+            ON
+                completness.id_bho = borehole.id_bho
         """
 
         if len(where) > 0:

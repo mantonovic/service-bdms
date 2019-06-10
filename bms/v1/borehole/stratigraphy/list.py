@@ -39,13 +39,6 @@ class ListStratigraphies(Action):
 
         rowsSql = """
             SELECT
-                /*(
-                    select row_to_json(t)
-                    FROM (
-                        SELECT
-                            id_bho as id
-                    ) t
-                ) as borehole,*/
                 id_sty as id,
                 stratigraphy.id_bho_fk as borehole,
                 stratigraphy.kind_id_cli as kind,
@@ -61,6 +54,43 @@ class ListStratigraphies(Action):
             INNER JOIN borehole
             ON stratigraphy.id_bho_fk = id_bho
 
+            INNER JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_agg(
+                        json_build_object(
+                            'workflow', id_wkf,
+                            'role', name_rol,
+                            'username', username,
+                            'started', started,
+                            'finished', finished
+                        )
+                    ) as status
+                FROM (
+                    SELECT
+                        id_bho_fk,
+                        name_rol,
+                        id_wkf,
+                        username,
+                        started_wkf as started,
+                        finished_wkf as finished
+                    FROM
+                        workflow,
+                        roles,
+                        users
+                    WHERE
+                        id_rol = id_rol_fk
+                    AND
+                        id_usr = id_usr_fk
+                    ORDER BY
+                        id_wkf
+                ) t
+                GROUP BY
+                    id_bho_fk
+            ) as v
+            ON
+                v.id_bho_fk = id_bho
+
             INNER JOIN codelist AS lk
             ON lk.id_cli = stratigraphy.kind_id_cli
         """
@@ -71,6 +101,43 @@ class ListStratigraphies(Action):
 
             INNER JOIN borehole
             ON id_bho_fk = id_bho
+            
+            INNER JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_agg(
+                        json_build_object(
+                            'workflow', id_wkf,
+                            'role', name_rol,
+                            'username', username,
+                            'started', started,
+                            'finished', finished
+                        )
+                    ) as status
+                FROM (
+                    SELECT
+                        id_bho_fk,
+                        name_rol,
+                        id_wkf,
+                        username,
+                        started_wkf as started,
+                        finished_wkf as finished
+                    FROM
+                        workflow,
+                        roles,
+                        users
+                    WHERE
+                        id_rol = id_rol_fk
+                    AND
+                        id_usr = id_usr_fk
+                    ORDER BY
+                        id_wkf
+                ) t
+                GROUP BY
+                    id_bho_fk
+            ) as v
+            ON
+                v.id_bho_fk = id_bho
         """
 
         if len(where) > 0:

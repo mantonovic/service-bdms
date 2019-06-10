@@ -84,6 +84,9 @@ class BaseHandler(web.RequestHandler):
                             id_usr as "id",
                             username,
                             COALESCE(
+                                viewer_usr, FALSE
+                            ) as viewer,
+                            COALESCE(
                                 admin_usr, FALSE
                             ) as admin,
                             firstname || ' ' || lastname as "name",
@@ -117,6 +120,9 @@ class BaseHandler(web.RequestHandler):
                                 ) t
                             ) as group,
                             w.ws as workgroups,
+                            COALESCE(
+                                w.wgps, '{}'::int[]
+                            ) AS wid,
                             rl.roles as roles
                         FROM
                             users
@@ -146,11 +152,13 @@ class BaseHandler(web.RequestHandler):
                         LEFT JOIN (
                             SELECT
                                 id_usr_fk,
+								array_agg(id_wgp) as wgps,
                                 array_to_json(array_agg(j)) as ws
                             FROM
                             (
                                 SELECT
                                     id_usr_fk,
+                                    id_wgp,
                                     json_build_object(
                                         'id', id_wgp,
                                         'workgroup', name_wgp,
