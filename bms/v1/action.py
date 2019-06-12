@@ -90,21 +90,26 @@ class Action():
         # the belonging boreholes with his role active
         for workgroup in user['workgroups']:
 
-            role_filter = ""
-            if len(workgroup['roles']) == 1:
-                role_filter = f" = '{workgroup['roles'][0]}'"
-            else:
-                role_filter = f"""
-                    IN ('{ "', '".join(workgroup['roles'])}')
-                """
+            # role_filter = ""
+            # if len(workgroup['roles']) == 1:
+            #     role_filter = f" = '{workgroup['roles'][0]}'"
+            # else:
+            #     role_filter = f"""
+            #         IN ('{ "', '".join(workgroup['roles'])}')
+            #     """
 
+            # where.append(f"""
+            #     id_wgp_fk = {workgroup['id']}
+            #     AND (
+            #         status[
+            #             array_length(status, 1)
+            #         ]  ->> 'role'
+            #     ) {role_filter}
+            # """)
+
+            # User can see not finished data belonging to his workgroups 
             where.append(f"""
                 id_wgp_fk = {workgroup['id']}
-                AND (
-                    status[
-                        array_length(status, 1)
-                    ]  ->> 'role'
-                ) {role_filter}
             """)
 
         return '({})'.format(
@@ -149,6 +154,28 @@ class Action():
                     where.append("""
                         percentage = %s
                     """ % self.getIdx())
+
+            if (
+                'role' in keys and
+                filter['role'] != '' and
+                filter['role'] != 'all'
+            ):
+                params.append(filter['role'])
+                where.append("""
+                    status[
+                        array_length(status, 1)
+                    ]  ->> 'role' = %s
+                """ % self.getIdx())
+
+            if (
+                'workgroup' in keys and
+                filter['workgroup'] != ''
+                and filter['workgroup'] != 'all'
+            ):
+                params.append(filter['workgroup'])
+                where.append("""
+                    id_wgp_fk = %s
+                """ % self.getIdx())
 
             if 'identifier' in keys and filter['identifier'] != '':
                 if filter['identifier'] == '$null':

@@ -7,7 +7,9 @@ from bms import (
 from bms.v1.handlers import Producer
 from bms.v1.workflow import (
     ListWorkflows,
-    PatchWorkflow
+    PatchWorkflow,
+    SubmitWorkflow,
+    RejectWorkflow
 )
 
 
@@ -16,7 +18,7 @@ class WorkflowProducerHandler(Producer):
     async def execute(self, request):
         action = request.pop('action', None)
 
-        if action in ['LIST', 'PATCH', 'FINISH']:
+        if action in ['LIST', 'PATCH', 'SUBMIT', 'REJECT']:
 
             async with self.pool.acquire() as conn:
 
@@ -24,7 +26,7 @@ class WorkflowProducerHandler(Producer):
                 id_bho = None
 
                 if action in [
-                    'PATCH', 'FINISH'
+                    'PATCH', 'SUBMIT', 'REJECT'
                 ]:
                     # Get Borehole id
                     id_bho = await conn.fetchval("""
@@ -48,8 +50,13 @@ class WorkflowProducerHandler(Producer):
                     exe = PatchWorkflow(conn)
                     request['user'] = self.user
 
-                elif action == 'FINISH':
-                    exe = PatchWorkflow(conn)
+                elif action == 'SUBMIT':
+                    exe = SubmitWorkflow(conn)
+                    request['user'] = self.user
+                    request['bid'] = id_bho
+
+                elif action == 'REJECT':
+                    exe = RejectWorkflow(conn)
                     request['user'] = self.user
                     request['bid'] = id_bho
 

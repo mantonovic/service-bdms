@@ -31,6 +31,15 @@ class ListEditingBorehole(Action):
         rowsSql = f"""
             SELECT
                 borehole.id_bho as id,
+                borehole.public_bho as visible,
+                (
+                    SELECT row_to_json(t)
+                    FROM (
+                        SELECT
+                            id_wgp as id,
+                            name_wgp as name
+                    ) t
+                ) as workgroup,
                 (
                     select row_to_json(t)
                     FROM (
@@ -95,6 +104,9 @@ class ListEditingBorehole(Action):
 
             FROM
                 borehole
+                
+            INNER JOIN workgroups
+            ON id_wgp = id_wgp_fk
 
             INNER JOIN (
                 SELECT

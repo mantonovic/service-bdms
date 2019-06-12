@@ -24,10 +24,33 @@ class StratigraphyProducerHandler(Producer):
 
                 exe = None
 
-                # Lock check
-                await self.check_lock(
-                    request['id'], self.user, conn
-                )
+                id_bho = None
+
+                if action in [
+                    'CREATE'
+                ]:
+                    # Lock check
+                    await self.check_lock(
+                        request['id'], self.user, conn
+                    )
+
+                elif action in [
+                    'PATCH', 'DELETE', 'CHECK', 'CLONE'
+                ]:
+                    # Get Borehole id
+                    id_bho = await conn.fetchval("""
+                        SELECT
+                            id_bho_fk
+                        FROM
+                            public.stratigraphy
+                        WHERE
+                            id_sty = $1;
+                    """, request['id'])
+
+                    # Lock check
+                    await self.check_lock(
+                        id_bho, self.user, conn
+                    )
 
                 if action == 'CREATE':
                     exe = CreateStratigraphy(conn)

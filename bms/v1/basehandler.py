@@ -66,7 +66,7 @@ class BaseHandler(web.RequestHandler):
         # print(f'Authorization: {auth_header}')
 
         if auth_header is None or not auth_header.startswith('Basic '):
-            self.set_header('WWW-Authenticate', 'Basic realm=BasicAuthSample')
+            self.set_header('WWW-Authenticate', 'Basic realm=BDMS')
             self.set_status(401)
             self.finish()
             return # self.user
@@ -152,10 +152,9 @@ class BaseHandler(web.RequestHandler):
                         LEFT JOIN (
                             SELECT
                                 id_usr_fk,
-								array_agg(id_wgp) as wgps,
+                                array_agg(id_wgp) as wgps,
                                 array_to_json(array_agg(j)) as ws
-                            FROM
-                            (
+                            FROM (
                                 SELECT
                                     id_usr_fk,
                                     id_wgp,
@@ -185,7 +184,14 @@ class BaseHandler(web.RequestHandler):
                 """, username, password)
 
                 if val is None:
-                    raise AuthenticationException()
+                    self.set_header(
+                        'WWW-Authenticate',
+                        'Basic realm=BDMS'
+                    )
+                    self.set_status(401)
+                    self.finish()
+                    return
+                    # raise AuthenticationException()
 
                 self.user = json.loads(val)
 
@@ -228,12 +234,14 @@ class BaseHandler(web.RequestHandler):
                 "error": bex.code,
                 "data": bex.data
             })
+
         except Exception as ex:
             print(traceback.print_exc())
             self.write({
                 "success": False,
                 "message": str(ex)
             })
+
         self.finish()
 
     def authorize(self):

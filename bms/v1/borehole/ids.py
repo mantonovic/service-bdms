@@ -17,6 +17,7 @@ class BoreholeIds(Action):
         sql = """
             SELECT
                 array_agg(borehole.id_bho)
+
             FROM
                 borehole
 

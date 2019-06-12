@@ -16,6 +16,7 @@ class PatchBorehole(Action):
             
             # Updating character varing, boolean fields
             if field in [
+                'visible',
                 'extended.original_name',
                 'custom.public_name',
                 'custom.project_name',
@@ -39,12 +40,15 @@ class PatchBorehole(Action):
                 'extended.groundwater',
                 'custom.mistakes',
                 'custom.remarks'
-                    ]:
+            ]:
 
                 column = None
 
                 if field == 'extended.original_name':
                     column = 'original_name_bho'
+
+                elif field == 'visible':
+                    column = 'public_bho'
 
                 elif field == 'custom.public_name':
                     column = 'public_name_bho'

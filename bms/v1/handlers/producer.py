@@ -116,5 +116,13 @@ class Producer(BaseHandler):
         # """, now, user['id'], id)
 
     def authorize(self):
-        if 'EDIT' not in self.user['roles']:
-            raise AuthorizationException()
+
+        if (
+            'EDIT' in self.user['roles'] or
+            'CONTROL' in self.user['roles'] or
+            'VALID' in self.user['roles'] or
+            'PUBLIC' in self.user['roles']
+        ):
+            return
+
+        raise AuthorizationException()

@@ -49,6 +49,7 @@ class GetBorehole(Action):
             FROM (
                 SELECT
                     borehole.id_bho as id,
+                    borehole.public_bho as visible,
                     (
                         SELECT row_to_json(t)
                         FROM (
@@ -75,13 +76,6 @@ class GetBorehole(Action):
                                 ) as date
                         ) t2
                     ) as author,
-                    /*(
-                        SELECT row_to_json(t2)
-                        FROM (
-                            SELECT
-                                ('' || id_rol_fk) as code
-                        ) t2
-                    ) as version,*/
                     {sql_lock}
                     kind_id_cli as kind,
                     restriction_id_cli as restriction,
@@ -149,11 +143,22 @@ class GetBorehole(Action):
                     ) as custom,
                     stratigraphy as stratigraphy,
                     completness.percentage,
+                    (
+                        SELECT row_to_json(t)
+                        FROM (
+                            SELECT
+                                id_wgp as id,
+                                name_wgp as name
+                        ) t
+                    ) as workgroup,
                     status[array_length(status, 1)] as workflow,
                     status[array_length(status, 1)]  ->> 'role' as "role"
 
                 FROM
                     borehole
+
+                INNER JOIN workgroups
+                ON id_wgp = id_wgp_fk
 
                 INNER JOIN (
                     SELECT

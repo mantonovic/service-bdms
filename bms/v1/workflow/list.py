@@ -41,6 +41,7 @@ class ListWorkflows(Action):
                                     firstname || ' ' || lastname as "name"
                             ) t
                         ) as author
+
                     FROM public.workflow
 
                     INNER JOIN public.users as u
@@ -54,6 +55,7 @@ class ListWorkflows(Action):
 
                     ORDER BY
                         id_wkf
+
                 ) as t
 
             """, id
