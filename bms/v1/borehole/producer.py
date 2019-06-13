@@ -53,9 +53,14 @@ class BoreholeProducerHandler(Producer):
                     'PATCH',
                 ]:
                     # Lock check
-                    await self.check_lock(
+                    res = await self.check_lock(
                         request['id'], self.user, conn
                     )
+
+                    if action in [
+                        'PATCH'
+                    ] and res['role'] != 'EDIT': 
+                        raise AuthorizationException() 
 
                 if action == 'CREATE':
                     exe = CreateBorehole(conn)
