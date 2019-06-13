@@ -24,7 +24,7 @@ class Producer(BaseHandler):
                 borehole.id_wgp_fk
 
             FROM
-                borehole
+                bdms.borehole
 
             INNER JOIN (
                 SELECT
@@ -47,9 +47,9 @@ class Producer(BaseHandler):
                         started_wkf as started,
                         finished_wkf as finished
                     FROM
-                        workflow,
-                        roles,
-                        users
+                        bdms.workflow,
+                        bdms.roles,
+                        bdms.users
                     WHERE
                         id_rol = id_rol_fk
                     AND
@@ -64,7 +64,7 @@ class Producer(BaseHandler):
                 v.id_bho_fk = id_bho
 
             LEFT JOIN
-                users
+                bdms.users
             ON
                 users.id_usr = borehole.locked_by
 

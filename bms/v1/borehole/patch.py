@@ -140,7 +140,7 @@ class PatchBorehole(Action):
                     value.append(user['id'])
                     value.append(id)
                     await self.conn.execute("""
-                        UPDATE public.borehole
+                        UPDATE bdms.borehole
                         SET
                             %s,
                             update_bho = now(),
@@ -154,7 +154,7 @@ class PatchBorehole(Action):
 
                 else:
                     await self.conn.execute("""
-                        UPDATE public.borehole
+                        UPDATE bdms.borehole
                         SET
                             %s = $1,
                             update_bho = now(),
@@ -185,7 +185,7 @@ class PatchBorehole(Action):
                     value = None
 
                 await self.conn.execute("""
-                    UPDATE public.borehole
+                    UPDATE bdms.borehole
                     SET
                         %s = to_date($1, 'YYYY-MM-DD'),
                         update_bho = now(),
@@ -285,7 +285,7 @@ class PatchBorehole(Action):
                             SELECT
                                 schema_cli
                             FROM
-                                codelist
+                                bdms.codelist
                             WHERE
                                 id_cli = $1
                         """, value)):
@@ -297,7 +297,7 @@ class PatchBorehole(Action):
                     )
 
                 await self.conn.execute("""
-                    UPDATE public.borehole
+                    UPDATE bdms.borehole
                     SET
                         %s = $1,
                         update_bho = now(),
@@ -315,7 +315,7 @@ class PatchBorehole(Action):
                     schema = 'madm404'
 
                 await self.conn.execute("""
-                    DELETE FROM public.borehole_codelist
+                    DELETE FROM bdms.borehole_codelist
                     WHERE id_bho_fk = $1
                     AND code_cli = $2
                 """, id, schema)
@@ -328,7 +328,7 @@ class PatchBorehole(Action):
                             SELECT
                                 schema_cli
                             FROM
-                                codelist
+                                bdms.codelist
                             WHERE
                                 id_cli = ANY($2)
                             AND
@@ -346,13 +346,13 @@ class PatchBorehole(Action):
 
                     await self.conn.executemany("""
                         INSERT INTO
-                            public.borehole_codelist (
+                            bdms.borehole_codelist (
                                 id_bho_fk, id_cli_fk, code_cli
                             ) VALUES ($1, $2, $3)
                     """, [(id, v, schema) for v in value])
 
                     await self.conn.execute("""
-                        UPDATE public.borehole
+                        UPDATE bdms.borehole
                         SET
                             update_bho = now(),
                             updater_bho = $1
@@ -397,14 +397,15 @@ class PatchBorehole(Action):
                             ) t
                         ) as updater
                     FROM
-                        borehole
-                    INNER JOIN public.users as locker
+                        bdms.borehole
+                    INNER JOIN bdms.users as locker
                         ON locked_by = locker.id_usr
-                    INNER JOIN public.completness
+                    INNER JOIN bdms.completness
                         ON completness.id_bho = borehole.id_bho
-                    INNER JOIN public.users as updater
+                    INNER JOIN bdms.users as updater
                         ON updater_bho = updater.id_usr
-                    WHERE borehole.id_bho = $1
+                    WHERE
+                        borehole.id_bho = $1
                 ) t2
             """, id)
 

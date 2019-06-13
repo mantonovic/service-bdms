@@ -11,7 +11,7 @@ class StartEditing(GetBorehole):
 
         # Lock row for current user
         await self.conn.execute("""
-            UPDATE borehole SET
+            UPDATE bdms.borehole SET
                 locked_at = current_timestamp,
                 locked_by = $1
             WHERE id_bho = $2;

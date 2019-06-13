@@ -24,7 +24,7 @@ class RejectWorkflow(Action):
                         id_bho_fk,
                         id_rol_fk
                     FROM
-                        public.workflow
+                        bdms.workflow
                     WHERE
                         id_wkf = $1;
                 """, id)
@@ -42,7 +42,7 @@ class RejectWorkflow(Action):
                 raise Exception("Finishing wrong workflow")
 
             id_rol = await self.conn.fetchval("""
-                UPDATE public.workflow
+                UPDATE bdms.workflow
                 SET
                     finished_wkf = now(),
                     id_usr_fk = $1
@@ -64,7 +64,7 @@ class RejectWorkflow(Action):
                 if id_rol == PUBLIC:
                     await self.conn.fetchval("""
                         UPDATE
-                            public.borehole
+                            bdms.borehole
                         SET
                             public_bho = FALSE
                         WHERE id_bho = $1;

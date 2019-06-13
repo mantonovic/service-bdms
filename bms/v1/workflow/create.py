@@ -9,7 +9,7 @@ class CreateWorkflow(Action):
         return {
             "id": (
                 await self.conn.fetchval("""
-                    INSERT INTO public.workflow(
+                    INSERT INTO bdms.workflow(
 	                    id_bho_fk,
                         id_usr_fk,
                         id_rol_fk

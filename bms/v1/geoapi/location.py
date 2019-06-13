@@ -23,7 +23,7 @@ class GetLocation(Action):
                     ) AS point
                 ) as g
                 LEFT JOIN
-                    cantons
+                    bdms.cantons
                 ON ST_Intersects(
                     g.point,
                     ST_Transform(
@@ -31,7 +31,7 @@ class GetLocation(Action):
                     )
                 )
                 LEFT JOIN
-                    municipalities
+                    bdms.municipalities
                 ON ST_Intersects(
                     g.point,
                     ST_Transform(

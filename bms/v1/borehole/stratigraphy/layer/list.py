@@ -40,12 +40,12 @@ class ListLayers(Action):
                     SUM(depth_to_lay)
                         OVER (ORDER BY depth_from_lay, id_lay ASC) AS depth*/
                 FROM
-                    layer
+                    bdms.layer
 
-                INNER JOIN stratigraphy
+                INNER JOIN bdms.stratigraphy
                 ON id_sty = id_sty_fk
                 
-                INNER JOIN borehole
+                INNER JOIN bdms.borehole
                 ON stratigraphy.id_bho_fk = id_bho
 
                 INNER JOIN (
@@ -69,9 +69,9 @@ class ListLayers(Action):
                             started_wkf as started,
                             finished_wkf as finished
                         FROM
-                            workflow,
-                            roles,
-                            users
+                            bdms.workflow,
+                            bdms.roles,
+                            bdms.users
                         WHERE
                             id_rol = id_rol_fk
                         AND

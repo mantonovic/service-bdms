@@ -15,9 +15,11 @@ class DeleteStratigraphy(Action):
                 locked_at,
                 locked_by
             FROM
-                borehole
-            LEFT JOIN users
-            ON users.id_usr = borehole.locked_by
+                bdms.borehole
+            LEFT JOIN
+                bdms.users
+            ON
+                users.id_usr = borehole.locked_by
             WHERE
                 id_bho = $1
         """, id)
@@ -43,7 +45,7 @@ class DeleteStratigraphy(Action):
                 )
 
             await self.conn.fetchval("""
-                    DELETE FROM public.stratigraphy
+                    DELETE FROM bdms.stratigraphy
                     WHERE id_sty = $1
                 """, id)
 

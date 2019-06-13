@@ -20,7 +20,7 @@ class ListCanton(Action):
                         ), 2, 2
                     )::json as geom
                 FROM
-                    cantons
+                    bdms.cantons
                 GROUP BY kantonsnum, name
                 ORDER BY name
             ) as cant

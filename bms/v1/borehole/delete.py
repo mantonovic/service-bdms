@@ -6,7 +6,7 @@ class DeleteBorehole(Action):
 
     async def execute(self, id):
         await self.conn.fetchval("""
-                DELETE FROM public.borehole
+                DELETE FROM bdms.borehole
                 WHERE id_bho = $1
             """, id)
         return None

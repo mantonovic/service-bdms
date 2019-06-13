@@ -9,7 +9,7 @@ class Unlock(GetBorehole):
 
         # Lock row for current user
         await self.conn.execute("""
-            UPDATE borehole SET
+            UPDATE bdms.borehole SET
                 locked_at = NULL,
                 locked_by = NULL
             WHERE id_bho = $1;

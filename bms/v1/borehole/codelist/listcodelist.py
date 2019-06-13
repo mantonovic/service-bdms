@@ -9,7 +9,7 @@ class ListCodeList(Action):
             SELECT
                 DISTINCT schema_cli
             FROM
-                public.codelist
+                bdms.codelist
         """)
         data = {}
         for rec in recs:
@@ -76,7 +76,7 @@ class ListCodeList(Action):
                         ) as it,
 					    conf_cli as conf
                     FROM
-                        public.codelist
+                        bdms.codelist
                     WHERE
                         schema_cli = $1
                     ORDER BY

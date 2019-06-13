@@ -23,7 +23,7 @@ class PatchSetting(Action):
                 SELECT
                     settings_usr
                 FROM
-                    users
+                    bdms.users
                 WHERE id_usr = $1
             """, user_id)
 
@@ -74,7 +74,7 @@ class PatchSetting(Action):
                     tmp = tmp[pathList[idx]]
 
             await self.conn.execute("""
-                UPDATE public.users
+                UPDATE bdms.users
                 SET
                     settings_usr = $1
                 WHERE id_usr = $2

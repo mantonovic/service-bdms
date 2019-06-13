@@ -1,23 +1,29 @@
 # -*- coding: utf-8 -*-
-from bms import EDIT
 from bms.v1.action import Action
 
 
 class CreateBorehole(Action):
 
     async def execute(self, id, user):
+
+        permit = False
+        for w in user['workgroups']:
+            if w['id'] == id and 'EDIT' in w['roles']:
+                permit = True
+
+        if permit is False:
+            raise Exception("Not permitted action")
+
         bid = await self.conn.fetchval("""
-            INSERT INTO public.borehole(
-                project_id,
+            INSERT INTO bdms.borehole(
                 author_id,
                 updater_bho,
-                id_wgp_fk,
-                id_rol_fk
+                id_wgp_fk
             )
             VALUES (
-                $1, $2, $3, $4, $5
+                $1, $2, $3
             ) RETURNING id_bho
-        """, id, user['id'], user['id'], user['workgroups'][0]['id'], EDIT)
+        """, user['id'], user['id'], id)
 
         return {
             "id": bid

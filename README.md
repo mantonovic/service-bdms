@@ -1,5 +1,41 @@
 # Borehole Management System Service
 
+## Installation
+
+### Databasa initilization
+
+Create the database
+
+```bash
+sudo -u postgres createdb -E UTF8 bdms
+```
+
+Create the tables:
+
+```bash
+sudo -u postgres psql -d bdms -f db.sql
+```
+
+Add default data:
+
+```bash
+sudo -u postgres psql -d bdms -f data.sql
+sudo -u postgres psql -d bdms -f cantons.sql
+sudo -u postgres psql -d bdms -f municipalities.sql
+```
+
+### Python env
+
+
+
+### Run Server
+
+```bashm
+python3 bms/main.py 
+```
+
+## Developer corner
+
 Setup developer environment
 
 ```bash

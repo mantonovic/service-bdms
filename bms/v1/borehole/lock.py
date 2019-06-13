@@ -17,7 +17,7 @@ class Lock(Action):
 
         # Lock row for current user
         await self.conn.execute("""
-            UPDATE borehole SET
+            UPDATE bdms.borehole SET
                 locked_at = $1,
                 locked_by = $2
             WHERE id_bho = $3;
@@ -30,7 +30,7 @@ class Lock(Action):
                 started_wkf
 
             FROM
-                workflow
+                bdms.workflow
 
             WHERE
                 id_bho_fk = $1
@@ -45,7 +45,7 @@ class Lock(Action):
 
         if row[1] is None:
             await self.conn.execute("""
-                UPDATE workflow SET
+                UPDATE bdms.workflow SET
                     started_wkf = current_timestamp,
                     id_usr_fk = $1
                 WHERE id_wkf = $2;
@@ -64,8 +64,8 @@ class Lock(Action):
                         'YYYY-MM-DD"T"HH24:MI:SS'
                     ) as date
                 FROM
-                    borehole
-                INNER JOIN public.users as locker
+                    bdms.borehole
+                INNER JOIN bdms.users as locker
                     ON locked_by = locker.id_usr
                 WHERE id_bho = $1
             ) t2

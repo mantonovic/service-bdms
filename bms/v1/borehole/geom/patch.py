@@ -24,8 +24,8 @@ class PatchGeom(Action):
                             location_y_bho,
                             code_cli
                         FROM
-                            public.borehole
-                        LEFT JOIN public.codelist
+                            bdms.borehole
+                        LEFT JOIN bdms.codelist
                         ON id_cli = srs_id_cli
                         WHERE
                             id_bho = $1
@@ -39,7 +39,7 @@ class PatchGeom(Action):
                     location[2] is None
                         ):
                     await self.conn.execute("""
-                        UPDATE public.borehole
+                        UPDATE bdms.borehole
                         SET geom_bho = NULL
                         WHERE id_bho = $1
                     """, id)
@@ -60,13 +60,13 @@ class PatchGeom(Action):
                     try:
                         if location[2] == '2056':
                             await self.conn.execute("""
-                                UPDATE public.borehole
+                                UPDATE bdms.borehole
                                 SET geom_bho = ST_GeomFromText('%s', $1)
                                 WHERE id_bho = $2
                             """ % point, int(location[2]), id)
                         else:
                             await self.conn.execute("""
-                                UPDATE public.borehole
+                                UPDATE bdms.borehole
                                 SET geom_bho = ST_Transform(
                                     ST_GeomFromText('%s', $1),
                                     2056
@@ -82,5 +82,5 @@ class PatchGeom(Action):
         except PatchAttributeException as bmsx:
             raise bmsx
 
-        except Exception as ex:
+        except Exception:
             raise Exception("Error while updating geometry column")

@@ -21,7 +21,7 @@ class SubmitWorkflow(Action):
                         id_bho_fk,
                         id_rol_fk
                     FROM
-                        public.workflow
+                        bdms.workflow
                     WHERE
                         id_wkf = $1;
                 """, id)
@@ -39,7 +39,7 @@ class SubmitWorkflow(Action):
                 raise Exception("Finishing wrong workflow")
 
             id_rol = await self.conn.fetchval("""
-                UPDATE public.workflow
+                UPDATE bdms.workflow
                 SET
                     finished_wkf = now(),
                     id_usr_fk = $1
@@ -59,7 +59,7 @@ class SubmitWorkflow(Action):
             else:
                 await self.conn.fetchval("""
                     UPDATE
-                        public.borehole
+                        bdms.borehole
                     SET
                         public_bho = $1
                     WHERE id_bho = $2;

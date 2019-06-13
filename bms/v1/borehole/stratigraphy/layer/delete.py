@@ -21,7 +21,7 @@ class DeleteLayer(Action):
                 SELECT
                     id_sty_fk
                 FROM
-                    layer
+                    bdms.layer
                 WHERE
                     id_lay = $1
             """, id)
@@ -126,6 +126,6 @@ class DeleteLayer(Action):
 
     async def delete(self, id):
         await self.conn.fetchval("""
-            DELETE FROM public.layer
+            DELETE FROM bdms.layer
             WHERE id_lay = $1
         """, id)

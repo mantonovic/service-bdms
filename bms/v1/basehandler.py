@@ -125,12 +125,12 @@ class BaseHandler(web.RequestHandler):
                             ) AS wid,
                             rl.roles as roles
                         FROM
-                            users
+                            bdms.users
 
-                        INNER JOIN public.groups
+                        LEFT JOIN bdms.groups
                             ON id_grp = id_grp_fk
 
-                        LEFT JOIN (
+                        INNER JOIN (
                             SELECT
                                 r.id_usr_fk,
                                 array_agg(r.name_rol) AS roles
@@ -140,8 +140,8 @@ class BaseHandler(web.RequestHandler):
                                     id_usr_fk,
                                     name_rol
                                 FROM
-                                    users_roles,
-                                    roles
+                                    bdms.users_roles,
+                                    bdms.roles
                                 WHERE
                                     id_rol = id_rol_fk
                             ) r
@@ -164,9 +164,9 @@ class BaseHandler(web.RequestHandler):
                                         'roles', array_agg(name_rol)
                                     ) as j
                                 FROM
-                                    users_roles,
-                                    workgroups,
-                                    roles
+                                    bdms.users_roles,
+                                    bdms.workgroups,
+                                    bdms.roles
                                 WHERE
                                     id_rol = id_rol_fk
                                 AND
@@ -178,6 +178,7 @@ class BaseHandler(web.RequestHandler):
                             GROUP BY id_usr_fk
                         ) as w
                         ON w.id_usr_fk = id_usr
+
                         WHERE username = $1
                         AND password = $2
                     ) as t

@@ -37,9 +37,9 @@ class GetStratigraphy(Action):
                     ) as date
 
                 FROM
-                    stratigraphy
+                    bdms.stratigraphy
 
-                INNER JOIN borehole
+                INNER JOIN bdms.borehole
                     ON stratigraphy.id_bho_fk = id_bho
 
                 INNER JOIN (
@@ -63,9 +63,9 @@ class GetStratigraphy(Action):
                             started_wkf as started,
                             finished_wkf as finished
                         FROM
-                            workflow,
-                            roles,
-                            users
+                            bdms.workflow,
+                            bdms.roles,
+                            bdms.users
                         WHERE
                             id_rol = id_rol_fk
                         AND

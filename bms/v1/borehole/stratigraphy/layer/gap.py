@@ -19,7 +19,7 @@ class GapLayer(Action):
             SELECT
                 id_sty_fk
             FROM
-                layer
+                bdms.layer
             WHERE
                 id_lay = $1
         """, id)
@@ -81,7 +81,7 @@ class GapLayer(Action):
                                 SELECT
                                     id_cli
                                 FROM
-                                    codelist
+                                    bdms.codelist
                                 WHERE
                                     code_cli = $1
                                 AND

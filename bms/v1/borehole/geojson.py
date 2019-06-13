@@ -75,7 +75,7 @@ class ListGeojson(Action):
                                             ) AS p
                                         ) AS properties
 
-                                    FROM borehole
+                                    FROM bdms.borehole
 
                                     INNER JOIN (
                                         SELECT
@@ -98,9 +98,9 @@ class ListGeojson(Action):
                                                 started_wkf as started,
                                                 finished_wkf as finished
                                             FROM
-                                                workflow,
-                                                roles,
-                                                users
+                                                bdms.workflow,
+                                                bdms.roles,
+                                                bdms.users
                                             WHERE
                                                 id_rol = id_rol_fk
                                             AND
@@ -115,12 +115,12 @@ class ListGeojson(Action):
                                         v.id_bho_fk = id_bho
 
                                     LEFT JOIN
-                                        codelist kd
+                                        bdms.codelist kd
                                     ON
                                         kind_id_cli = kd.id_cli
 
                                     LEFT JOIN
-                                        codelist rs
+                                        bdms.codelist rs
                                     ON
                                         restriction_id_cli = rs.id_cli
 

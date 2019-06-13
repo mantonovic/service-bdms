@@ -41,12 +41,12 @@ class ListProject(Action):
                 id_pro as id,
                 name_pro as name
             FROM
-                project
+                bdms.project
         """
 
         cntSql = """
             SELECT count(*) AS cnt
-            FROM project
+            FROM bdms.project
         """
 
         if len(where) > 0:

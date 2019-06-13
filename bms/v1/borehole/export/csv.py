@@ -42,7 +42,7 @@ class ExportCsv(Action):
                 top_bedrock_bho as top_bedrock,
                 groundwater_bho as groundwater
             FROM
-                borehole
+                bdms.borehole
             
             INNER JOIN (
                 SELECT
@@ -65,9 +65,9 @@ class ExportCsv(Action):
                         started_wkf as started,
                         finished_wkf as finished
                     FROM
-                        workflow,
-                        roles,
-                        users
+                        bdms.workflow,
+                        bdms.roles,
+                        bdms.users
                     WHERE
                         id_rol = id_rol_fk
                     AND
@@ -81,25 +81,25 @@ class ExportCsv(Action):
             ON
                 v.id_bho_fk = id_bho
 
-            LEFT JOIN codelist as knd
+            LEFT JOIN bdms.codelist as knd
                 ON knd.id_cli = kind_id_cli
 
-            LEFT JOIN codelist as srd
+            LEFT JOIN bdms.codelist as srd
                 ON srd.id_cli = srs_id_cli
 
-            LEFT JOIN codelist as hrs
+            LEFT JOIN bdms.codelist as hrs
                 ON hrs.id_cli = hrs_id_cli
 
-            LEFT JOIN codelist as rest
+            LEFT JOIN bdms.codelist as rest
                 ON rest.id_cli = restriction_id_cli
 
-            LEFT JOIN codelist as meth
+            LEFT JOIN bdms.codelist as meth
                 ON meth.id_cli = method_id_cli
 
-            LEFT JOIN codelist as prp
+            LEFT JOIN bdms.codelist as prp
                 ON prp.id_cli = purpose_id_cli
 
-            LEFT JOIN codelist as sts
+            LEFT JOIN bdms.codelist as sts
                 ON sts.id_cli = status_id_cli
         """
 

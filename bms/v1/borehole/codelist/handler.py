@@ -33,7 +33,7 @@ class CodeListHandler(Viewer):
                         SELECT
                             id_cli
                         FROM
-                            codelist
+                            bdms.codelist
                         WHERE
                             schema_cli = 'layer_kind'
                         AND

@@ -24,7 +24,7 @@ class PatchCode(Action):
                     conf_cli,
                     schema_cli
                 FROM
-                    public.codelist
+                    bdms.codelist
                 WHERE
                     id_cli = $1
             """, code_id)
@@ -68,7 +68,7 @@ class PatchCode(Action):
                     tmp = tmp[pathList[idx]]
 
             await self.conn.execute("""
-                UPDATE public.codelist
+                UPDATE bdms.codelist
                 SET
                     conf_cli = $1
                 WHERE

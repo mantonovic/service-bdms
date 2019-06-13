@@ -113,14 +113,15 @@ class GetLayer(Action):
                     ) AS notes,
                     stratigraphy.kind_id_cli AS kind
                 FROM
-                    layer
+                    bdms.layer
 
-                INNER JOIN public.stratigraphy as stratigraphy
+                INNER JOIN bdms.stratigraphy as stratigraphy
                 ON id_sty_fk = stratigraphy.id_sty
 
-                INNER JOIN borehole
-                    ON stratigraphy.id_bho_fk = id_bho
-                    INNER JOIN (
+                INNER JOIN bdms.borehole
+                ON stratigraphy.id_bho_fk = id_bho
+
+                INNER JOIN (
                     SELECT
                         id_bho_fk,
                         array_agg(
@@ -141,9 +142,9 @@ class GetLayer(Action):
                             started_wkf as started,
                             finished_wkf as finished
                         FROM
-                            workflow,
-                            roles,
-                            users
+                            bdms.workflow,
+                            bdms.roles,
+                            bdms.users
                         WHERE
                             id_rol = id_rol_fk
                         AND
@@ -157,17 +158,17 @@ class GetLayer(Action):
                 ON
                     v.id_bho_fk = id_bho
 
-                INNER JOIN public.users as creator
+                INNER JOIN bdms.users as creator
                 ON creator_lay = creator.id_usr
 
-                INNER JOIN public.users as updater
+                INNER JOIN bdms.users as updater
                 ON updater_lay = updater.id_usr
 
                 LEFT JOIN (
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mlpr112
                     FROM
-                        layer_codelist
+                        bdms.layer_codelist
                     WHERE
                         code_cli = 'mlpr112'
                     GROUP BY id_lay_fk
@@ -178,7 +179,7 @@ class GetLayer(Action):
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mlpr113
                     FROM
-                        layer_codelist
+                        bdms.layer_codelist
                     WHERE
                         code_cli = 'mlpr113'
                     GROUP BY id_lay_fk
@@ -189,7 +190,7 @@ class GetLayer(Action):
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mlpr108
                     FROM
-                        layer_codelist
+                        bdms.layer_codelist
                     WHERE
                         code_cli = 'mlpr108'
                     GROUP BY id_lay_fk
@@ -200,7 +201,7 @@ class GetLayer(Action):
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mlpr110
                     FROM
-                        layer_codelist
+                        bdms.layer_codelist
                     WHERE
                         code_cli = 'mlpr110'
                     GROUP BY id_lay_fk
@@ -211,7 +212,7 @@ class GetLayer(Action):
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mlpr115
                     FROM
-                        layer_codelist
+                        bdms.layer_codelist
                     WHERE
                         code_cli = 'mlpr115'
                     GROUP BY id_lay_fk
@@ -222,7 +223,7 @@ class GetLayer(Action):
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mlpr117
                     FROM
-                        layer_codelist
+                        bdms.layer_codelist
                     WHERE
                         code_cli = 'mlpr117'
                     GROUP BY id_lay_fk
@@ -233,7 +234,7 @@ class GetLayer(Action):
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mcla101
                     FROM
-                        layer_codelist
+                        bdms.layer_codelist
                     WHERE
                         code_cli = 'mcla101'
                     GROUP BY id_lay_fk
@@ -244,7 +245,7 @@ class GetLayer(Action):
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mcla104
                     FROM
-                        layer_codelist
+                        bdms.layer_codelist
                     WHERE
                         code_cli = 'mcla104'
                     GROUP BY id_lay_fk
@@ -255,7 +256,7 @@ class GetLayer(Action):
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as mcla107
                     FROM
-                        layer_codelist
+                        bdms.layer_codelist
                     WHERE
                         code_cli = 'mcla107'
                     GROUP BY id_lay_fk
@@ -266,7 +267,7 @@ class GetLayer(Action):
                     SELECT
                         id_lay_fk, array_agg(id_cli_fk) as vlit401
                     FROM
-                        layer_codelist
+                        bdms.layer_codelist
                     WHERE
                         code_cli = 'custom.lit_pet_top_bedrock'
                     GROUP BY id_lay_fk

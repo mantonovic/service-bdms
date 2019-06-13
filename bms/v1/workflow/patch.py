@@ -22,7 +22,7 @@ class PatchWorkflow(Action):
                     SELECT
                         array_agg(code_cli)
                     FROM
-                        codelist
+                        bdms.codelist
                     WHERE
                         schema_cli = 'borehole_form'
                 """)
@@ -33,7 +33,7 @@ class PatchWorkflow(Action):
                         mentions.append(field_name)
 
                 id_bho = await self.conn.fetchval(f"""
-                    UPDATE public.workflow
+                    UPDATE bdms.workflow
                     SET
                         {column} = $1,
                         mentions_wkf = $2,
@@ -43,7 +43,7 @@ class PatchWorkflow(Action):
                 """, value, mentions, user['id'], id)
 
                 await self.conn.execute("""
-                    UPDATE public.borehole
+                    UPDATE bdms.borehole
                     SET
                         update_bho = now(),
                         updater_bho = $1

@@ -21,7 +21,7 @@ class PatchStartigraphy(Action):
                     value = None
 
                 await self.conn.execute("""
-                    UPDATE public.stratigraphy
+                    UPDATE bdms.stratigraphy
                     SET
                         %s = to_date($1, 'YYYY-MM-DD'),
                         update_sty = now(),
@@ -49,13 +49,13 @@ class PatchStartigraphy(Action):
                         SELECT
                             id_bho_fk
                         FROM
-                            public.stratigraphy
+                            bdms.stratigraphy
                         WHERE
                             id_sty = $1
                     """, id)
 
                     await self.conn.execute("""
-                        UPDATE public.stratigraphy
+                        UPDATE bdms.stratigraphy
                         SET
                             %s = FALSE,
                             update_sty = now(),
@@ -64,7 +64,7 @@ class PatchStartigraphy(Action):
                     """ % column, user_id, id_bho)
 
                 await self.conn.execute("""
-                    UPDATE public.stratigraphy
+                    UPDATE bdms.stratigraphy
                     SET
                         %s = $1,
                         update_sty = now(),
@@ -81,7 +81,7 @@ class PatchStartigraphy(Action):
                     column = 'name_sty'
 
                 await self.conn.execute("""
-                    UPDATE public.stratigraphy
+                    UPDATE bdms.stratigraphy
                     SET
                         %s = $1,
                         update_sty = now(),
@@ -103,7 +103,7 @@ class PatchStartigraphy(Action):
                             SELECT
                                 schema_cli
                             FROM
-                                codelist
+                                bdms.codelist
                             WHERE
                                 id_cli = $1
                         """, value)):
@@ -115,7 +115,7 @@ class PatchStartigraphy(Action):
                     )
 
                 await self.conn.execute("""
-                    UPDATE public.stratigraphy
+                    UPDATE bdms.stratigraphy
                     SET
                         %s = $1,
                         update_sty = now(),

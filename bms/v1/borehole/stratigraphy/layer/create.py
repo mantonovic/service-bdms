@@ -10,7 +10,7 @@ class CreateLayer(Action):
             SELECT
                 depth_to_lay
             FROM
-                layer
+                bdms.layer
             WHERE
                 id_sty_fk = $1
             ORDER BY depth_to_lay DESC
@@ -22,11 +22,12 @@ class CreateLayer(Action):
         return {
             "id": (
                 await self.conn.fetchval("""
-                    INSERT INTO public.layer(
+                    INSERT INTO bdms.layer(
                         id_sty_fk, creator_lay,
-                        updater_lay, depth_from_lay
+                        updater_lay, depth_from_lay,
+                        last_lay
                     )
-                    VALUES ($1, $2, $3, $4) RETURNING id_lay
+                    VALUES ($1, $2, $3, $4, False) RETURNING id_lay
                 """, id, user_id, user_id, depth_to)
             )
         }

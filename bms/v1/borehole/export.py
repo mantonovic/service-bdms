@@ -35,20 +35,20 @@ class ExportBorehole(Action):
                 top_bedrock_bho as top_bedrock,
                 groundwater_bho as groundwater
             FROM
-                borehole
-            LEFT JOIN codelist as knd
+                bdms.borehole
+            LEFT JOIN bdms.codelist as knd
                 ON knd.id_cli = kind_id_cli
-            LEFT JOIN codelist as srd
+            LEFT JOIN bdms.codelist as srd
                 ON srd.id_cli = srs_id_cli
-            LEFT JOIN codelist as hrs
+            LEFT JOIN bdms.codelist as hrs
                 ON hrs.id_cli = hrs_id_cli
-            LEFT JOIN codelist as rest
+            LEFT JOIN bdms.codelist as rest
                 ON rest.id_cli = restriction_id_cli
-            LEFT JOIN codelist as meth
+            LEFT JOIN bdms.codelist as meth
                 ON meth.id_cli = method_id_cli
-            LEFT JOIN codelist as prp
+            LEFT JOIN bdms.codelist as prp
                 ON prp.id_cli = purpose_id_cli
-            LEFT JOIN codelist as sts
+            LEFT JOIN bdms.codelist as sts
                 ON sts.id_cli = status_id_cli
         """
 

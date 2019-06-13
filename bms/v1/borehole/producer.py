@@ -46,7 +46,6 @@ class BoreholeProducerHandler(Producer):
                 exe = None
 
                 if action in [
-                    'CHECK',
                     'LOCK',
                     'UNLOCK',
                     'EDIT',

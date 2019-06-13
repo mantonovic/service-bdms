@@ -33,7 +33,7 @@ class WorkflowProducerHandler(Producer):
                         SELECT
                             id_bho_fk
                         FROM
-                            public.workflow
+                            bdms.workflow
                         WHERE
                             id_wkf = $1;
                     """, request['id'])

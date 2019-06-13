@@ -19,7 +19,7 @@ class BoreholeIds(Action):
                 array_agg(borehole.id_bho)
 
             FROM
-                borehole
+                bdms.borehole
 
             INNER JOIN (
                 SELECT
@@ -59,12 +59,12 @@ class BoreholeIds(Action):
                 v.id_bho_fk = id_bho
 
             INNER JOIN
-                public.users as author
+                bdms.users as author
             ON
                 author_id = author.id_usr
 
             INNER JOIN
-                public.completness
+                bdms.completness
             ON
                 completness.id_bho = borehole.id_bho
         """

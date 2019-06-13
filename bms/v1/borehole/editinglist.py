@@ -103,9 +103,9 @@ class ListEditingBorehole(Action):
                 status[array_length(status, 1)]  ->> 'role' as "role"
 
             FROM
-                borehole
+                bdms.borehole
                 
-            INNER JOIN workgroups
+            INNER JOIN bdms.workgroups
             ON id_wgp = id_wgp_fk
 
             INNER JOIN (
@@ -129,9 +129,9 @@ class ListEditingBorehole(Action):
                         started_wkf as started,
                         finished_wkf as finished
                     FROM
-                        workflow,
-                        roles,
-                        users
+                        bdms.workflow,
+                        bdms.roles,
+                        bdms.users
                     WHERE
                         id_rol = id_rol_fk
                     AND
@@ -146,17 +146,17 @@ class ListEditingBorehole(Action):
                 v.id_bho_fk = id_bho
 
             INNER JOIN
-                public.completness
+                bdms.completness
             ON
                 completness.id_bho = borehole.id_bho
 
             LEFT JOIN
-                public.users as locker
+                bdms.users as locker
             ON
                 locked_by = locker.id_usr
 
             INNER JOIN
-                public.users as author
+                bdms.users as author
             ON
                 author_id = author.id_usr
 
@@ -183,10 +183,10 @@ class ListEditingBorehole(Action):
                         ) AS date,
                         COUNT(id_lay) AS layers
                     FROM
-                        stratigraphy
-                    INNER JOIN codelist
+                        bdms.stratigraphy
+                    INNER JOIN bdms.codelist
                         ON kind_id_cli = id_cli
-                    LEFT JOIN layer
+                    LEFT JOIN bdms.layer
                         ON id_sty_fk = id_sty
                     GROUP BY id_bho_fk, id_sty, id_cli, date_sty
                     ORDER BY date_sty DESC, id_sty DESC
@@ -201,7 +201,7 @@ class ListEditingBorehole(Action):
             SELECT
                 count(*) AS cnt
             FROM
-                borehole
+                bdms.borehole
 
             INNER JOIN (
                 SELECT
@@ -224,9 +224,9 @@ class ListEditingBorehole(Action):
                         started_wkf as started,
                         finished_wkf as finished
                     FROM
-                        workflow,
-                        roles,
-                        users
+                        bdms.workflow,
+                        bdms.roles,
+                        bdms.users
                     WHERE
                         id_rol = id_rol_fk
                     AND
@@ -241,7 +241,7 @@ class ListEditingBorehole(Action):
                 v.id_bho_fk = id_bho
 
             INNER JOIN
-                public.completness
+                bdms.completness
             ON
                 completness.id_bho = borehole.id_bho
         """

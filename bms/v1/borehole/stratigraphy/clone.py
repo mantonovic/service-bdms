@@ -9,7 +9,7 @@ class CloneStratigraphy(Action):
 
         id_sty = (
             await self.conn.fetchval("""
-                INSERT INTO public.stratigraphy(
+                INSERT INTO bdms.stratigraphy(
                     id_bho_fk,
                     kind_id_cli,
                     date_sty
@@ -19,7 +19,7 @@ class CloneStratigraphy(Action):
                     kind_id_cli,
                     now()
                 FROM
-                    stratigraphy
+                    bdms.stratigraphy
                 WHERE id_sty = $1
             RETURNING id_sty
             """, id)
@@ -27,7 +27,7 @@ class CloneStratigraphy(Action):
 
         # Copy layers
         await self.conn.execute(f"""
-            INSERT INTO public.layer(
+            INSERT INTO bdms.layer(
                 id_sty_fk,
                 depth_from_lay,
                 depth_to_lay,
@@ -99,7 +99,7 @@ class CloneStratigraphy(Action):
                 now(),
                 {user_id} as updater_lay
             FROM
-                public.layer
+                bdms.layer
             WHERE
                 id_sty_fk = $1
         """, id)

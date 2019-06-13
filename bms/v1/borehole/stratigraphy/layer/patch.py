@@ -48,7 +48,7 @@ class PatchLayer(Action):
                     column = 'notes_lay'
 
                 await self.conn.execute("""
-                    UPDATE public.layer
+                    UPDATE bdms.layer
                     SET
                         %s = $1,
                         update_lay = now(),
@@ -71,7 +71,7 @@ class PatchLayer(Action):
                     column = 'drilling_date_lay'
 
                 await self.conn.execute("""
-                    UPDATE public.layer
+                    UPDATE bdms.layer
                     SET
                         %s = to_date($1, 'YYYY-MM-DD'),
                         update_lay = now(),
@@ -184,7 +184,7 @@ class PatchLayer(Action):
                             SELECT
                                 schema_cli
                             FROM
-                                codelist
+                                bdms.codelist
                             WHERE id_cli = $1
                         """, value)):
                     raise Exception(
@@ -195,7 +195,7 @@ class PatchLayer(Action):
                     )
 
                 await self.conn.execute("""
-                    UPDATE public.layer
+                    UPDATE bdms.layer
                     SET
                         %s = $1,
                         update_lay = now(),
@@ -249,7 +249,7 @@ class PatchLayer(Action):
                     schema = 'custom.lit_pet_top_bedrock'
 
                 await self.conn.execute("""
-                    DELETE FROM public.layer_codelist
+                    DELETE FROM bdms.layer_codelist
                     WHERE id_lay_fk = $1
                     AND code_cli = $2
                 """, id, schema)
@@ -280,13 +280,13 @@ class PatchLayer(Action):
 
                     await self.conn.executemany("""
                         INSERT INTO
-                            public.layer_codelist (
+                            bdms.layer_codelist (
                                 id_lay_fk, id_cli_fk, code_cli
                             ) VALUES ($1, $2, $3)
                     """, [(id, v, schema) for v in value])
 
                     await self.conn.execute("""
-                        UPDATE public.layer
+                        UPDATE bdms.layer
                         SET
                             update_lay = now(),
                             updater_lay = $1

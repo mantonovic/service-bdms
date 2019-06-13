@@ -42,12 +42,12 @@ class ListWorkflows(Action):
                             ) t
                         ) as author
 
-                    FROM public.workflow
+                    FROM bdms.workflow
 
-                    INNER JOIN public.users as u
+                    INNER JOIN bdms.users as u
                         ON id_usr_fk = u.id_usr
 
-                    INNER JOIN public.roles as r
+                    INNER JOIN bdms.roles as r
                         ON id_rol_fk = r.id_rol
 
                     WHERE

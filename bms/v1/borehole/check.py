@@ -10,7 +10,7 @@ class CheckBorehole(Action):
             sql = """
                 SELECT EXISTS(
                     SELECT 1
-                    FROM borehole
+                    FROM bdms.borehole
                     WHERE original_name_bho = $1
                 ) AS exists
             """
@@ -18,7 +18,7 @@ class CheckBorehole(Action):
             sql = """
                 SELECT EXISTS(
                     SELECT 1
-                    FROM borehole
+                    FROM bdms.borehole
                     WHERE public_name_bho = $1
                 ) AS exists;
             """

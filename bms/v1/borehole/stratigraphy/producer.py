@@ -42,7 +42,7 @@ class StratigraphyProducerHandler(Producer):
                         SELECT
                             id_bho_fk
                         FROM
-                            public.stratigraphy
+                            bdms.stratigraphy
                         WHERE
                             id_sty = $1;
                     """, request['id'])

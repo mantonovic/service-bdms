@@ -32,7 +32,7 @@ class LayerProducerHandler(Producer):
                             SELECT
                                 id_bho_fk
                             FROM
-                                stratigraphy
+                                bdms.stratigraphy
                             WHERE
                                 id_sty = $1
                         """
@@ -46,8 +46,8 @@ class LayerProducerHandler(Producer):
                             SELECT
                                 id_bho_fk
                             FROM
-                                layer
-                            INNER JOIN stratigraphy
+                                bdms.layer
+                            INNER JOIN bdms.stratigraphy
                             ON id_sty_fk = id_sty
                             WHERE
                                 id_lay = $1

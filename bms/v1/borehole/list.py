@@ -69,10 +69,10 @@ class ListBorehole(Action):
                 status[array_length(status, 1)] as workflow,
                 status[array_length(status, 1)]  ->> 'role' as "role"
             FROM
-                borehole
+                bdms.borehole
 
             INNER JOIN
-                public.users as author
+                bdms.users as author
             ON
                 author_id = author.id_usr
 
@@ -97,9 +97,9 @@ class ListBorehole(Action):
                         started_wkf as started,
                         finished_wkf as finished
                     FROM
-                        workflow,
-                        roles,
-                        users
+                        bdms.workflow,
+                        bdms.roles,
+                        bdms.users
                     WHERE
                         id_rol = id_rol_fk
                     AND
@@ -116,7 +116,7 @@ class ListBorehole(Action):
 
         cntSql = """
             SELECT count(*) AS cnt
-            FROM borehole
+            FROM bdms.borehole
             INNER JOIN (
                 SELECT
                     id_bho_fk,
@@ -138,9 +138,9 @@ class ListBorehole(Action):
                         started_wkf as started,
                         finished_wkf as finished
                     FROM
-                        workflow,
-                        roles,
-                        users
+                        bdms.workflow,
+                        bdms.roles,
+                        bdms.users
                     WHERE
                         id_rol = id_rol_fk
                     AND

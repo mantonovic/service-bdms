@@ -17,9 +17,9 @@ class GetMunicipality(Action):
                         ST_Envelope(municipalities.geom), 2, 2
                     )::json as geom
                 FROM
-                    municipalities, (
+                    bdms.municipalities, (
                         SELECT distinct kantonsnum, name
-                        from cantons
+                        from bdms.cantons
                     ) as cantons
                 WHERE
                     municipalities.kantonsnum = cantons.kantonsnum

@@ -49,9 +49,9 @@ class ListStratigraphies(Action):
                     'YYYY-MM-DD'
                 ) as date
             FROM
-                stratigraphy
+                bdms.stratigraphy
 
-            INNER JOIN borehole
+            INNER JOIN bdms.borehole
             ON stratigraphy.id_bho_fk = id_bho
 
             INNER JOIN (
@@ -75,9 +75,9 @@ class ListStratigraphies(Action):
                         started_wkf as started,
                         finished_wkf as finished
                     FROM
-                        workflow,
-                        roles,
-                        users
+                        bdms.workflow,
+                        bdms.roles,
+                        bdms.users
                     WHERE
                         id_rol = id_rol_fk
                     AND
@@ -91,15 +91,15 @@ class ListStratigraphies(Action):
             ON
                 v.id_bho_fk = id_bho
 
-            INNER JOIN codelist AS lk
+            INNER JOIN bdms.codelist AS lk
             ON lk.id_cli = stratigraphy.kind_id_cli
         """
 
         cntSql = """
             SELECT count(*) AS cnt
-            FROM stratigraphy
+            FROM bdms.stratigraphy
 
-            INNER JOIN borehole
+            INNER JOIN bdms.borehole
             ON id_bho_fk = id_bho
             
             INNER JOIN (
@@ -123,9 +123,9 @@ class ListStratigraphies(Action):
                         started_wkf as started,
                         finished_wkf as finished
                     FROM
-                        workflow,
-                        roles,
-                        users
+                        bdms.workflow,
+                        bdms.roles,
+                        bdms.users
                     WHERE
                         id_rol = id_rol_fk
                     AND
