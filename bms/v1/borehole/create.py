@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from bms import EDIT
 from bms.v1.action import Action
-from bms.v1.workflow import CreateWorkflow
 
 
 class CreateBorehole(Action):
@@ -27,9 +26,15 @@ class CreateBorehole(Action):
             ) RETURNING id_bho
         """, user['id'], user['id'], id)
 
-        await (
-            CreateWorkflow(self.conn)
-        ).execute(bid, user, EDIT)
+        await self.conn.fetchval("""
+            INSERT INTO bdms.workflow(
+                id_bho_fk,
+                id_usr_fk,
+                id_rol_fk
+            ) VALUES (
+                $1, $2, $3
+            ) RETURNING id_wkf
+        """, bid, user['id'], EDIT)
 
         return {
             "id": bid
