@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+from bms import EDIT
 from bms.v1.action import Action
+from bms.v1.workflow import CreateWorkflow
 
 
 class CreateBorehole(Action):
@@ -24,6 +26,10 @@ class CreateBorehole(Action):
                 $1, $2, $3
             ) RETURNING id_bho
         """, user['id'], user['id'], id)
+
+        await (
+            CreateWorkflow(self.conn)
+        ).execute(bid, user, EDIT)
 
         return {
             "id": bid
