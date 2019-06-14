@@ -98,7 +98,7 @@ class GetLayer(Action):
                     COALESCE(
                         mcla104, '{{}}'::int[]
                     ) AS uscs_determination,
-                    layer.unconrocks_id_cli AS unconrocks,
+                    -- layer.unconrocks_id_cli AS unconrocks,
                     COALESCE(
                         mcla107, '{{}}'::int[]
                     ) AS debris,

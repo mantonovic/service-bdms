@@ -262,7 +262,7 @@ class PatchLayer(Action):
                             SELECT
                                 schema_cli
                             FROM
-                                codelist
+                                bdms.codelist
                             WHERE
                                 id_cli = ANY($2)
                             AND
@@ -299,5 +299,5 @@ class PatchLayer(Action):
         except PatchAttributeException as bmsx:
             raise bmsx
 
-        except Exception as ex:
+        except Exception:
             raise Exception("A server error occured while updating the layer")

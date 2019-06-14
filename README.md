@@ -13,15 +13,15 @@ sudo -u postgres createdb -E UTF8 bdms
 Create the tables:
 
 ```bash
-sudo -u postgres psql -d bdms -f db.sql
+sudo -u postgres psql -d bdms -f db/1_schema.sql
 ```
 
 Add default data:
 
 ```bash
-sudo -u postgres psql -d bdms -f data.sql
-sudo -u postgres psql -d bdms -f cantons.sql
-sudo -u postgres psql -d bdms -f municipalities.sql
+sudo -u postgres psql -d bdms -f db/2_data.sql
+sudo -u postgres psql -d bdms -f db/3_cantons.sql
+sudo -u postgres psql -d bdms -f db/4_municipalities.sql
 ```
 
 ### Python env
@@ -42,11 +42,7 @@ Setup developer environment
 python3 -m venv ./venv
 source venv/bin/activate
 pip3 install --upgrade pip
-pip3 install jsonschema \
-  pytest \
-  dateutils \
-  tornado \
-  asyncpg
+pip install -r requirements.txt
 ```
 
 Activate virtual environment
