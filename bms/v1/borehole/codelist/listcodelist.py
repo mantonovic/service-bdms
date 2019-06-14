@@ -12,8 +12,11 @@ class ListCodeList(Action):
                 bdms.codelist
         """)
         data = {}
+
+        # Default language
+        dl = 'en'
         for rec in recs:
-            val = await self.conn.fetchval("""
+            val = await self.conn.fetchval(f"""
                 SELECT
                     array_to_json(
                         array_agg(
@@ -38,11 +41,11 @@ class ListCodeList(Action):
                                 SELECT
                                     COALESCE(
                                         text_cli_de,
-                                        text_cli_en
+                                        text_cli_{dl}
                                     ) as text,
                                     COALESCE(
                                         description_cli_de,
-                                        description_cli_en
+                                        description_cli_{dl}
                                     ) as descr
                             ) t
                         ) as de,
@@ -52,11 +55,11 @@ class ListCodeList(Action):
                                 SELECT
                                     COALESCE(
                                         text_cli_fr,
-                                        text_cli_en
+                                        text_cli_{dl}
                                     ) as text,
                                     COALESCE(
                                         description_cli_fr,
-                                        description_cli_en
+                                        description_cli_{dl}
                                     ) as descr
                             ) t
                         ) as fr,
@@ -66,11 +69,11 @@ class ListCodeList(Action):
                                 SELECT
                                     COALESCE(
                                         text_cli_it,
-                                        text_cli_en
+                                        text_cli_{dl}
                                     ) as text,
                                     COALESCE(
                                         description_cli_it,
-                                        description_cli_en
+                                        description_cli_{dl}
                                     ) as descr
                             ) t
                         ) as it,
