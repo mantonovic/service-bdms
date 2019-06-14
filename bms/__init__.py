@@ -50,3 +50,4 @@ from bms.v1.borehole import PatchBorehole
 from bms.v1.geoapi import ListMunicipality
 from bms.v1.geoapi import ListCanton
 from bms.v1.geoapi import Wmts
+from bms.v1.geoapi import Wms
