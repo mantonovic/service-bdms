@@ -63,8 +63,6 @@ class BaseHandler(web.RequestHandler):
 
         auth_header = self.request.headers.get('Authorization')
 
-        # print(f'Authorization: {auth_header}')
-
         if auth_header is None or not auth_header.startswith('Basic '):
             self.set_header('WWW-Authenticate', 'Basic realm=BDMS')
             self.set_status(401)

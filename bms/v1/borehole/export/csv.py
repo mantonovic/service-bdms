@@ -532,7 +532,6 @@ class ExportCsv(Action):
             for row in data:
                 r = []
                 for col in cols:
-                    print(col, type(row[col]))
                     if isinstance(row[col], list):
                         r.append(",".join(str(x) for x in row[col]))
                     else:

@@ -130,7 +130,6 @@ class Action():
                     borehole.id_bho = %s
                 """ % self.getIdx())
             where.append("(%s)" % " OR ".join(_or))
-            # print(where)
 
         else:
 

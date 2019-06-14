@@ -41,8 +41,6 @@ class Lock(Action):
             LIMIT 1
         """, id)
 
-        print("Found: ", row)
-
         if row[1] is None:
             await self.conn.execute("""
                 UPDATE bdms.workflow SET

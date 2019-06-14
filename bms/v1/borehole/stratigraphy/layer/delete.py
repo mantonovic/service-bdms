@@ -35,9 +35,6 @@ class DeleteLayer(Action):
 
             cnt = len(layers['data'])
 
-            print(layers)
-            print(f"layers: {cnt}")
-
             for index in range(0, cnt):
 
                 layer = layers['data'][index]

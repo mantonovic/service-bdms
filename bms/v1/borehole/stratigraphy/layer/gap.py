@@ -37,16 +37,12 @@ class GapLayer(Action):
 
             layer = layers['data'][index]
 
-            print(layer)
-
             if layer['id'] == id:
 
                 upper = None
 
                 if index > 0:
                     upper = layers['data'][(index-1)]
-
-                print(upper)
 
                 if then == 0:  # Fill with undefined
 

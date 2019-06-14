@@ -22,9 +22,7 @@ class Wms(Viewer):
             print(f"Fetching WMS GetCapability: {url}")
             response = await http_client.fetch(
                 HTTPRequest(
-                    url=url,
-                    # auth_username='user_br82a',
-                    # auth_password='co4l94qqzf23ne9m'
+                    url=url
                 )
             )
 
