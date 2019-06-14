@@ -53,7 +53,8 @@ if __name__ == "__main__":
         CodeListHandler,
         MunicipalityHandler,
         CantonHandler,
-        Wmts
+        Wmts,
+        Wms
     )
 
     AsyncIOMainLoop().install()
@@ -92,7 +93,8 @@ if __name__ == "__main__":
         (r'/api/v1/geoapi/municipality', MunicipalityHandler),
         (r'/api/v1/geoapi/canton', CantonHandler),
         (r'/api/v1/geoapi/location', GeoapiHandler),
-        (r"/api/v1/geoapi/wmts", Wmts)
+        (r"/api/v1/geoapi/wmts", Wmts),
+        (r"/api/v1/geoapi/wms/swisstopo", Wms)
 
     ], **settings)
 

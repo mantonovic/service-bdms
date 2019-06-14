@@ -255,7 +255,8 @@ class PatchLayer(Action):
                 """, id, schema)
 
                 if len(value) > 0:
-                    # Check if domain(s) is(are) extracted from the correct schema
+                    # Check if domain(s) is(are) extracted from the
+                    # correct schema
                     check = await self.conn.fetchval("""
                         SELECT COALESCE(count(schema_cli), 0) = $1
                         FROM (
@@ -269,6 +270,7 @@ class PatchLayer(Action):
                                 schema_cli = $3
                         ) AS c
                     """, len(value), value, schema)
+
                     if check is False:
                         raise Exception(
                             "One ore more attribute ids %s are "
