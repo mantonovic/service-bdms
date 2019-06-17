@@ -27,7 +27,6 @@ from bms.v1.borehole.stratigraphy.layer.producer import LayerProducerHandler
 from bms.v1.borehole.stratigraphy.layer.viewer import LayerViewerHandler
 
 from bms.v1.setting.handler import SettingHandler
-from bms.v1.user.handler import UserHandler
 
 from bms.v1.borehole.project.handler import ProjectHandler
 from bms.v1.borehole.codelist.handler import CodeListHandler
@@ -51,3 +50,15 @@ from bms.v1.geoapi import ListMunicipality
 from bms.v1.geoapi import ListCanton
 from bms.v1.geoapi import Wmts
 from bms.v1.geoapi import Wms
+
+# User actions
+from bms.v1.user.handler import UserHandler
+from bms.v1.user.admin import AdminHandler
+from bms.v1.user import ListUsers
+from bms.v1.user import CheckUsername
+from bms.v1.user import CreateUser
+
+# Workgroup actions
+from bms.v1.user.workgrpup.admin import WorkgroupAdminHandler
+from bms.v1.user.workgrpup import ListWorkgroups
+from bms.v1.user.workgrpup import CreateWorkgroup

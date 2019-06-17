@@ -29,6 +29,8 @@ if __name__ == "__main__":
         # user handlers
         SettingHandler,
         UserHandler,
+        AdminHandler,
+        WorkgroupAdminHandler,
 
         # Borehole handlers
         BoreholeViewerHandler,
@@ -70,6 +72,9 @@ if __name__ == "__main__":
         # Borehole handlers
         (r'/api/v1/setting', SettingHandler),
         (r'/api/v1/user', UserHandler),
+        (r'/api/v1/user/edit', AdminHandler),
+
+        (r'/api/v1/user/workgroup/edit', WorkgroupAdminHandler),
 
         # Borehole handlers
         (r'/api/v1/borehole', BoreholeViewerHandler),
