@@ -77,7 +77,7 @@ class BaseHandler(web.RequestHandler):
             async with self.pool.acquire() as conn:
                 val = await conn.fetchval("""
                     SELECT row_to_json(t)
-                        FROM (
+                    FROM (
                         SELECT
                             id_usr as "id",
                             username,
@@ -117,18 +117,20 @@ class BaseHandler(web.RequestHandler):
                                         name_grp as name
                                 ) t
                             ) as group,
-                            w.ws as workgroups,
+                            w.ws AS workgroups,
                             COALESCE(
                                 w.wgps, '{}'::int[]
                             ) AS wid,
-                            rl.roles as roles
+                            COALESCE(
+                               rl.roles, '{}'::character varying[]
+                            ) AS roles
                         FROM
                             bdms.users
 
                         LEFT JOIN bdms.groups
                             ON id_grp = id_grp_fk
 
-                        INNER JOIN (
+                        LEFT JOIN (
                             SELECT
                                 r.id_usr_fk,
                                 array_agg(r.name_rol) AS roles
@@ -178,7 +180,7 @@ class BaseHandler(web.RequestHandler):
                         ON w.id_usr_fk = id_usr
 
                         WHERE username = $1
-                        AND password = $2
+                        AND password = crypt($2, password)
                     ) as t
                 """, username, password)
 

@@ -5,7 +5,8 @@ from bms import (
 from bms.v1.handlers.admin import Admin
 from bms.v1.user import (
     ListUsers,
-    CreateUser
+    CreateUser,
+    UpdateUser
 )
 
 
@@ -14,14 +15,14 @@ class AdminHandler(Admin):
 
         action = request.pop('action', None)
 
-        if action in ['LIST', 'CREATE']:
+        if action in ['LIST', 'CREATE', 'UPDATE']:
 
             async with self.pool.acquire() as conn:
 
                 exe = None
 
                 if action in [
-                    'LIST', 'CREATE'
+                    'LIST', 'CREATE', 'UPDATE'
                 ]:
                     if self.user['admin'] is False: 
                         raise AuthorizationException() 
@@ -31,6 +32,9 @@ class AdminHandler(Admin):
 
                 elif action == 'CREATE':
                     exe = CreateUser(conn)
+
+                elif action == 'UPDATE':
+                    exe = UpdateUser(conn)
 
                 if exe is not None:
                     return (

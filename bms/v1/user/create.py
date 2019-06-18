@@ -24,7 +24,7 @@ class CreateUser(Action):
                         False,
                         True,
                         $1,
-                        $2,
+                        crypt($2, gen_salt('md5')),
                         $3,
                         $4,
                         $5

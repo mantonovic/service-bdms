@@ -282,7 +282,6 @@ class ExportHandler(Viewer):
 
                                 pdfs.append(a.pdf)
 
-                    
                     def append_pdf(input, output):
                         [
                             output.addPage(
