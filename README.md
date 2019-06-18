@@ -24,19 +24,9 @@ sudo -u postgres psql -d bdms -f db/3_cantons.sql
 sudo -u postgres psql -d bdms -f db/4_municipalities.sql
 ```
 
-### Python env
+## Run Server
 
-
-
-### Run Server
-
-```bashm
-python3 bms/main.py 
-```
-
-## Developer corner
-
-Setup developer environment
+### Setup virtual environment
 
 ```bash
 python3 -m venv ./venv
@@ -45,14 +35,14 @@ pip3 install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Activate virtual environment
+### Activate virtual environment
 
 ```bash
 source venv/bin/activate
 ```
 
-Run Server
+### Run Server
 
 ```bashm
-python3 bms/main.py -c assets/config.json
+python bms/main.py --pg_database=bdms
 ```
