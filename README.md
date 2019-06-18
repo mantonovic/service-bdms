@@ -2,7 +2,7 @@
 
 ## Installation
 
-### Databasa initilization
+### Database initilization
 
 Create the database
 
@@ -45,4 +45,15 @@ source venv/bin/activate
 
 ```bashm
 python bms/main.py --pg_database=bdms
+```
+
+Config parameters:
+
+```
+--pg-database      PostgrSQL database name (default bms)
+--pg-host          PostgrSQL database host (default localhost)
+--pg-password      PostgrSQL user password (default postgres)
+--pg-port          PostgrSQL database port (default 5432)
+--pg-user          PostgrSQL database user (default postgres)
+--port             Tornado Web port (default 8888)
 ```
