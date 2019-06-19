@@ -85,15 +85,26 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io
 Git install:
 
 ```bash
-apt-get install git
+sudo apt-get install git
 ```
 
 ### Build image and run docker
 
-```bash
-sudo docker build -t swisstopo/bdms:0.0.0 ./config
-```
+Clone server repository:
 
 ```bash
-sudo docker run -d --name bdmsContainer -p 80:80 swisstopo/bdms:0.0.0
+git clone https://github.com/geoadmin/bdms-service
+cd bdms-service
+```
+
+Build Docker image:
+
+```bash
+ sudo docker build -t swisstopo/bdms:1.0.0 ./config
+```
+
+Run Docker container:
+
+```bash
+sudo docker run -d --name bdmsContainer -p 80:80 swisstopo/bdms:1.0.0
 ```
