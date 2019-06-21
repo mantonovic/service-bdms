@@ -10,7 +10,8 @@ FROM ubuntu
 LABEL maintainer="davide.zanin@supsi.ch"
 
 # Setting default args that become an env variable,
-# you can passing it during build with --build-arg RELEASE=x.x.x
+# you can passing it during build with --build-arg 
+# ( e.g --build-arg SERVER_RELEASE=x.x.x)
 # Setting Release, Time Zone and DB parameters
 ARG FEND_RELEASE=1.0.0
 ARG SERVER_RELEASE=1.0.0
