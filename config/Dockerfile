@@ -19,9 +19,10 @@ ARG A_DB_USER='postgres'
 ARG A_DB_PASS='postgres'
 ARG A_DB_NAME='bms'
 ARG A_TZ='Europe/Zurich'
-#ARG A_REPO_PATH='git@gitlab.com:davideZanin' https://github.com/dzanin/bdms-service.git
-#ARG A_FEND_NAME_REPO='bms-webapp'
-#ARG A_SERVER_NAME_REPO='server'
+# Gitlab repo
+# ARG A_REPO_PATH='git@gitlab.com:davideZanin'
+# ARG A_FEND_NAME_REPO='bms-webapp'
+# ARG A_SERVER_NAME_REPO='server'
 ARG A_REPO_PATH='https://github.com/dzanin'
 ARG A_FEND_NAME_REPO='bdms-web'
 ARG A_SERVER_NAME_REPO='bdms-service'
@@ -79,7 +80,7 @@ RUN cd ${FEND_NAME_REPO} &&\
     npm install axios &&\
     npm run build 
 
-    #Use with github tag-version
+    # Use with github tag-version
     # apt-get -y install wget &&\
     # wget ${REPO_PATH}/${SERVER_NAME_REPO}/archive/${SERVER_RELEASE_VERSION}.tar.gz &&\
     # mv ${SERVER_RELEASE_VERSION}.tar.gz server.tar.gz &&\
@@ -88,7 +89,7 @@ RUN cd ${FEND_NAME_REPO} &&\
     # tar xvzf server.tar.gz &&\
     # tar xvzf html.tar.gz &&\
 
-# create folders and move cloned file to /usr/src/swisstopo in html or server location
+# Create folders and move cloned file to /usr/src/swisstopo in html or server location
 RUN cd .. &&\
     mkdir -p /usr/src/swisstopo/server &&\
     mkdir -p /usr/src/swisstopo/html
@@ -108,7 +109,8 @@ WORKDIR /usr/src/swisstopo/server
 RUN cd db &&\
     unzip sql.zip
 
-#COPY bdms.sql /usr/src/swisstopo/server/config/
+# Passing sql from host
+# COPY bdms.sql /usr/src/swisstopo/server/config/
 
 # Install requirements, add user/group docker
 RUN python3.7 -m pip install -r requirements.txt &&\
@@ -139,6 +141,7 @@ RUN /etc/init.d/postgresql start &&\
 #     psql -U postgres -d ${DB_NAME} -a -f db/2_data.sql &&\
 #     psql -U postgres -d ${DB_NAME} -a -f db/3_cantons.sql &&\
 #     psql -U postgres -d ${DB_NAME} -a -f db/4_municipalities.sql
+  #  DB useful commands
   #  psql -U postgres -d ${DB_NAME} -a -f db/bdms.sql
   #  PGPASSWORD=${DB_PASS} pg_restore -h localhost -p 5432 -U ${DB_USER} -d ${DB_NAME} -v "config/bdms.backup" -w
   #  pg_restore -U postgres -d ${DB_NAME} -a -f config/bdms.backup
@@ -153,14 +156,12 @@ USER root
 # Configure nginx: add proxy.conf, add an available site, create a like to enable site
 RUN chmod +x config/my_wrapper_script.sh &&\
     rm /etc/nginx/sites-enabled/default &&\
-#    chown -R $USER:$USER /var/www/example.com/html &&\
-#    mv html/index.html /var/www/example.com/html/ &&\
+#   chown -R $USER:$USER /var/www/example.com/html &&\
+#   mv html/index.html /var/www/example.com/html/ &&\
     chown -R $USER:$USER /usr/src/swisstopo/html &&\
     mv config/${SITE} /etc/nginx/sites-available/ &&\
     mv config/proxy.conf /etc/nginx/proxy.conf &&\
     ln -s /etc/nginx/sites-available/${SITE} /etc/nginx/sites-enabled/
-
-#ENTRYPOINT [ "./my_wrapper_script.sh" ]
 
 # Expose port 80
 EXPOSE 80
