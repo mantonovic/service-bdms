@@ -6,3 +6,5 @@ tornado
 PyPdf2
 reportlab
 pyshp
+svglib
+svg2rlg
