@@ -1,9 +1,9 @@
 # Build with (x.x.x means release version number):
-# sudo docker build -t dockerhubContainer/bms:x.x.x ./config 
+# sudo docker build -t dockerhubContainer/bdms:x.x.x ./config 
 # Test with:
-# sudo docker run -it --rm --name bmsContainer -p 80:80 dockerhubContainer/bms:x.x.x /bin/sh 
+# sudo docker run -it --rm --name bmsContainer -p 80:80 dockerhubContainer/bdms:x.x.x /bin/sh 
 # Run with:
-# sudo docker run -d --name bmsContainer -p 80:80 dockerhubContainer/bms:x.x.x
+# sudo docker run -d --name bmsContainer -p 80:80 dockerhubContainer/bdms:x.x.x
 
 FROM ubuntu
 
