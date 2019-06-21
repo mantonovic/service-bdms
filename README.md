@@ -97,14 +97,14 @@ git clone https://github.com/geoadmin/bdms-service
 cd bdms-service
 ```
 
-Build Docker image:
+Build Docker image (x.x.x is the release number, start with 1.0.0):
 
 ```bash
- sudo docker build -t swisstopo/bdms:1.0.0 ./config
+ sudo docker build -t swisstopo/bdms:x.x.x ./config
 ```
 
-Run Docker container:
+Run Docker container (x.x.x is the release number, start with 1.0.0):
 
 ```bash
-sudo docker run -d --name bdmsContainer -p 80:80 swisstopo/bdms:1.0.0
+sudo docker run -d --name bdmsContainer -p 80:80 swisstopo/bdms:x.x.x
 ```
