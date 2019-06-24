@@ -93,8 +93,8 @@ sudo apt-get install git
 Clone server repository:
 
 ```bash
-git clone https://github.com/geoadmin/bdms-service
-cd bdms-service
+git clone https://github.com/geoadmin/service-bdms
+cd service-bdms
 ```
 
 Build Docker image (x.x.x is the release number, start with 1.0.0):

@@ -26,8 +26,8 @@ ARG A_TZ='Europe/Zurich'
 # Github fork
 # ARG A_REPO_PATH='https://github.com/dzanin'
 ARG A_REPO_PATH='https://github.com/geoadmin'
-ARG A_FEND_NAME_REPO='bdms-web'
-ARG A_SERVER_NAME_REPO='bdms-service'
+ARG A_FEND_NAME_REPO='web-bdms'
+ARG A_SERVER_NAME_REPO='service-bdms'
 ARG A_SITE='swisstopo.ch'
 
 ENV FEND_RELEASE_VERSION=${FEND_RELEASE}
