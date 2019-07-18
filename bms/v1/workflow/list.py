@@ -20,11 +20,11 @@ class ListWorkflows(Action):
                         r.name_rol as "role",
                         to_char(
                             started_wkf,
-                            'YYYY-MM-DD"T"HH24:MI:SS'
+                            'YYYY-MM-DD"T"HH24:MI:SSOF'
                         ) as started,
                         to_char(
                             finished_wkf,
-                            'YYYY-MM-DD"T"HH24:MI:SS'
+                            'YYYY-MM-DD"T"HH24:MI:SSOF'
                         ) as finished,
                         COALESCE(
                             notes_wkf, ''

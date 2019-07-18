@@ -28,7 +28,7 @@ class GetLayer(Action):
                                 creator.username as username,
                                 to_char(
                                     creation_lay,
-                                    'YYYY-MM-DD"T"HH24:MI:SS'
+                                    'YYYY-MM-DD"T"HH24:MI:SSOF'
                                 ) as date
                         ) t
                     ) as creator,
@@ -40,7 +40,7 @@ class GetLayer(Action):
                                 updater.username as username,
                                 to_char(
                                     update_lay,
-                                    'YYYY-MM-DD"T"HH24:MI:SS'
+                                    'YYYY-MM-DD"T"HH24:MI:SSOF'
                                 ) as date
                         ) t
                     ) as updater,
