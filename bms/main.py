@@ -107,5 +107,5 @@ if __name__ == "__main__":
     application.pool = ioloop.run_until_complete(get_conn())
 
     http_server = HTTPServer(application)
-    http_server.listen(options.port, 'localhost')
+    http_server.listen(options.port)
     ioloop.run_forever()

@@ -57,3 +57,54 @@ Config parameters:
 --pg-user          PostgrSQL database user (default postgres)
 --port             Tornado Web port (default 8888)
 ```
+
+## Run with docker
+
+### Installation
+
+Docker install:
+
+```bash
+sudo apt-get remove docker docker-engine docker.io containerd runc
+sudo apt-get update
+sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+```
+
+Git install:
+
+```bash
+sudo apt-get install git
+```
+
+### Build image and run docker
+
+Clone server repository:
+
+```bash
+git clone https://github.com/geoadmin/service-bdms
+cd service-bdms
+```
+
+Build Docker image (x.x.x is the release number, start with 1.0.0):
+
+```bash
+ sudo docker build -t swisstopo/bdms:x.x.x ./config
+```
+
+Run Docker container (x.x.x is the release number, start with 1.0.0):
+
+```bash
+sudo docker run -d --name bdmsContainer -p 80:80 swisstopo/bdms:x.x.x
+```
