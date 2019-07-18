@@ -44,7 +44,7 @@ source venv/bin/activate
 ### Run Server
 
 ```bashm
-python bms/main.py --pg_database=bdms
+python bms/main.py --pg-database=bdms
 ```
 
 Config parameters:

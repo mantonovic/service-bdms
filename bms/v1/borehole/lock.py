@@ -5,23 +5,19 @@ from bms import (
     Locked,
     NotFound
 )
-from datetime import datetime
-from datetime import timedelta
 
 
 class Lock(Action):
 
     async def execute(self, id, user):
 
-        now = datetime.now()
-
         # Lock row for current user
         await self.conn.execute("""
             UPDATE bdms.borehole SET
-                locked_at = $1,
-                locked_by = $2
-            WHERE id_bho = $3;
-        """, now, user['id'], id)
+                locked_at = now(),
+                locked_by = $1
+            WHERE id_bho = $2;
+        """, user['id'], id)
 
         # also start workflow if not yet started
         row = await self.conn.fetchrow("""
@@ -59,7 +55,7 @@ class Lock(Action):
                         as fullname,
                     to_char(
                         borehole.locked_at,
-                        'YYYY-MM-DD"T"HH24:MI:SS'
+                        'YYYY-MM-DD"T"HH24:MI:SSOF'
                     ) as date
                 FROM
                     bdms.borehole

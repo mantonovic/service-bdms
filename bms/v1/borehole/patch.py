@@ -378,7 +378,7 @@ class PatchBorehole(Action):
                                         as fullname,
                                     to_char(
                                         borehole.locked_at,
-                                        'YYYY-MM-DD"T"HH24:MI:SS'
+                                        'YYYY-MM-DD"T"HH24:MI:SSOF'
                                     ) as date
                             ) AS t
                         ) as lock,
@@ -392,7 +392,7 @@ class PatchBorehole(Action):
                                         as fullname,
                                     to_char(
                                         update_bho,
-                                        'YYYY-MM-DD"T"HH24:MI:SS'
+                                        'YYYY-MM-DD"T"HH24:MI:SSOF'
                                     ) as date
                             ) t
                         ) as updater

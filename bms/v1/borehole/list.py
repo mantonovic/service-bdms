@@ -38,7 +38,7 @@ class ListBorehole(Action):
                             author.username as username,
                             to_char(
                                 created_bho,
-                                'YYYY-MM-DD"T"HH24:MI:SS'
+                                'YYYY-MM-DD"T"HH24:MI:SSOF'
                             ) as date
                     ) t
                 ) as author,
