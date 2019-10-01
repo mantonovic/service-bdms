@@ -92,6 +92,7 @@ class BaseHandler(web.RequestHandler):
                                 settings_usr::json,
                                 '{'
                                 '   "filter": {},'
+                                '   "efilter": {},'
                                 '   "boreholetable": {'
                                 '        "orderby": "original_name",'
                                 '        "direction": "ASC"'
