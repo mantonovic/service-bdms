@@ -37,7 +37,16 @@ class PatchSetting(Action):
 
             # Used when reordering overlays
             goingUp = False
-            reordering = isinstance(key, list) and key[-1] == 'position'
+            reordering = (
+                isinstance(key, list) and
+                key[-1] == 'position'
+            )
+            removingOverlay = (
+                isinstance(key, str) and
+                tree in ['map.explorer', 'map.editor'] and
+                value is None
+            )
+            deleted = None
 
             if tmp is not None:
                 for idx in range(0, l):
@@ -45,11 +54,12 @@ class PatchSetting(Action):
                         tmp[pathList[idx]] = {}
                     elif idx == (l-1):
                         if value is None:
+                            deleted = tmp[pathList[idx]]
                             del tmp[pathList[idx]]
                             break
                         else:
                             if (
-                                reordering is True and
+                                reordering and
                                 tmp[pathList[idx]] < value
                             ):
                                 goingUp = True
@@ -58,7 +68,7 @@ class PatchSetting(Action):
                     tmp = tmp[pathList[idx]]
 
                 # if reordering overlays position
-                if reordering is True:
+                if reordering:
                     pathList = tree.split('.')
                     l = len(pathList)
                     tmp = setting
@@ -68,10 +78,23 @@ class PatchSetting(Action):
                     for Identifier in tmp:
                         layer = tmp[Identifier]
                         if Identifier != key[0] and layer['position'] == value:
-                            if goingUp is True:
+                            if goingUp:
                                 layer['position'] -= 1
                             else:
                                 layer['position'] += 1
+
+                elif removingOverlay:
+                    pathList = tree.split('.')
+                    l = len(pathList)
+                    tmp = setting
+
+                    for idx in range(0, l):
+                        tmp = tmp[pathList[idx]]
+
+                    for Identifier in tmp:
+                        layer = tmp[Identifier]
+                        if layer['position'] > deleted['position']:
+                            layer['position'] -= 1
 
             else:
                 setting = {
