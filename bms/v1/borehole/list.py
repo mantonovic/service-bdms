@@ -60,7 +60,9 @@ class ListBorehole(Action):
                     select row_to_json(t)
                     FROM (
                         SELECT
-                            status_id_cli as status
+                            status_id_cli as status,
+                            purpose_id_cli as purpose,
+                            top_bedrock_bho as top_bedrock
                     ) t
                 ) as extended,
                 /*
