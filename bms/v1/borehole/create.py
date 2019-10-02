@@ -15,16 +15,27 @@ class CreateBorehole(Action):
         if permit is False:
             raise Exception("Not permitted action")
 
+        srs = await self.conn.fetchval("""
+            SELECT id_cli
+            FROM
+                bdms.codelist
+            WHERE
+                schema_cli = 'srs'
+            AND
+                code_cli = '2056'
+        """)
+
         bid = await self.conn.fetchval("""
             INSERT INTO bdms.borehole(
                 author_id,
                 updater_bho,
-                id_wgp_fk
+                id_wgp_fk,
+                srs_id_cli
             )
             VALUES (
-                $1, $2, $3
+                $1, $2, $3, $4
             ) RETURNING id_bho
-        """, user['id'], user['id'], id)
+        """, user['id'], user['id'], id, srs)
 
         await self.conn.fetchval("""
             INSERT INTO bdms.workflow(
