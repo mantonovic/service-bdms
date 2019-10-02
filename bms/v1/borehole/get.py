@@ -16,7 +16,7 @@ class GetBorehole(Action):
             )
 
         sql_lock = ""
-        if with_lock is True:
+        if with_lock:
             sql_lock = f"""
                 CASE
                     WHEN (

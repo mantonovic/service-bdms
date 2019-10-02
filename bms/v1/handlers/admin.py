@@ -6,7 +6,7 @@ class Admin(Producer):
 
     def authorize(self):
 
-        if self.user['admin'] is True:
+        if self.user['admin']:
             return
 
         raise AuthorizationException()

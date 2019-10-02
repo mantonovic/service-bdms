@@ -42,7 +42,7 @@ class PatchStartigraphy(Action):
                         f"Value of field {field} is not a boolean"
                     )
 
-                if value is True:
+                if value:
                     # Reset all others stratigraphy to false
 
                     id_bho = await self.conn.fetchval("""
