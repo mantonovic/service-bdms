@@ -77,7 +77,9 @@ class ListCodeList(Action):
                                     ) as descr
                             ) t
                         ) as it,
-					    conf_cli as conf
+					    conf_cli as conf,
+                        path_cli::text as path,
+                        nlevel(path_cli) as level
                     FROM
                         bdms.codelist
                     WHERE

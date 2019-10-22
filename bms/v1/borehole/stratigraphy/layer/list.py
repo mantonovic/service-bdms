@@ -35,7 +35,8 @@ class ListLayers(Action):
                         ELSE elevation_z_bho - depth_to_lay
                     END AS msm_to,
                     lithostratigraphy_id_cli as lithostratigraphy,
-                    layer.lithology_id_cli as lithology
+                    layer.lithology_id_cli as lithology,
+                    layer.chronostratigraphy_id_cli AS chronostratigraphy
                     /*,
                     SUM(depth_to_lay)
                         OVER (ORDER BY depth_from_lay, id_lay ASC) AS depth*/
