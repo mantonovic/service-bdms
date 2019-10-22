@@ -46,8 +46,6 @@ class CreateLayer(Action):
             # Bedrock is not inserted
             if bedrock is None:
 
-                print("Bedrock not inserted")
-
                 # Just find the deepest inserted layer
                 depth_from = await self.conn.fetchval("""
                     SELECT
@@ -64,14 +62,10 @@ class CreateLayer(Action):
             # Only Bedrock is inserted and start from the surface
             elif cnt == 1 and bedrock[0] == 0:
 
-                print("Only Bedrock is inserted")
-
                 depth_from = bedrock[1]
 
             # Bedrock is inserted with some other layers
             elif cnt > 1:
-
-                print(f"Bedrock is inserted with {cnt-1} other layers")
 
                 # Check if there is space over the bedrock
                 row = await self.conn.fetchrow("""
@@ -94,18 +88,12 @@ class CreateLayer(Action):
                     LIMIT 1
                 """, id)
 
-                print(row, bedrock[0])
-
                 # space found
                 if row is not None and row[0] < bedrock[0]:
-
-                    print(f"Free space found between {row[0]} and {bedrock[0]}")
                     depth_from = row[0]
 
                 # There are some layers but not over the bedrock
                 elif row is None and bedrock[0] > 0:
-
-                    print(f"Free space found between 0 and {bedrock[0]}")
                     depth_from = 0
 
                 # Space not present
