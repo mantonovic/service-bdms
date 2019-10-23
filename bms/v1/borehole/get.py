@@ -138,7 +138,9 @@ class GetBorehole(Action):
                                     ate, '{{}}'::int[]
                                 ) AS attributes_to_edit,
                                 mistakes_bho as mistakes,
-                                remarks_bho as remarks
+                                COALESCE(
+                                    remarks_bho, ''
+                                ) as remarks
                         ) t
                     ) as custom,
                     stratigraphy as stratigraphy,
