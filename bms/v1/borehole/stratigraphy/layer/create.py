@@ -35,10 +35,12 @@ class CreateLayer(Action):
                     l.id_sty_fk = s.id_sty
                 AND
                     s.id_bho_fk = b.id_bho
+                /*
                 AND
                     l.chronostratigraphy_id_cli = b.chronostrat_id_cli
                 AND
                     l.lithology_id_cli = b.lithology_id_cli
+                */
                 AND
                     l.depth_from_lay = b.top_bedrock_bho
             """, id)

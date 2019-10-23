@@ -11,7 +11,7 @@ class AddBedrock(Action):
                 b.id_bho,
                 b.top_bedrock_bho,
                 b.chronostrat_id_cli,
-                b.lithology_id_cli, -- ok
+                b.lithology_id_cli,
                 b.lithostrat_id_cli
             FROM
                 bdms.stratigraphy as s,
@@ -35,7 +35,7 @@ class AddBedrock(Action):
                         id_sty_fk, creator_lay, updater_lay,
                         depth_from_lay,
                         chronostratigraphy_id_cli,
-                        lithology_id_cli, -- ok
+                        lithology_id_cli,
                         lithostratigraphy_id_cli,
                         last_lay
                     )

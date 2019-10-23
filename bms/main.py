@@ -57,7 +57,8 @@ if __name__ == "__main__":
         MunicipalityHandler,
         CantonHandler,
         Wmts,
-        Wms
+        Wms,
+        # GetFeature
     )
 
     AsyncIOMainLoop().install()
@@ -100,7 +101,8 @@ if __name__ == "__main__":
         (r'/api/v1/geoapi/canton', CantonHandler),
         (r'/api/v1/geoapi/location', GeoapiHandler),
         (r"/api/v1/geoapi/wmts", Wmts),
-        (r"/api/v1/geoapi/wms/swisstopo", Wms)
+        (r"/api/v1/geoapi/wms/swisstopo", Wms),
+        # (r"/api/v1/geoapi/getfeature", GetFeature)
 
     ], **settings)
 

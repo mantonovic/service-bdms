@@ -50,6 +50,7 @@ from bms.v1.geoapi import ListMunicipality
 from bms.v1.geoapi import ListCanton
 from bms.v1.geoapi import Wmts
 from bms.v1.geoapi import Wms
+# from bms.v1.geoapi import GetFeature
 
 # User actions
 from bms.v1.user.handler import UserHandler
