@@ -8,6 +8,7 @@ PUBLIC = 4
 
 from bms.v1.basehandler import BaseHandler
 from bms.v1.exceptions import AuthorizationException
+from bms.v1.exceptions import WorkgroupFreezed
 from bms.v1.exceptions import Locked
 from bms.v1.exceptions import NotFound
 

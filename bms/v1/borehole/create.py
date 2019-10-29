@@ -7,14 +7,6 @@ class CreateBorehole(Action):
 
     async def execute(self, id, user):
 
-        permit = False
-        for w in user['workgroups']:
-            if w['id'] == id and 'EDIT' in w['roles']:
-                permit = True
-
-        if permit is False:
-            raise Exception("Not permitted action")
-
         srs = await self.conn.fetchval("""
             SELECT id_cli
             FROM

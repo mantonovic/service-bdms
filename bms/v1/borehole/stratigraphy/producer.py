@@ -64,6 +64,7 @@ class StratigraphyProducerHandler(Producer):
 
                 elif action == 'CREATE':
                     exe = CreateStratigraphy(conn)
+                    request['user_id'] = self.user['id']
 
                 elif action == 'DELETE':
                     exe = DeleteStratigraphy(conn)

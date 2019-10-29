@@ -2,7 +2,8 @@
 from bms import (
     Locked,
     EDIT,
-    AuthorizationException
+    AuthorizationException,
+    WorkgroupFreezed
 )
 from bms.v1.handlers import Producer
 from bms.v1.borehole import (
@@ -29,17 +30,18 @@ class BoreholeProducerHandler(Producer):
         action = request.pop('action', None)
 
         if action in [
-                'CREATE',
-                'LOCK',
-                'UNLOCK',
-                'EDIT',
-                'DELETE',
-                'DELETELIST',
-                'PATCH',
-                'MULTIPATCH',
-                'CHECK',
-                'LIST',
-                'IDS']:
+            'CREATE',
+            'LOCK',
+            'UNLOCK',
+            'EDIT',
+            'DELETE',
+            'DELETELIST',
+            'PATCH',
+            'MULTIPATCH',
+            'CHECK',
+            'LIST',
+            'IDS'
+        ]:
 
             async with self.pool.acquire() as conn:
 
@@ -50,6 +52,7 @@ class BoreholeProducerHandler(Producer):
                     'UNLOCK',
                     'EDIT',
                     'DELETE',
+                    'DELETELIST',
                     'PATCH',
                 ]:
                     # Lock check
@@ -57,12 +60,28 @@ class BoreholeProducerHandler(Producer):
                         request['id'], self.user, conn
                     )
 
-                    if action in [
-                        'PATCH'
-                    ] and res['role'] != 'EDIT': 
+                    await self.check_edit(
+                        request['id'], self.user, conn
+                    )
+
+                    if (
+                        action in ['PATCH'] and
+                        res['role'] != 'EDIT'
+                    ):
                         raise AuthorizationException() 
 
                 if action == 'CREATE':
+                    # Check if Workgroup is not freezed
+                    for w in self.user['workgroups']:
+                        if (
+                            w['id'] == request['id'] and
+                            (
+                                w['disabled'] is not None or
+                                'EDIT' not in w['roles']
+                            )
+                        ):
+                            raise WorkgroupFreezed() 
+
                     exe = CreateBorehole(conn)
                     request['user'] = self.user
 

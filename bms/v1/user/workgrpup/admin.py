@@ -4,9 +4,14 @@ from bms import (
 )
 from bms.v1.handlers.admin import Admin
 from bms.v1.user.workgrpup import (
+    CreateWorkgroup,
+    DeleteWorkgroup,
+    DisableWorkgroup,
+    EnableWorkgroup,
     ListWorkgroups,
     CreateWorkgroup,
-    SetRole
+    SetRole,
+    UpdateWorkgroup
 )
 
 
@@ -15,14 +20,28 @@ class WorkgroupAdminHandler(Admin):
 
         action = request.pop('action', None)
 
-        if action in ['LIST', 'CREATE', 'SET']:
+        if action in [
+            'CREATE',
+            'DISABLE',
+            'DELETE',
+            'ENABLE',
+            'LIST',
+            'SET',
+            'UPDATE'
+        ]:
 
             async with self.pool.acquire() as conn:
 
                 exe = None
 
                 if action in [
-                    'LIST', 'CREATE', 'SET'
+                    'CREATE',
+                    'DELETE',
+                    'DISABLE',
+                    'ENABLE',
+                    'LIST',
+                    'SET',
+                    'UPDATE'
                 ]:
                     if self.user['admin'] is False: 
                         raise AuthorizationException() 
@@ -35,6 +54,18 @@ class WorkgroupAdminHandler(Admin):
 
                 elif action == 'SET':
                     exe = SetRole(conn)
+
+                elif action == 'DISABLE':
+                    exe = DisableWorkgroup(conn)
+
+                elif action == 'ENABLE':
+                    exe = EnableWorkgroup(conn)
+
+                elif action == 'DELETE':
+                    exe = DeleteWorkgroup(conn)
+
+                elif action == 'UPDATE':
+                    exe = UpdateWorkgroup(conn)
 
                 if exe is not None:
                     return (

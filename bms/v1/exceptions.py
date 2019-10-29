@@ -33,6 +33,11 @@ class AuthorizationException(BmsException):
         super().__init__("Authorization error", 'E-101')
 
 
+class WorkgroupFreezed(BmsException):
+    def __init__(self):
+        super().__init__("Workgroup is freezed", 'E-103')
+
+
 class PatchAttributeException(BmsException):
     def __init__(self, attribute):
         super().__init__(f"Attribute \"{attribute}\" unknown", 'E-201')

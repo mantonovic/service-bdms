@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from bms import (
     AuthorizationException,
+    WorkgroupFreezed,
     BaseHandler,
     EDIT,
     Locked
@@ -14,6 +15,25 @@ import json
 
 
 class Producer(BaseHandler):
+
+    async def check_edit(self, id, user, conn):
+        id_wgp = await conn.fetchval("""
+            SELECT
+                id_wgp_fk
+            FROM
+                bdms.borehole
+            WHERE
+                id_bho = $1
+        """, id)
+        for w in self.user['workgroups']:
+            if (
+                w['id'] == id_wgp and
+                (
+                    w['disabled'] is not None or
+                    'EDIT' not in w['roles']
+                )
+            ):
+                raise WorkgroupFreezed() 
 
     async def check_lock(self, id, user, conn):
         rec = await conn.fetchrow("""

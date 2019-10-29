@@ -15,13 +15,27 @@ class UserHandler(Viewer):
 
         if action in ['GET']:
 
+            workgroups = []
+            roles = []
+
+            for workgroup in self.user['workgroups']:
+                print(workgroup)
+                if workgroup['disabled'] is not None:
+                    workgroup['roles'] = ['VIEWER']
+                
+                workgroups.append(workgroup)
+            
+                for role in workgroup['roles']:
+                    if role not in roles:
+                        roles.append(role)
+
             return {
                 "data": {
                     "admin": self.user['admin'],
                     "viewer": self.user['viewer'],
                     "username": self.user['username'],
-                    "roles": self.user['roles'],
-                    "workgroups": self.user['workgroups'],
+                    "roles": roles,  # self.user['roles'],
+                    "workgroups": workgroups, #  self.user['workgroups'],
                     "name": self.user['name']
                 }
             }
