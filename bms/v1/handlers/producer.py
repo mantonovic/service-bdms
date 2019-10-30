@@ -145,7 +145,10 @@ class Producer(BaseHandler):
 
     def authorize(self):
 
+        print(self.user['roles'])
+
         if (
+            'VIEW' in self.user['roles'] or
             'EDIT' in self.user['roles'] or
             'CONTROL' in self.user['roles'] or
             'VALID' in self.user['roles'] or

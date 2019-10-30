@@ -11,6 +11,7 @@ from bms.v1.exceptions import AuthorizationException
 from bms.v1.exceptions import WorkgroupFreezed
 from bms.v1.exceptions import Locked
 from bms.v1.exceptions import NotFound
+from bms.v1.exceptions import DuplicateException
 
 # Borehole's ACTION Handlers
 from bms.v1.borehole.producer import BoreholeProducerHandler

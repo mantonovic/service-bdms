@@ -65,7 +65,12 @@ class BoreholeProducerHandler(Producer):
                     )
 
                     if (
-                        action in ['PATCH'] and
+                        action in [
+                            'CHECK',
+                            'PATCH',
+                            'DELETE',
+                            'DELETELIST'
+                        ] and
                         res['role'] != 'EDIT'
                     ):
                         raise AuthorizationException() 

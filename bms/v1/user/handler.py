@@ -21,7 +21,7 @@ class UserHandler(Viewer):
             for workgroup in self.user['workgroups']:
                 print(workgroup)
                 if workgroup['disabled'] is not None:
-                    workgroup['roles'] = ['VIEWER']
+                    workgroup['roles'] = ['VIEW']
                 
                 workgroups.append(workgroup)
             

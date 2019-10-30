@@ -110,7 +110,9 @@ class BaseHandler(web.RequestHandler):
                                 '   }'
                                 '}'::json
                             ) as setting,
-                            w.ws AS workgroups,
+                            COALESCE(
+                               w.ws, '{}'::json
+                            ) AS workgroups,
                             COALESCE(
                                 w.wgps, '{}'::int[]
                             ) AS wid,

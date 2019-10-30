@@ -38,6 +38,11 @@ class WorkgroupFreezed(BmsException):
         super().__init__("Workgroup is freezed", 'E-103')
 
 
+class DuplicateException(BmsException):
+    def __init__(self):
+        super().__init__("Record already exists", 'E-104')
+
+
 class PatchAttributeException(BmsException):
     def __init__(self, attribute):
         super().__init__(f"Attribute \"{attribute}\" unknown", 'E-201')
