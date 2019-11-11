@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from bms.v1.action import Action
+from bms.v1.borehole import ListBorehole
+from bms.v1.borehole.codelist import ListCodeList
 import math
 from io import BytesIO
 import traceback
@@ -10,81 +12,25 @@ class ExportShapefile(Action):
 
     async def execute(self, filter={}, user=None):
 
+        language = 'en'
+        if (
+            'language' in filter
+            and filter['language'] in ['it', 'de', 'fr']
+        ):
+            language = filter['language']
+
         permissions = None
         if user is not None:
             permissions = self.filterPermission(user)
 
         where, params = self.filterBorehole(filter)
+
         sql = """
-            SELECT
-                id_bho as id,
-                original_name_bho as original_name,
-                knd.code_cli as kind,
-                st_x(geom_bho) AS x,
-                st_y(geom_bho) AS y
-            FROM
-                bdms.borehole
-
-            INNER JOIN (
-                SELECT
-                    id_bho_fk,
-                    array_agg(
-                        json_build_object(
-                            'workflow', id_wkf,
-                            'role', name_rol,
-                            'username', username,
-                            'started', started,
-                            'finished', finished
-                        )
-                    ) as status
-                FROM (
-                    SELECT
-                        id_bho_fk,
-                        name_rol,
-                        id_wkf,
-                        username,
-                        started_wkf as started,
-                        finished_wkf as finished
-                    FROM
-                        bdms.workflow,
-                        bdms.roles,
-                        bdms.users
-                    WHERE
-                        id_rol = id_rol_fk
-                    AND
-                        id_usr = id_usr_fk
-                    ORDER BY
-                        id_wkf
-                ) t
-                GROUP BY
-                    id_bho_fk
-            ) as v
-            ON
-                v.id_bho_fk = id_bho
-
-            LEFT JOIN bdms.codelist as knd
-                ON knd.id_cli = kind_id_cli
-
-            LEFT JOIN bdms.codelist as srd
-                ON srd.id_cli = srs_id_cli
-
-            LEFT JOIN bdms.codelist as hrs
-                ON hrs.id_cli = hrs_id_cli
-
-            LEFT JOIN bdms.codelist as rest
-                ON rest.id_cli = restriction_id_cli
-
-            LEFT JOIN bdms.codelist as meth
-                ON meth.id_cli = method_id_cli
-
-            LEFT JOIN bdms.codelist as prp
-                ON prp.id_cli = purpose_id_cli
-
-            LEFT JOIN bdms.codelist as sts
-                ON sts.id_cli = status_id_cli
-
+            {}
             WHERE geom_bho IS NOT NULL
-        """
+        """.format(
+            ListBorehole.get_sql_text(language)
+        )
 
         if len(where) > 0:
             sql += """
@@ -96,9 +42,31 @@ class ExportShapefile(Action):
                 AND {permissions}
             """
 
-        recs = await self.conn.fetch(sql, *(params))
+        # recs = await self.conn.fetch(sql, *(params))
 
-        if len(recs) > 0:
+        rec = await self.conn.fetchval(
+            """
+            SELECT
+                array_to_json(
+                    array_agg(
+                        row_to_json(t)
+                    )
+                )
+            FROM (
+                %s
+                ORDER BY 1
+            ) AS t
+        """ % sql, *(params))
+
+        data = self.decode(rec) if rec is not None else []
+
+        if len(data) > 0:
+
+            cl = await ListCodeList(self.conn).execute('borehole_form')
+
+            shp_header = {}
+            for c in cl['data']['borehole_form']:
+                shp_header[c['code']] = c
 
             shp = BytesIO()
             shx = BytesIO()
@@ -108,26 +76,49 @@ class ExportShapefile(Action):
                 shp=shp, shx=shx, dbf=dbf
             )
 
-            w.field('NAME', 'C')
-            w.field('KIND', 'C')
+            keys = data[0].keys()
+            for key in keys:
+                if key in ['location_x', 'location_y']:
+                    continue
+
+                w.field(
+                    (
+                        shp_header[key][language]['text']
+                        if key in shp_header
+                        else key
+                    ).upper(), 'C'
+                )
+            # w.field('NAME', 'C')
+            # w.field('KIND', 'C')
             # w.field('DATE', 'D')
 
-            for rec in recs:
-                w.point(rec[3], rec[4]) 
-                w.record(rec[1], rec[2])
+            # for rec in recs:
+            #     w.point(rec[3], rec[4]) 
+            #     w.record(rec[1], rec[2])
 
+            for row in data:
+                r = []
+                w.point(row['location_x'], row['location_y']) 
+
+                for col in keys:
+                    if isinstance(row[col], list):
+                        r.append(",".join(str(x) for x in row[col]))
+                    else:
+                        r.append(row[col])
+
+                w.record(*r)
+
+            # Go to: https://spatialreference.org/ 
+            # Then download the ESRI WKT epsg.
             prj = BytesIO(
-                b'PROJCS["CH1903+_LV95",GEOGCS["GCS_CH1903+",' \
-                b'DATUM["D_CH1903+",SPHEROID["Bessel_1841",' \
-                b'6377397.155,299.1528128]],PRIMEM["Greenwich",0],' \
-                b'UNIT["Degree",0.017453292519943295]],PROJECTION' \
-                b'["Hotine_Oblique_Mercator_Azimuth_Center"],PARAMETER' \
-                b'["latitude_of_center",46.95240555555556],' \
-                b'PARAMETER["longitude_of_center",7.439583333333333],' \
-                b'PARAMETER["azimuth",90],PARAMETER["scale_factor",1],' \
-                b'PARAMETER["false_easting",2600000],' \
-                b'PARAMETER["false_northing",1200000],UNIT["Meter",1]]'
-                
+                b'PROJCS["CH1903+ / LV95",GEOGCS["CH1903+",DATUM["D_CH1903",' \
+                b'SPHEROID["Bessel_1841",6377397.155,299.1528128]],PRIMEM["G' \
+                b'reenwich",0],UNIT["Degree",0.017453292519943295]],PROJECTI' \
+                b'ON["Hotine_Oblique_Mercator_Azimuth_Center"],PARAMETER["la' \
+                b'titude_of_center",46.95240555555556],PARAMETER["longitude_' \
+                b'of_center",7.439583333333333],PARAMETER["azimuth",90],PARA' \
+                b'METER["scale_factor",1],PARAMETER["false_easting",2600000]' \
+                b',PARAMETER["false_northing",1200000],UNIT["Meter",1]]'
             )
 
         return shp, shx, dbf, prj

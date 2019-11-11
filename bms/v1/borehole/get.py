@@ -134,9 +134,9 @@ class GetBorehole(Action):
                                     as processing_status,
                                 national_relevance_id_cli
                                     as national_relevance,
-                                COALESCE(
+                                /*COALESCE(
                                     ate, '{{}}'::int[]
-                                ) AS attributes_to_edit,
+                                ) AS attributes_to_edit,*/
                                 mistakes_bho as mistakes,
                                 COALESCE(
                                     remarks_bho, ''
@@ -217,6 +217,7 @@ class GetBorehole(Action):
                 LEFT JOIN bdms.municipalities
                     ON municipalities.gid = city_bho
 
+                /*
                 LEFT JOIN (
                     SELECT
                         id_bho_fk, array_agg(id_cli_fk) as ate
@@ -227,6 +228,7 @@ class GetBorehole(Action):
                     GROUP BY id_bho_fk
                 ) tmadm404
                     ON tmadm404.id_bho_fk = borehole.id_bho
+                */
 
                 LEFT JOIN (
                     SELECT

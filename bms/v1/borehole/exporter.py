@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-S
+# -*- coding: utf-8 -*-
 from bms.v1.handlers import Viewer
 from bms.v1.borehole import ExportBorehole
 from io import StringIO

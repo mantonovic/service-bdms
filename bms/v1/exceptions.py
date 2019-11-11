@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-S
+# -*- coding: utf-8 -*-
 
 
 class BmsException(Exception):

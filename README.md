@@ -2,6 +2,21 @@
 
 ## Installation
 
+```bash
+sudo apt-get install \
+    unzip \
+    python3.7 \
+    python3-pip \
+    nginx \
+    nano \
+    npm \
+    git \
+    postgresql \
+    postgresql-contrib \
+    postgis \
+    libsqlite3-mod-spatialite 
+```
+
 ### Database initilization
 
 Create the database

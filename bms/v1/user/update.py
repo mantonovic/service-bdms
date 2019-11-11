@@ -9,6 +9,18 @@ class UpdateUser(Action):
         firstname = '', middlename = '', lastname = '',
         admin = False
     ):
+        was_admin = await self.conn.fetchval("""
+            SELECT admin_usr
+            FROM
+                bdms.users
+            WHERE
+                id_usr = $1
+        """, user_id)
+
+        # Admin user cannot remove his own admin flag
+        if was_admin and admin is False:
+            admin = True
+
         if password != '':
             return {
                 "id": (
@@ -37,6 +49,7 @@ class UpdateUser(Action):
                     )
                 )
             }
+
         else:
             return {
                 "id": (

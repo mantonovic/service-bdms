@@ -1,7 +1,10 @@
-# -*- coding: utf-8 -*-S
+# -*- coding: utf-8 -*-
 from bms.v1.handlers import Viewer
-from bms.v1.borehole.export.csv import ExportCsv
-from bms.v1.borehole.export.shapefile import ExportShapefile
+from bms.v1.borehole.export import (
+    ExportSimpleCsv,
+    ExportShapefile,
+    ExportCsv
+)
 from .pdf import PdfBorehole
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from io import BytesIO
@@ -35,11 +38,10 @@ class ExportHandler(Viewer):
                         for idx in range(0, len(coords)):
                             coords[idx] = float(coords[idx])
                         arguments[key] = coords
-                    else:                        
-                        if key == 'format':
-                            arguments[key] = self.get_argument(key).split(',')
-                        else:
-                            arguments[key] = self.get_argument(key)
+                    elif key == 'format':
+                        arguments[key] = self.get_argument(key).split(',')
+                    else:
+                        arguments[key] = self.get_argument(key)
 
             if 'format' not in arguments.keys():
                 raise MissingParameter("format")
@@ -84,6 +86,7 @@ class ExportHandler(Viewer):
 
                 if 'csv' in arguments['format']:
 
+                    # action = ExportSimpleCsv(conn)
                     action = ExportCsv(conn)
                     if arguments is None:
                         csvfile = await action.execute(
@@ -95,6 +98,7 @@ class ExportHandler(Viewer):
                             filter=arguments,
                             user=self.user
                         )
+
 
                     if output_stream is not None:
                         output_stream.writestr(
