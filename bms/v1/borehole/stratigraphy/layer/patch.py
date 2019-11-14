@@ -121,7 +121,7 @@ class PatchLayer(Action):
 
                 elif field == 'tectonic_unit':
                     column = 'tectonic_unit_id_cli'
-                    schema = 'vtec404'
+                    schema = 'vtec400'
 
                 elif field == 'plasticity':
                     column = 'plasticity_id_cli'
@@ -180,7 +180,7 @@ class PatchLayer(Action):
                     schema = 'mcla106'
 
                 # Check if domain is extracted from the correct schema
-                if schema != (await self.conn.fetchval("""
+                if value is not None and schema != (await self.conn.fetchval("""
                             SELECT
                                 schema_cli
                             FROM

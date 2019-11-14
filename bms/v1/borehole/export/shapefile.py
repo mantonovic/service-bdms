@@ -73,7 +73,7 @@ class ExportShapefile(Action):
             dbf = BytesIO()
 
             w = shapefile.Writer(
-                shp=shp, shx=shx, dbf=dbf
+                shp=shp, shx=shx, dbf=dbf, encoding="utf8"
             )
 
             keys = data[0].keys()

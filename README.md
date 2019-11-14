@@ -39,14 +39,29 @@ sudo -u postgres psql -d bdms -f db/3_cantons.sql
 sudo -u postgres psql -d bdms -f db/4_municipalities.sql
 ```
 
+Or remotly with port forwarding:
+
+```bash
+ssh -R 9432:localhost:5432 USER_NAME@IP_ADDRESS
+```
+
+And then:
+```bash
+psql -U postgres -d bdms -h localhost -p 9432 -f db/1_schema.sql
+psql -U postgres -d bdms -h localhost -p 9432 -f db/2_data.sql
+psql -U postgres -d bdms -h localhost -p 9432 -f db/4_municipalities.sql
+psql -U postgres -d bdms -h localhost -p 9432 -f db/3_cantons.sql
+```
+
 ## Run Server
 
 ### Setup virtual environment
 
 ```bash
-python3 -m venv ./venv
+sudo apt-get install python3-venv
+python3.7 -m venv ./venv
 source venv/bin/activate
-pip3 install --upgrade pip
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 

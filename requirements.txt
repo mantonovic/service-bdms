@@ -8,3 +8,4 @@ reportlab
 pyshp
 svglib
 svg2rlg
+spatialite

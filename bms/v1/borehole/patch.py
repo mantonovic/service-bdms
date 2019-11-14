@@ -260,13 +260,13 @@ class PatchBorehole(Action):
                 elif field == 'custom.qt_top_bedrock':
                     column = 'qt_top_bedrock_id_cli'
 
-                elif field == 'custom.processing_status':
-                    column = 'processing_status_id_cli'
-                    schema = 'madm401'
+                # elif field == 'custom.processing_status':
+                #     column = 'processing_status_id_cli'
+                #     schema = 'madm401'
 
-                elif field == 'custom.national_relevance':
-                    column = 'national_relevance_id_cli'
-                    schema = 'madm402'
+                # elif field == 'custom.national_relevance':
+                #     column = 'national_relevance_id_cli'
+                #     schema = 'madm402'
 
                 elif field == 'custom.lit_pet_top_bedrock':
                     column = 'lithology_id_cli'
