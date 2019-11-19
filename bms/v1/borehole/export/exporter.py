@@ -132,7 +132,7 @@ class ExportHandler(Viewer):
                         pdfs = []
 
                         for cid in arguments['id'].split(','):
-                            cid = cid.split(',')
+                            cid = cid.split(':')
                             if len(cid)==2:
                                 bid = int(cid[0])
                                 sid = int(cid[1])
@@ -140,7 +140,7 @@ class ExportHandler(Viewer):
                                 # TODO: test if passed sid belongs to passed bid
                                 # else raise error
                             elif len(cid)==1:
-                                bid = int(bid[0])
+                                bid = int(cid[0])
                                 sid = await conn.fetchval("""
                                     SELECT
                                         id_sty
@@ -151,6 +151,7 @@ class ExportHandler(Viewer):
                                     AND
                                         primary_sty IS TRUE
                                 """, bid)
+                                print("SID:",sid)
                             else:
                                 raise ValueError("id parameters are {berehole id}:{stratigraphy id}")
 
