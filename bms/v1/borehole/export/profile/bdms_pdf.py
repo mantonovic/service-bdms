@@ -99,7 +99,6 @@ class bdmsPdf():
         self.pStyles = None
         self.profile = profile
         self.lastPlotElev = None
-        #print(settings['page']['size'],self.width/mm,self.height/mm)
         
     def setTextStyle(self, style):
         self.c.setFillColorRGB(
@@ -233,7 +232,6 @@ class bdmsPdf():
             self.c.rect(ulx, uly, width*mm, -depth*mm,  fill=1)
         if pattern and path.isfile(pattern):
             # Opens the pattern
-            print("PAT:",pattern)
             bg = svg2rlg(pattern)
             # The width and height of the pattern
             bg_w = bg.width 
@@ -246,7 +244,6 @@ class bdmsPdf():
             for i in range(0, int(w/bg_w)+1):
                 for j in range(0, int(h/bg_h)+2):
                     renderPDF.draw(bg, self.c, ulx + (i*bg_w), uly - (j*bg_h))
-                    #print(i,j,i/mm,j/mm)
             
         # restore original state
         self.c.restoreState()
@@ -269,9 +266,7 @@ class bdmsPdf():
         low_m = self.lastPlotElev - (h * scale // 1000)
         top_m = self.lastPlotElev
 
-        # print('M:', low_m, top_m)
         for l in self.profile['layers']:
-            # print("LITO: ", l['conf_lithology'], l['conf_lithostra'])
             if l['conf_lithology'] and 'image' in l['conf_lithology']:
                 pattern = self.settings['svgpath'] + l['conf_lithology']['image']
             else:
@@ -283,16 +278,12 @@ class bdmsPdf():
             else:
                 color = None
                 color = random_color()
-            # print("COLOR: ", color)
-
-            #print('L: ',l['msm_from'], l['msm_to'], top_m, low_m )
 
             # the layer is entirerly within the page
             if l['msm_to'] >= low_m and l['msm_from'] <= top_m:
                 ly = y + ((top_m - l['msm_from']) * 1000 / scale)
                 d = (l['msm_from'] - l['msm_to']) * 1000 / scale
                 label_depth = l['msm_to']
-                #print('contained', ly, d)
             
             # the layer extend to the next the page    
             elif l['msm_to'] < low_m and l['msm_from'] > low_m and l['msm_from'] <= top_m:
@@ -300,24 +291,19 @@ class bdmsPdf():
                 ly = y + ((top_m - l['msm_from']) * 1000 / scale)
                 d = (l['msm_from'] - low_m) * 1000 / scale
                 label_depth = low_m
-                #print('go out in next page', ly, d)
 
             # the layer is a continuation of previous page and finish in the current
             elif l['msm_to'] > low_m and l['msm_from'] > top_m and l['msm_to'] < top_m:
                 ly = y
                 d = (top_m - l['msm_to']) * 1000 / scale
                 label_depth = l['msm_to']
-                #print('from previous page', ly, d)
-                
 
             # the layer is a continuation of previous page and extend in the following
             elif l['msm_to'] < low_m and l['msm_from'] > top_m:
                 ly = y
                 d = h
                 label_depth = low_m
-                #print('from previous page & to next', ly, d)
             else:
-                #print('out of page')
                 ly = None
                 d = None
                 pass
@@ -386,7 +372,6 @@ class bdmsPdf():
         """
 
         # set major and minor tics in m
-        # print("space",available_mm * scale / 1000)
         minor_tics = None
         major_tics = None
         i = 0
@@ -462,7 +447,6 @@ class bdmsPdf():
             'content', '1:{}'.format(scale)
         )
         
-        # print('SN',self.profile['strataname'])
         self.drawLeftTextBox2(140, 12, 25, 3, 'bold',
             'contentB',  _('Vers'),
             'content', '{}'.format(self.profile['strataname'])
@@ -624,7 +608,6 @@ class bdmsPdf():
         i = 1
         self.drawRightText(190,265,'content', 'p. {}/{}'.format(i,pages))
         self.c.showPage()
-        print('stats: ', self.lastPlotElev, self.profile['elevation_z']-self.profile['length'])
 
         while self.lastPlotElev > (self.profile['elevation_z']-self.profile['length']):
             self.drawProfile(0, 0, 190, 260, scale)
