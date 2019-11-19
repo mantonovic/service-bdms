@@ -28,7 +28,7 @@ pdfmetrics.registerFont(TTFont('VeraBI', 'VeraBI.ttf'))
 settings= {
     'textStyles': {
         'title': ('VeraBd', 4, (0,0,0)), # font, size, color(R,G,B)
-        'subtitle': ('VeraBd', 3, (0,0,0)),
+        'subtitle': ('VeraBd', 2.5, (0,0,0)),
         'contentB': ('VeraBd', 2, (0,0,0)),
         'content': ('Vera', 2, (0,0,0))
     },
@@ -229,10 +229,11 @@ class bdmsPdf():
                 self.settings['boxStyles']['thin'][0])
         
         if color:
-            self.c.setFillColorRGB(*color)
+            self.c.setFillColorRGB(color[0]/255, color[1]/255, color[2]/255)
             self.c.rect(ulx, uly, width*mm, -depth*mm,  fill=1)
-        if pattern:
+        if pattern and path.isfile(pattern):
             # Opens the pattern
+            print("PAT:",pattern)
             bg = svg2rlg(pattern)
             # The width and height of the pattern
             bg_w = bg.width 
@@ -246,7 +247,7 @@ class bdmsPdf():
                 for j in range(0, int(h/bg_h)+2):
                     renderPDF.draw(bg, self.c, ulx + (i*bg_w), uly - (j*bg_h))
                     #print(i,j,i/mm,j/mm)
-                    
+            
         # restore original state
         self.c.restoreState()
     
@@ -270,9 +271,9 @@ class bdmsPdf():
 
         # print('M:', low_m, top_m)
         for l in self.profile['layers']:
-
-            if l['conf_lithology'] and 'img' in l['conf_lithology']:
-                pattern = self.settings['svgpath'] + l['conf_lithology']['img']
+            # print("LITO: ", l['conf_lithology'], l['conf_lithostra'])
+            if l['conf_lithology'] and 'image' in l['conf_lithology']:
+                pattern = self.settings['svgpath'] + l['conf_lithology']['image']
             else:
                 pattern = None
                 pattern = self.settings['svgpath'] +'15101001.svg'
@@ -282,6 +283,7 @@ class bdmsPdf():
             else:
                 color = None
                 color = random_color()
+            # print("COLOR: ", color)
 
             #print('L: ',l['msm_from'], l['msm_to'], top_m, low_m )
 
@@ -289,6 +291,7 @@ class bdmsPdf():
             if l['msm_to'] >= low_m and l['msm_from'] <= top_m:
                 ly = y + ((top_m - l['msm_from']) * 1000 / scale)
                 d = (l['msm_from'] - l['msm_to']) * 1000 / scale
+                label_depth = l['msm_to']
                 #print('contained', ly, d)
             
             # the layer extend to the next the page    
@@ -296,12 +299,14 @@ class bdmsPdf():
                 #ly = y + (l['depth_from'] * 1000 / scale)
                 ly = y + ((top_m - l['msm_from']) * 1000 / scale)
                 d = (l['msm_from'] - low_m) * 1000 / scale
+                label_depth = low_m
                 #print('go out in next page', ly, d)
 
             # the layer is a continuation of previous page and finish in the current
             elif l['msm_to'] > low_m and l['msm_from'] > top_m and l['msm_to'] < top_m:
                 ly = y
                 d = (top_m - l['msm_to']) * 1000 / scale
+                label_depth = l['msm_to']
                 #print('from previous page', ly, d)
                 
 
@@ -309,6 +314,7 @@ class bdmsPdf():
             elif l['msm_to'] < low_m and l['msm_from'] > top_m:
                 ly = y
                 d = h
+                label_depth = low_m
                 #print('from previous page & to next', ly, d)
             else:
                 #print('out of page')
@@ -332,7 +338,7 @@ class bdmsPdf():
 
                 self.drawLeftText(
                     x + w + 1, ly + d - 1, 
-                    'content', '{:+.2f} m'.format(l['msm_to'])
+                    'content', '{:+.2f} m'.format(label_depth) #l['msm_to'])
                 )
                 paratext = '<br/>'.join([
                         '<u>{}</u>: {}'.format(_('description'),l['layer_desc'] or '-'),
@@ -446,22 +452,22 @@ class bdmsPdf():
         self.drawBox(0, 0, 190, 260, 'bold')
         
         #TITLE BOX
-        self.drawTextBox(0, 0, 150, 15, 'bold', 
+        self.drawTextBox(0, 0, 140, 15, 'bold', 
                 'title', _('Geological_Profile'), 'center'
         )
         
         #vers. & date boxes
-        self.drawLeftTextBox2(150, 0, 40, 12, 'bold',
+        self.drawLeftTextBox2(140, 0, 50, 12, 'bold',
             'contentB',  _('Scale'),
             'content', '1:{}'.format(scale)
         )
         
-        print('SN',self.profile['strataname'])
-        self.drawLeftTextBox2(150, 12, 20, 3, 'bold',
+        # print('SN',self.profile['strataname'])
+        self.drawLeftTextBox2(140, 12, 25, 3, 'bold',
             'contentB',  _('Vers'),
             'content', '{}'.format(self.profile['strataname'])
         )
-        self.drawLeftTextBox2(170, 12, 20, 3, 'bold',
+        self.drawLeftTextBox2(165, 12, 25, 3, 'bold',
             'contentB',  _('Date'),
             'content', '{}'.format(self.profile['stratadate'])
         )

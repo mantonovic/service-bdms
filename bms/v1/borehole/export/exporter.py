@@ -123,9 +123,9 @@ class ExportHandler(Viewer):
 
                 if 'pdf' in arguments['format']:
 
-                    lan='it'
-                    idsty=6
-                    schema='bdms'
+                    lan = arguments['lang'] if 'lang' in arguments else 'en'
+                    idsty =6
+                    schema ='bdms'
 
                     if 'id' in arguments:
 
@@ -161,7 +161,7 @@ class ExportHandler(Viewer):
                                             cli_kind.text_cli_{} as kind,
                                             location_x_bho as location_e,
                                             location_y_bho as location_n,
-                                            elevation_z_bho as elevation_z,
+                                            COALESCE(elevation_z_bho, 0) as elevation_z,
                                             cli_srs.text_cli_{} as srs,
                                             cli_hrs.text_cli_{} as hrs,
                                             length_bho as length,
@@ -202,11 +202,13 @@ class ExportHandler(Viewer):
                                                         depth_from_lay as depth_from,
                                                         depth_to_lay as depth_to,
                                                         CASE
-                                                            WHEN elevation_z_bho is NULL THEN NULL
+                                                            WHEN elevation_z_bho is NULL 
+                                                            THEN 0 - depth_from_lay
                                                             ELSE elevation_z_bho - depth_from_lay
                                                         END AS msm_from,
                                                         CASE
-                                                            WHEN elevation_z_bho is NULL THEN NULL
+                                                            WHEN elevation_z_bho is NULL 
+                                                            THEN 0 - depth_to_lay
                                                             ELSE elevation_z_bho - depth_to_lay
                                                         END AS msm_to,
                                                         cli_lithostra.text_cli_{} as lithostratigraphy,
@@ -279,7 +281,7 @@ class ExportHandler(Viewer):
 
                                 a = bdms.bdmsPdf( json.loads(res))
                                 a.renderProfilePDF(
-                                    arguments['lang'] if 'lang' in arguments else 'de',
+                                    arguments['lang'] if 'lang' in arguments else 'en',
                                     int(arguments['scale']) if 'scale' in arguments else 200
                                 )
                                 a.close()
