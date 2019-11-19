@@ -6,7 +6,7 @@ class CheckUsername(Action):
 
     async def execute(self, username):
         return {
-            "check": not (
+            "exists": (
                 await self.conn.fetchval(
                 """
                     SELECT EXISTS(
