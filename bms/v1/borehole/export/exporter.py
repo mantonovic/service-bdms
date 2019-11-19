@@ -131,20 +131,30 @@ class ExportHandler(Viewer):
 
                         pdfs = []
 
-                        for bid in arguments['id'].split(','):
-                            bid = int(bid)
-                            sid = await conn.fetchval("""
-                                SELECT
-                                    id_sty
-	                            FROM
-                                    bdms.stratigraphy
-                                WHERE
-                                    id_bho_fk = $1
-                                AND
-                                    primary_sty IS TRUE
-                            """, bid)
+                        for cid in arguments['id'].split(','):
+                            cid = cid.split(',')
+                            if len(cid)==2:
+                                bid = int(cid[0])
+                                sid = int(cid[1])
 
-                            print("FOUND: ", sid)
+                                # TODO: test if passed sid belongs to passed bid
+                                # else raise error
+                            elif len(cid)==1:
+                                bid = int(bid[0])
+                                sid = await conn.fetchval("""
+                                    SELECT
+                                        id_sty
+                                    FROM
+                                        bdms.stratigraphy
+                                    WHERE
+                                        id_bho_fk = $1
+                                    AND
+                                        primary_sty IS TRUE
+                                """, bid)
+                            else:
+                                raise ValueError("id parameters are {berehole id}:{stratigraphy id}")
+
+                            print(f"Processing berehole id {bid} and stratigraphy id {sid}")
 
                             if sid is not None:
                                         
