@@ -35,12 +35,6 @@ class CreateLayer(Action):
                     l.id_sty_fk = s.id_sty
                 AND
                     s.id_bho_fk = b.id_bho
-                /*
-                AND
-                    l.chronostratigraphy_id_cli = b.chronostrat_id_cli
-                AND
-                    l.lithology_id_cli = b.lithology_id_cli
-                */
                 AND
                     l.depth_from_lay = b.top_bedrock_bho
             """, id)
@@ -84,9 +78,9 @@ class CreateLayer(Action):
                     AND
                         s.id_bho_fk = b.id_bho
                     AND
-                        depth_to_lay < top_bedrock_bho
+                        depth_to_lay <= top_bedrock_bho
                     ORDER BY
-                        depth_to_lay DESC
+                        depth_to_lay DESC NULLS LAST
                     LIMIT 1
                 """, id)
 
