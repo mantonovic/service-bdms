@@ -47,13 +47,13 @@ class AdminHandler(Admin):
                         action == 'UPDATE' and
                         self.user['id'] == request['user_id']
                     ):
-                        was_admin = await self.conn.fetchval("""
+                        was_admin = await conn.fetchval("""
                             SELECT admin_usr
                             FROM
                                 bdms.users
                             WHERE
                                 id_usr = $1
-                        """, user_id)
+                        """, request['user_id'])
 
                         if was_admin and request['admin'] is False:
                             request['admin'] = True
