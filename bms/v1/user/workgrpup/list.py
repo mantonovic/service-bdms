@@ -18,9 +18,24 @@ class ListWorkgroups(Action):
                 FROM (
                     SELECT
                         id_wgp as id,
-                        name_wgp as name
+                        name_wgp as name,
+                        to_char(
+                            disabled_wgp,
+                            'YYYY-MM-DD"T"HH24:MI:SSOF'
+                        ) as disabled,
+                        to_char(
+                            created_wgp,
+                            'YYYY-MM-DD"T"HH24:MI:SSOF'
+                        ) as created,
+                        count(id_bho) as boreholes
                         
                     FROM bdms.workgroups
+                    
+                    LEFT JOIN bdms.borehole
+                    ON id_wgp = id_wgp_fk
+                    
+                    GROUP BY
+                        id_wgp, name_wgp
 
                     ORDER BY
                         name_wgp

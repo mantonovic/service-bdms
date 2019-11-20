@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-S
+# -*- coding: utf-8 -*-
 
 
 class BmsException(Exception):
@@ -31,6 +31,16 @@ class AuthenticationException(BmsException):
 class AuthorizationException(BmsException):
     def __init__(self):
         super().__init__("Authorization error", 'E-101')
+
+
+class WorkgroupFreezed(BmsException):
+    def __init__(self):
+        super().__init__("Workgroup is freezed", 'E-103')
+
+
+class DuplicateException(BmsException):
+    def __init__(self):
+        super().__init__("Record already exists", 'E-104')
 
 
 class PatchAttributeException(BmsException):

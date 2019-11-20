@@ -29,6 +29,7 @@ if __name__ == "__main__":
     from bms import (
         # user handlers
         SettingHandler,
+        DownloadHandler,
         UserHandler,
         AdminHandler,
         WorkgroupAdminHandler,
@@ -57,7 +58,8 @@ if __name__ == "__main__":
         MunicipalityHandler,
         CantonHandler,
         Wmts,
-        Wms
+        Wms,
+        # GetFeature
     )
 
     AsyncIOMainLoop().install()
@@ -72,6 +74,7 @@ if __name__ == "__main__":
 
         # Borehole handlers
         (r'/api/v1/setting', SettingHandler),
+        (r'/api/v1/setting/download', DownloadHandler),
         (r'/api/v1/user', UserHandler),
         (r'/api/v1/user/edit', AdminHandler),
 
@@ -81,6 +84,7 @@ if __name__ == "__main__":
         (r'/api/v1/borehole', BoreholeViewerHandler),
         (r'/api/v1/borehole/edit', BoreholeProducerHandler),
         (r'/api/v1/borehole/download', ExportHandler),
+        (r'/api/v1/borehole/upload', BoreholeProducerHandler),
 
         # Workflow handlers
         (r'/api/v1/workflow/edit', WorkflowProducerHandler),
@@ -100,7 +104,8 @@ if __name__ == "__main__":
         (r'/api/v1/geoapi/canton', CantonHandler),
         (r'/api/v1/geoapi/location', GeoapiHandler),
         (r"/api/v1/geoapi/wmts", Wmts),
-        (r"/api/v1/geoapi/wms/swisstopo", Wms)
+        (r"/api/v1/geoapi/wms/swisstopo", Wms),
+        # (r"/api/v1/geoapi/getfeature", GetFeature)
 
     ], **settings)
 

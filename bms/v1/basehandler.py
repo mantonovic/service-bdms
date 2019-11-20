@@ -92,6 +92,7 @@ class BaseHandler(web.RequestHandler):
                                 settings_usr::json,
                                 '{'
                                 '   "filter": {},'
+                                '   "efilter": {},'
                                 '   "boreholetable": {'
                                 '        "orderby": "original_name",'
                                 '        "direction": "ASC"'
@@ -109,15 +110,9 @@ class BaseHandler(web.RequestHandler):
                                 '   }'
                                 '}'::json
                             ) as setting,
-                            (
-                                select row_to_json(t)
-                                FROM (
-                                    SELECT
-                                        id_grp as id,
-                                        name_grp as name
-                                ) t
-                            ) as group,
-                            w.ws AS workgroups,
+                            COALESCE(
+                               w.ws, '{}'::json
+                            ) AS workgroups,
                             COALESCE(
                                 w.wgps, '{}'::int[]
                             ) AS wid,
@@ -126,9 +121,6 @@ class BaseHandler(web.RequestHandler):
                             ) AS roles
                         FROM
                             bdms.users
-
-                        LEFT JOIN bdms.groups
-                            ON id_grp = id_grp_fk
 
                         LEFT JOIN (
                             SELECT
@@ -141,9 +133,12 @@ class BaseHandler(web.RequestHandler):
                                     name_rol
                                 FROM
                                     bdms.users_roles,
-                                    bdms.roles
+                                    bdms.roles,
+                                    bdms.workgroups
                                 WHERE
                                     id_rol = id_rol_fk
+                                AND
+                                    id_wgp = id_wgp_fk
                             ) r
                             GROUP BY id_usr_fk
                         ) as rl
@@ -161,7 +156,8 @@ class BaseHandler(web.RequestHandler):
                                     json_build_object(
                                         'id', id_wgp,
                                         'workgroup', name_wgp,
-                                        'roles', array_agg(name_rol)
+                                        'roles', array_agg(name_rol),
+                                        'disabled', disabled_wgp
                                     ) as j
                                 FROM
                                     bdms.users_roles,
@@ -174,6 +170,8 @@ class BaseHandler(web.RequestHandler):
                                 GROUP BY
                                     id_usr_fk,
                                     id_wgp
+                                ORDER BY
+                                    name_wgp
                             ) AS t
                             GROUP BY id_usr_fk
                         ) as w
@@ -181,6 +179,7 @@ class BaseHandler(web.RequestHandler):
 
                         WHERE username = $1
                         AND password = crypt($2, password)
+                        AND disabled_usr IS NULL
                     ) as t
                 """, username, password)
 

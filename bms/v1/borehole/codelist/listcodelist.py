@@ -5,12 +5,25 @@ from bms.v1.action import Action
 class ListCodeList(Action):
 
     async def execute(self, schema=None):
-        recs = await self.conn.fetch("""
-            SELECT
-                DISTINCT schema_cli
-            FROM
-                bdms.codelist
-        """)
+
+        if schema is None:
+            recs = await self.conn.fetch("""
+                SELECT
+                    DISTINCT schema_cli
+                FROM
+                    bdms.codelist
+            """)
+        
+        else:
+            recs = await self.conn.fetch("""
+                SELECT
+                    DISTINCT schema_cli
+                FROM
+                    bdms.codelist
+                WHERE
+                    schema_cli = $1
+            """, schema)
+            
         data = {}
 
         # Default language
@@ -77,7 +90,9 @@ class ListCodeList(Action):
                                     ) as descr
                             ) t
                         ) as it,
-					    conf_cli as conf
+					    conf_cli as conf,
+                        path_cli::text as path,
+                        nlevel(path_cli) as level
                     FROM
                         bdms.codelist
                     WHERE

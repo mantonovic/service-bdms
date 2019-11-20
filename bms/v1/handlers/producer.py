@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from bms import (
     AuthorizationException,
+    WorkgroupFreezed,
     BaseHandler,
     EDIT,
     Locked
@@ -14,6 +15,38 @@ import json
 
 
 class Producer(BaseHandler):
+
+    def authorize(self):
+
+        if (
+            'VIEW' in self.user['roles'] or
+            'EDIT' in self.user['roles'] or
+            'CONTROL' in self.user['roles'] or
+            'VALID' in self.user['roles'] or
+            'PUBLIC' in self.user['roles']
+        ):
+            return
+
+        raise AuthorizationException()
+
+    async def check_edit(self, id, user, conn):
+        id_wgp = await conn.fetchval("""
+            SELECT
+                id_wgp_fk
+            FROM
+                bdms.borehole
+            WHERE
+                id_bho = $1
+        """, id)
+        for w in self.user['workgroups']:
+            if (
+                w['id'] == id_wgp and
+                (
+                    w['disabled'] is not None or
+                    'EDIT' not in w['roles']
+                )
+            ):
+                raise WorkgroupFreezed() 
 
     async def check_lock(self, id, user, conn):
         rec = await conn.fetchrow("""
@@ -114,23 +147,3 @@ class Producer(BaseHandler):
             )
 
         return json.loads(rec[5])
-
-        # Lock row for current user
-        # await conn.execute("""
-        #     UPDATE borehole SET
-        #         locked_at = $1,
-        #         locked_by = $2
-        #     WHERE id_bho = $3;
-        # """, now, user['id'], id)
-
-    def authorize(self):
-
-        if (
-            'EDIT' in self.user['roles'] or
-            'CONTROL' in self.user['roles'] or
-            'VALID' in self.user['roles'] or
-            'PUBLIC' in self.user['roles']
-        ):
-            return
-
-        raise AuthorizationException()

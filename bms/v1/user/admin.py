@@ -1,11 +1,14 @@
-# -*- coding: utf-8 -*-S
+# -*- coding: utf-8 -*-
 from bms import (
     AuthorizationException
 )
 from bms.v1.handlers.admin import Admin
 from bms.v1.user import (
-    ListUsers,
     CreateUser,
+    DeleteUser,
+    DisableUser,
+    EnableUser,
+    ListUsers,
     UpdateUser
 )
 
@@ -15,17 +18,45 @@ class AdminHandler(Admin):
 
         action = request.pop('action', None)
 
-        if action in ['LIST', 'CREATE', 'UPDATE']:
+        if action in [
+            'CREATE',
+            'DISABLE',
+            'DELETE',
+            'ENABLE',
+            'LIST',
+            'UPDATE'
+        ]:
 
             async with self.pool.acquire() as conn:
 
                 exe = None
 
                 if action in [
-                    'LIST', 'CREATE', 'UPDATE'
+                    'CREATE',
+                    'DELETE',
+                    'DISABLE',
+                    'ENABLE',
+                    'LIST',
+                    'UPDATE'
                 ]:
                     if self.user['admin'] is False: 
                         raise AuthorizationException() 
+
+                    # Admin user cannot remove his own admin flag
+                    if (
+                        action == 'UPDATE' and
+                        self.user['id'] == request['user_id']
+                    ):
+                        was_admin = await conn.fetchval("""
+                            SELECT admin_usr
+                            FROM
+                                bdms.users
+                            WHERE
+                                id_usr = $1
+                        """, request['user_id'])
+
+                        if was_admin and request['admin'] is False:
+                            request['admin'] = True
 
                 if action == 'LIST':
                     exe = ListUsers(conn)
@@ -35,6 +66,15 @@ class AdminHandler(Admin):
 
                 elif action == 'UPDATE':
                     exe = UpdateUser(conn)
+
+                elif action == 'DISABLE':
+                    exe = DisableUser(conn)
+
+                elif action == 'ENABLE':
+                    exe = EnableUser(conn)
+
+                elif action == 'DELETE':
+                    exe = DeleteUser(conn)
 
                 if exe is not None:
                     return (

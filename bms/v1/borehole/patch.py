@@ -260,13 +260,13 @@ class PatchBorehole(Action):
                 elif field == 'custom.qt_top_bedrock':
                     column = 'qt_top_bedrock_id_cli'
 
-                elif field == 'custom.processing_status':
-                    column = 'processing_status_id_cli'
-                    schema = 'madm401'
+                # elif field == 'custom.processing_status':
+                #     column = 'processing_status_id_cli'
+                #     schema = 'madm401'
 
-                elif field == 'custom.national_relevance':
-                    column = 'national_relevance_id_cli'
-                    schema = 'madm402'
+                # elif field == 'custom.national_relevance':
+                #     column = 'national_relevance_id_cli'
+                #     schema = 'madm402'
 
                 elif field == 'custom.lit_pet_top_bedrock':
                     column = 'lithology_id_cli'
@@ -305,59 +305,59 @@ class PatchBorehole(Action):
                     WHERE id_bho = $3
                 """ % column, value, user['id'], id)
 
-            elif field in [
-                        'custom.attributes_to_edit'
-                    ]:
+            # elif field in [
+            #             'custom.attributes_to_edit'
+            #         ]:
 
-                schema = field
+            #     schema = field
 
-                if field == 'custom.attributes_to_edit':
-                    schema = 'madm404'
+            #     if field == 'custom.attributes_to_edit':
+            #         schema = 'madm404'
 
-                await self.conn.execute("""
-                    DELETE FROM bdms.borehole_codelist
-                    WHERE id_bho_fk = $1
-                    AND code_cli = $2
-                """, id, schema)
+            #     await self.conn.execute("""
+            #         DELETE FROM bdms.borehole_codelist
+            #         WHERE id_bho_fk = $1
+            #         AND code_cli = $2
+            #     """, id, schema)
 
-                if len(value) > 0:
-                    # Check if domain is extracted from the correct schema
-                    check = await self.conn.fetchval("""
-                        SELECT COALESCE(count(schema_cli), 0) = $1
-                        FROM (
-                            SELECT
-                                schema_cli
-                            FROM
-                                bdms.codelist
-                            WHERE
-                                id_cli = ANY($2)
-                            AND
-                                schema_cli = $3
-                        ) AS c
-                    """, len(value), value, schema)
-                    if check is False:
-                        raise Exception(
-                            "One ore more attribute ids %s are "
-                            "not part of schema %s" %
-                            (
-                                value, schema
-                            )
-                        )
+            #     if len(value) > 0:
+            #         # Check if domain is extracted from the correct schema
+            #         check = await self.conn.fetchval("""
+            #             SELECT COALESCE(count(schema_cli), 0) = $1
+            #             FROM (
+            #                 SELECT
+            #                     schema_cli
+            #                 FROM
+            #                     bdms.codelist
+            #                 WHERE
+            #                     id_cli = ANY($2)
+            #                 AND
+            #                     schema_cli = $3
+            #             ) AS c
+            #         """, len(value), value, schema)
+            #         if check is False:
+            #             raise Exception(
+            #                 "One ore more attribute ids %s are "
+            #                 "not part of schema %s" %
+            #                 (
+            #                     value, schema
+            #                 )
+            #             )
 
-                    await self.conn.executemany("""
-                        INSERT INTO
-                            bdms.borehole_codelist (
-                                id_bho_fk, id_cli_fk, code_cli
-                            ) VALUES ($1, $2, $3)
-                    """, [(id, v, schema) for v in value])
+            #         await self.conn.executemany("""
+            #             INSERT INTO
+            #                 bdms.borehole_codelist (
+            #                     id_bho_fk, id_cli_fk, code_cli
+            #                 ) VALUES ($1, $2, $3)
+            #         """, [(id, v, schema) for v in value])
 
-                    await self.conn.execute("""
-                        UPDATE bdms.borehole
-                        SET
-                            update_bho = now(),
-                            updater_bho = $1
-                        WHERE id_bho = $2
-                    """, user['id'], id)
+            #         await self.conn.execute("""
+            #             UPDATE bdms.borehole
+            #             SET
+            #                 update_bho = now(),
+            #                 updater_bho = $1
+            #             WHERE id_bho = $2
+            #         """, user['id'], id)
 
             else:
                 raise PatchAttributeException(field)

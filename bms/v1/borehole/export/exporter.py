@@ -1,8 +1,11 @@
-# -*- coding: utf-8 -*-S
+# -*- coding: utf-8 -*-
 from bms.v1.handlers import Viewer
-from bms.v1.borehole.export.csv import ExportCsv
-from bms.v1.borehole.export.shapefile import ExportShapefile
-from .pdf import PdfBorehole
+from bms.v1.borehole.export import (
+    ExportSimpleCsv,
+    ExportShapefile,
+    ExportCsv,
+    ExportCsvFull
+)
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from io import BytesIO
 import zipfile
@@ -35,14 +38,15 @@ class ExportHandler(Viewer):
                         for idx in range(0, len(coords)):
                             coords[idx] = float(coords[idx])
                         arguments[key] = coords
-                    else:                        
-                        if key == 'format':
-                            arguments[key] = self.get_argument(key).split(',')
-                        else:
-                            arguments[key] = self.get_argument(key)
+                    elif key == 'format':
+                        arguments[key] = self.get_argument(key).split(',')
+                    else:
+                        arguments[key] = self.get_argument(key)
 
             if 'format' not in arguments.keys():
                 raise MissingParameter("format")
+
+            print(arguments)
 
             now = datetime.datetime.now()
 
@@ -84,6 +88,7 @@ class ExportHandler(Viewer):
 
                 if 'csv' in arguments['format']:
 
+                    # action = ExportSimpleCsv(conn)
                     action = ExportCsv(conn)
                     if arguments is None:
                         csvfile = await action.execute(
@@ -95,6 +100,7 @@ class ExportHandler(Viewer):
                             filter=arguments,
                             user=self.user
                         )
+
 
                     if output_stream is not None:
                         output_stream.writestr(
@@ -117,33 +123,76 @@ class ExportHandler(Viewer):
                         )
                         self.write(csvfile.getvalue())
 
+                if 'fullcsv' in arguments['format']:
+
+                    # action = ExportSimpleCsv(conn)
+                    action = ExportCsvFull(conn)
+                    if arguments is None:
+                        csvfile = await action.execute(
+                            user=self.user
+                        )
+
+                    else:
+                        csvfile = await action.execute(
+                            filter=arguments,
+                            user=self.user
+                        )
+
+                    if output_stream is not None:
+                        output_stream.writestr(
+                            'full-export-%s.csv' % now.strftime(
+                                    "%Y%m%d%H%M%S"
+                            ),
+                            csvfile.getvalue()
+                        )
+
+                    else:
+                        self.set_header(
+                            "Content-Type",
+                            "text/csv"
+                        )
+                        self.set_header(
+                            "Content-Disposition",
+                            "inline; filename=full-export-%s.csv" % now.strftime(
+                                    "%Y%m%d%H%M%S"
+                            )
+                        )
+                        self.write(csvfile.getvalue())
+
                 if 'pdf' in arguments['format']:
 
-                    lan='it'
-                    idsty=6
-                    schema='bdms'
+                    lan = arguments['lang'] if 'lang' in arguments else 'en'
+                    idsty =6
+                    schema ='bdms'
 
                     if 'id' in arguments:
 
                         pdfs = []
 
-                        for bid in arguments['id'].split(','):
-                            bid = int(bid)
-                            sid = await conn.fetchval("""
-                                SELECT
-                                    id_sty
-	                            FROM
-                                    bdms.stratigraphy
-                                WHERE
-                                    id_bho_fk = $1
-                                AND
-                                    primary_sty IS TRUE
-                            """, bid)
+                        for cid in arguments['id'].split(','):
+                            cid = cid.split(':')
+                            if len(cid)==2:
+                                bid = int(cid[0])
+                                sid = int(cid[1])
 
-                            print("FOUND: ", sid)
+                                # TODO: test if passed sid belongs to passed bid
+                                # else raise error
+                            elif len(cid)==1:
+                                bid = int(cid[0])
+                                sid = await conn.fetchval("""
+                                    SELECT
+                                        id_sty
+                                    FROM
+                                        bdms.stratigraphy
+                                    WHERE
+                                        id_bho_fk = $1
+                                    AND
+                                        primary_sty IS TRUE
+                                """, bid)
+                            else:
+                                raise ValueError("id parameters are {berehole id}:{stratigraphy id}")
 
                             if sid is not None:
-                                        
                                 res = await conn.fetchval("""
                                     SELECT
                                         row_to_json(t2)
@@ -157,7 +206,7 @@ class ExportHandler(Viewer):
                                             cli_kind.text_cli_{} as kind,
                                             location_x_bho as location_e,
                                             location_y_bho as location_n,
-                                            elevation_z_bho as elevation_z,
+                                            COALESCE(elevation_z_bho, 0) as elevation_z,
                                             cli_srs.text_cli_{} as srs,
                                             cli_hrs.text_cli_{} as hrs,
                                             length_bho as length,
@@ -198,11 +247,13 @@ class ExportHandler(Viewer):
                                                         depth_from_lay as depth_from,
                                                         depth_to_lay as depth_to,
                                                         CASE
-                                                            WHEN elevation_z_bho is NULL THEN NULL
+                                                            WHEN elevation_z_bho is NULL 
+                                                            THEN 0 - depth_from_lay
                                                             ELSE elevation_z_bho - depth_from_lay
                                                         END AS msm_from,
                                                         CASE
-                                                            WHEN elevation_z_bho is NULL THEN NULL
+                                                            WHEN elevation_z_bho is NULL 
+                                                            THEN 0 - depth_to_lay
                                                             ELSE elevation_z_bho - depth_to_lay
                                                         END AS msm_to,
                                                         cli_lithostra.text_cli_{} as lithostratigraphy,
@@ -271,11 +322,9 @@ class ExportHandler(Viewer):
                                     ) AS t2
                                 """.format(*((lan,)*11 + (schema,)*18)), sid, sid, sid)
 
-                                print(res)
-
                                 a = bdms.bdmsPdf( json.loads(res))
                                 a.renderProfilePDF(
-                                    arguments['lang'] if 'lang' in arguments else 'de',
+                                    arguments['lang'] if 'lang' in arguments else 'en',
                                     int(arguments['scale']) if 'scale' in arguments else 200
                                 )
                                 a.close()

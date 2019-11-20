@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-S
+# -*- coding: utf-8 -*-
 from bms.v1.handlers import Producer
 from bms.v1.borehole.stratigraphy.layer import (
     CreateLayer,

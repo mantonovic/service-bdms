@@ -4,7 +4,7 @@ from bms.v1.action import Action
 
 class CreateStratigraphy(Action):
 
-    async def execute(self, id):
+    async def execute(self, id, user_id):
         # find default stratigraphy type
         id_cli = await self.conn.fetchval("""
             SELECT
@@ -30,9 +30,9 @@ class CreateStratigraphy(Action):
             "id": (
                 await self.conn.fetchval("""
                     INSERT INTO bdms.stratigraphy(
-                        id_bho_fk, kind_id_cli, primary_sty
+                        id_bho_fk, kind_id_cli, primary_sty, author_sty
                     )
-                    VALUES ($1, $2, $3) RETURNING id_sty
-                """, id, id_cli, True if cnt == 0 else False)
+                    VALUES ($1, $2, $3, $4) RETURNING id_sty
+                """, id, id_cli, True if cnt == 0 else False, user_id)
             )
         }

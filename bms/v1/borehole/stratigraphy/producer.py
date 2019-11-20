@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-S
+# -*- coding: utf-8 -*-
 from bms.v1.handlers import Producer
 from bms.v1.borehole.stratigraphy import (
+    AddBedrock,
     CreateStratigraphy,
     PatchStartigraphy,
     DeleteStratigraphy,
@@ -13,11 +14,12 @@ class StratigraphyProducerHandler(Producer):
         action = request.pop('action', None)
 
         if action in [
-            'CREATE',
-            'PATCH',
-            'DELETE',
+            'ADDBEDROCK',
             'CHECK',
-            'CLONE'
+            'CLONE',
+            'CREATE',
+            'DELETE',
+            'PATCH'
         ]:
 
             async with self.pool.acquire() as conn:
@@ -35,7 +37,11 @@ class StratigraphyProducerHandler(Producer):
                     )
 
                 elif action in [
-                    'PATCH', 'DELETE', 'CHECK', 'CLONE'
+                    'ADDBEDROCK',
+                    'CHECK',
+                    'CLONE', 
+                    'DELETE',
+                    'PATCH',
                 ]:
                     # Get Borehole id
                     id_bho = await conn.fetchval("""
@@ -52,8 +58,13 @@ class StratigraphyProducerHandler(Producer):
                         id_bho, self.user, conn
                     )
 
-                if action == 'CREATE':
+                if action == 'ADDBEDROCK':
+                    exe = AddBedrock(conn)
+                    request['user_id'] = self.user['id']
+
+                elif action == 'CREATE':
                     exe = CreateStratigraphy(conn)
+                    request['user_id'] = self.user['id']
 
                 elif action == 'DELETE':
                     exe = DeleteStratigraphy(conn)
