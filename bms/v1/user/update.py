@@ -12,9 +12,19 @@ class UpdateUser(Action):
         admin = False
     ):
 
-        exists = await (CheckUsername(self.conn)).execute(username)
-        if exists['exists']:
-            raise DuplicateException()
+        old_username = await self.conn.fetchval("""
+            SELECT
+                username
+            FROM
+                bdms.users
+            WHERE
+                id_usr = $1
+        """, user_id)
+
+        if old_username != username:
+            exists = await (CheckUsername(self.conn)).execute(username)
+            if exists['exists']:
+                raise DuplicateException()
 
         was_admin = await self.conn.fetchval("""
             SELECT admin_usr
