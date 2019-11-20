@@ -190,14 +190,10 @@ class ExportHandler(Viewer):
                                     AND
                                         primary_sty IS TRUE
                                 """, bid)
-                                print("SID:",sid)
                             else:
                                 raise ValueError("id parameters are {berehole id}:{stratigraphy id}")
 
-                            print(f"Processing berehole id {bid} and stratigraphy id {sid}")
-
                             if sid is not None:
-                                        
                                 res = await conn.fetchval("""
                                     SELECT
                                         row_to_json(t2)
@@ -326,8 +322,6 @@ class ExportHandler(Viewer):
                                             strat_j.id_sty = $3
                                     ) AS t2
                                 """.format(*((lan,)*11 + (schema,)*18)), sid, sid, sid)
-
-                                print(res)
 
                                 a = bdms.bdmsPdf( json.loads(res))
                                 a.renderProfilePDF(
