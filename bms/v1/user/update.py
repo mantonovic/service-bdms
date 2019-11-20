@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from bms.v1.action import Action
+from . import CheckUsername
+from bms.v1.exceptions import DuplicateException
 
 
 class UpdateUser(Action):
@@ -9,6 +11,11 @@ class UpdateUser(Action):
         firstname = '', middlename = '', lastname = '',
         admin = False
     ):
+
+        exists = await (CheckUsername(self.conn)).execute(username)
+        if exists['exists']:
+            raise DuplicateException()
+
         was_admin = await self.conn.fetchval("""
             SELECT admin_usr
             FROM
