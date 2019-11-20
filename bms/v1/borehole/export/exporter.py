@@ -6,7 +6,6 @@ from bms.v1.borehole.export import (
     ExportCsv,
     ExportCsvFull
 )
-from .pdf import PdfBorehole
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from io import BytesIO
 import zipfile
