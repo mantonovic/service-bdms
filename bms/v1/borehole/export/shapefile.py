@@ -101,6 +101,8 @@ class ExportShapefile(Action):
                 w.point(row['location_x'], row['location_y']) 
 
                 for col in keys:
+                    if key in ['location_x', 'location_y']:
+                        continue
                     if isinstance(row[col], list):
                         r.append(",".join(str(x) for x in row[col]))
                     else:
