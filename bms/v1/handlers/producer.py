@@ -9,8 +9,11 @@ from bms import (
 from bms.v1.borehole import (
     Lock
 )
-from datetime import datetime
-from datetime import timedelta
+from datetime import (
+    datetime,
+    timedelta,
+    timezone
+)
 import json
 
 
@@ -125,7 +128,7 @@ class Producer(BaseHandler):
         if workgroup is None or rec[3] not in workgroup['roles']:
             raise AuthorizationException()
 
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
 
         td = timedelta(minutes=Lock.lock_timeout)
 
