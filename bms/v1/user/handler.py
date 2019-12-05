@@ -19,7 +19,6 @@ class UserHandler(Viewer):
             roles = []
 
             for workgroup in self.user['workgroups']:
-                print(workgroup)
                 if workgroup['disabled'] is not None:
                     workgroup['roles'] = ['VIEW']
                 
