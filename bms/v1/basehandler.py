@@ -62,8 +62,10 @@ class BaseHandler(web.RequestHandler):
     async def prepare(self):
 
         auth_header = self.request.headers.get('Authorization')
+        auth_type = self.request.headers.get('bdms-authorization', False)
 
         if auth_header is None or not auth_header.startswith('Basic '):
+
             self.set_header('WWW-Authenticate', 'Basic realm=BDMS')
             self.set_status(401)
             self.finish()
@@ -184,14 +186,23 @@ class BaseHandler(web.RequestHandler):
                 """, username, password)
 
                 if val is None:
-                    self.set_header(
-                        'WWW-Authenticate',
-                        'Basic realm=BDMS'
-                    )
-                    self.set_status(401)
+
+                    if auth_type == 'bdms-v1':
+                        self.write({
+                            "success": False,
+                            "message": "Authentication error",
+                            "error": "E-102"
+                        })
+
+                    else:
+                        self.set_header(
+                            'WWW-Authenticate',
+                            'Basic realm=BDMS'
+                        )
+                        self.set_status(401)
+
                     self.finish()
                     return
-                    # raise AuthenticationException()
 
                 self.user = json.loads(val)
 
