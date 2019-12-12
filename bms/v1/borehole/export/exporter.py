@@ -46,8 +46,6 @@ class ExportHandler(Viewer):
             if 'format' not in arguments.keys():
                 raise MissingParameter("format")
 
-            print(arguments)
-
             now = datetime.datetime.now()
 
             self.set_header(

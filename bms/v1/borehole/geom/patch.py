@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import traceback
 from bms.v1.action import Action
 from bms.v1.exceptions import (
     PatchAttributeException
@@ -74,7 +75,7 @@ class PatchGeom(Action):
                                 WHERE id_bho = $2
                             """ % point, int(location[2]), id)
                     except Exception as e:
-                        print(str(e))
+                        print(traceback.print_exc())
 
             else:
                 raise PatchAttributeException(field)

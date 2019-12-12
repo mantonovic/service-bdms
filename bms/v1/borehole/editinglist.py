@@ -292,8 +292,6 @@ class ListEditingBorehole(Action):
             paging
         )
 
-        # print (sql, params)
-
         rec = await self.conn.fetchrow(
             sql, *(params)
         )

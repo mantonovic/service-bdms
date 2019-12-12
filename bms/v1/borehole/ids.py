@@ -42,9 +42,9 @@ class BoreholeIds(Action):
                         started_wkf as started,
                         finished_wkf as finished
                     FROM
-                        workflow,
-                        roles,
-                        users
+                        bdms.workflow,
+                        bdms.roles,
+                        bdms.users
                     WHERE
                         id_rol = id_rol_fk
                     AND
