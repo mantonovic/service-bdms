@@ -16,7 +16,7 @@ class MultiPatchBorehole(Action):
             await self.conn.execute("BEGIN;")
             for id in ids:
                 for field in fields:
-                    await patch.execute(id, field[0], field[1], user['id'])
+                    await patch.execute(id, field[0], field[1], user)
                     # tasks.append(
                     #     asyncio.ensure_future(
                     #         patch.execute(id, field[0], field[1], user['id'])
