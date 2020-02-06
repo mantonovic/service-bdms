@@ -169,9 +169,9 @@ class PatchBorehole(Action):
 
             # Datetime values
             elif field in [
-                        'restriction_until',
-                        'drilling_date'
-                    ]:
+                'restriction_until',
+                'drilling_date'
+            ]:
 
                 column = None
 
