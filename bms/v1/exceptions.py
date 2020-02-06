@@ -8,6 +8,11 @@ class BmsException(Exception):
         self.data = data
 
 
+class DatabaseVersionMissmatch(BmsException):
+    def __init__(self):
+        super().__init__("Database version missmatch", 'E-010')
+
+
 class ActionWrong(BmsException):
     def __init__(self):
         super().__init__("Server error", 'E-000')
