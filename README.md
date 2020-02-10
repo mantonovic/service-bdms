@@ -85,6 +85,7 @@ Config parameters:
 --pg-password      PostgrSQL user password (default postgres)
 --pg-port          PostgrSQL database port (default 5432)
 --pg-user          PostgrSQL database user (default postgres)
+--pg-upgrade       Upgrade PostgrSQL schema (default false)
 --port             Tornado Web port (default 8888)
 ```
 

@@ -8,6 +8,35 @@ class BmsException(Exception):
         self.data = data
 
 
+class BmsDatabaseException(BmsException):
+    def __init__(self, *arg, **args):
+        super().__init__(*arg, **args)
+
+
+class DatabaseUpgraded(BmsDatabaseException):
+    def __init__(self, version):
+        super().__init__(
+            f"Database upgraded to latest version (v{version})",
+            'E-011'
+        )
+
+
+class DatabaseAlreadyUpgraded(BmsDatabaseException):
+    def __init__(self, version):
+        super().__init__(
+            f"Database already upgraded to latest version (v{version})",
+            'E-011'
+        )
+
+
+class DatabaseVersionMissmatch(BmsDatabaseException):
+    def __init__(self, source_version, database_version):
+        super().__init__(
+            f"Database version (v{database_version}) missmatch source (v{source_version})",
+            'E-010'
+        )
+
+
 class ActionWrong(BmsException):
     def __init__(self):
         super().__init__("Server error", 'E-000')
