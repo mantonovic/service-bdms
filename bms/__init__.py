@@ -7,8 +7,11 @@ VALID = 3
 PUBLIC = 4
 
 from bms.v1.basehandler import BaseHandler
-from bms.v1.exceptions import DatabaseVersionMissmatch
 from bms.v1.exceptions import BmsException
+from bms.v1.exceptions import BmsDatabaseException
+from bms.v1.exceptions import DatabaseAlreadyUpgraded
+from bms.v1.exceptions import DatabaseUpgraded
+from bms.v1.exceptions import DatabaseVersionMissmatch
 from bms.v1.exceptions import AuthenticationException
 from bms.v1.exceptions import AuthorizationException
 from bms.v1.exceptions import WorkgroupFreezed
