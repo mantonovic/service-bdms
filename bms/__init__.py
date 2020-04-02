@@ -24,6 +24,16 @@ from bms.v1.exceptions import DuplicateException
 from bms.v1.borehole.producer import BoreholeProducerHandler
 from bms.v1.borehole.viewer import BoreholeViewerHandler
 
+# Identifiers's ACTION Handlers
+from bms.v1.borehole.identifier import CreateIdentifier
+from bms.v1.borehole.identifier import CreateIdentifier
+from bms.v1.borehole.identifier import DeleteIdentifier
+from bms.v1.borehole.identifier import PatchIdentifier 
+from bms.v1.borehole.identifier import ListIdentifiers 
+from bms.v1.borehole.identifier import IdentifierProducerHandler
+from bms.v1.borehole.identifier import IdentifierAdminHandler
+from bms.v1.borehole.identifier import IdentifierViewerHandler
+
 # Stratigraphy's ACTION Handlers
 from bms.v1.borehole.stratigraphy.viewer import StratigraphyViewerHandler
 from bms.v1.borehole.stratigraphy.producer import StratigraphyProducerHandler

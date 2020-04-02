@@ -221,6 +221,20 @@ class ListBorehole(Action):
             FROM
                 bdms.borehole
 
+            LEFT JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_agg(id_cli_fk) as identifiers,
+                    array_agg(value_bco) as identifiers_value
+                FROM
+                    bdms.borehole_codelist
+                WHERE
+                    code_cli = 'borehole_identifier'
+                    GROUP BY id_bho_fk
+            ) as ids
+            ON
+                ids.id_bho_fk = id_bho
+
             LEFT JOIN bdms.codelist as qt_tbed
                 ON qt_tbed.id_cli = qt_top_bedrock_id_cli
 
@@ -330,6 +344,20 @@ class ListBorehole(Action):
             ON
                 author_id = author.id_usr
 
+            LEFT JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_agg(id_cli_fk) as borehole_identifier,
+                    array_agg(value_bco) as identifier_value
+                FROM
+                    bdms.borehole_codelist
+                WHERE
+                    code_cli = 'borehole_identifier'
+                    GROUP BY id_bho_fk
+            ) as ids
+            ON
+                ids.id_bho_fk = id_bho
+
             INNER JOIN (
                 SELECT
                     id_bho_fk,
@@ -402,6 +430,7 @@ class ListBorehole(Action):
                 count(*) AS cnt
             FROM
                 bdms.borehole
+
             INNER JOIN (
                 SELECT
                     id_bho_fk,
@@ -438,6 +467,20 @@ class ListBorehole(Action):
             ) as v
             ON
                 v.id_bho_fk = id_bho
+
+            LEFT JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_agg(id_cli_fk) as borehole_identifier,
+                    array_agg(value_bco) as identifier_value
+                FROM
+                    bdms.borehole_codelist
+                WHERE
+                    code_cli = 'borehole_identifier'
+                    GROUP BY id_bho_fk
+            ) as ids
+            ON
+                ids.id_bho_fk = id_bho
         """
 
         if len(where) > 0:

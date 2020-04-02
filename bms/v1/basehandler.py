@@ -69,7 +69,7 @@ class BaseHandler(web.RequestHandler):
             self.set_header('WWW-Authenticate', 'Basic realm=BDMS')
             self.set_status(401)
             self.finish()
-            return # self.user
+            return
 
         async with self.pool.acquire() as conn:
 
@@ -91,25 +91,7 @@ class BaseHandler(web.RequestHandler):
                         firstname || ' ' || lastname as "name",
                         COALESCE(
                             settings_usr::json,
-                            '{'
-                            '   "filter": {},'
-                            '   "efilter": {},'
-                            '   "boreholetable": {'
-                            '        "orderby": "original_name",'
-                            '        "direction": "ASC"'
-                            '    },'
-                            '    "eboreholetable": {'
-                            '        "orderby": "creation",'
-                            '        "direction": "DESC"'
-                            '    },'
-                            '   "map": {'
-                            '       "explorer": {},'
-                            '       "editor": {}'
-                            '   },'
-                            '   "appearance": {'
-                            '       "explorer": 1'
-                            '   }'
-                            '}'::json
+                            value_cfg::json
                         ) as setting,
                         COALESCE(
                             w.ws, '{}'::json
@@ -122,6 +104,9 @@ class BaseHandler(web.RequestHandler):
                         ) AS roles
                     FROM
                         bdms.users
+
+                    INNER JOIN bdms.config
+                    ON name_cfg = 'SETTINGS'
 
                     LEFT JOIN (
                         SELECT
@@ -178,9 +163,12 @@ class BaseHandler(web.RequestHandler):
                     ) as w
                     ON w.id_usr_fk = id_usr
 
-                    WHERE username = $1
-                    AND password = crypt($2, password)
-                    AND disabled_usr IS NULL
+                    WHERE
+                        username = $1
+                    AND
+                        password = crypt($2, password)
+                    AND
+                        disabled_usr IS NULL
                 ) as t
             """, username, password)
 

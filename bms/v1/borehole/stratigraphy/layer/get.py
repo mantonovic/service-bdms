@@ -111,12 +111,25 @@ class GetLayer(Action):
                     COALESCE(
                         notes_lay, ''
                     ) AS notes,
-                    stratigraphy.kind_id_cli AS kind
+                    COALESCE(
+                        lk1.kind, '{{}}'::int[]
+                    ) AS kinds
                 FROM
                     bdms.layer
 
                 INNER JOIN bdms.stratigraphy as stratigraphy
-                ON id_sty_fk = stratigraphy.id_sty
+                ON layer.id_sty_fk = stratigraphy.id_sty
+
+                LEFT JOIN (
+                    SELECT
+                        id_sty_fk, array_agg(id_cli_fk) as kind
+                    FROM
+                        bdms.stratigraphy_codelist
+                    WHERE
+                        code_cli = 'layer_kind'
+                    GROUP BY id_sty_fk
+                ) lk1
+                ON lk1.id_sty_fk = stratigraphy.id_sty
 
                 INNER JOIN bdms.borehole
                 ON stratigraphy.id_bho_fk = id_bho
