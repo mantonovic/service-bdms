@@ -533,8 +533,6 @@ class ListBorehole(Action):
             paging
         )
 
-        print(sql)
-
         rec = await self.conn.fetchrow(
             sql, *(params)
         )
