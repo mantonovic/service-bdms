@@ -3,7 +3,7 @@
 """
 
 __author__ = 'Institute of Earth science - SUPSI'
-__version__ = '1.0.1'
+__version__ = '1.0.0'
 
 from tornado import web
 from tornado.options import define, options
@@ -37,13 +37,24 @@ sql_files = {
 }
 
 async def get_conn():
-    return await asyncpg.create_pool(
-        user=options.pg_user,
-        password=options.pg_password,
-        database=options.pg_database,
-        host=options.pg_host,
-        port=options.pg_port
-    )
+    try:
+        return await asyncpg.create_pool(
+            user=options.pg_user,
+            password=options.pg_password,
+            database=options.pg_database,
+            host=options.pg_host,
+            port=options.pg_port
+        )
+    except Exception as x:
+        red("Connection to db failed.")
+#         print(f""" - pg_user: {options.pg_user}
+#  - pg_password: {options.pg_password}
+#  - pg_database: {options.pg_database}
+#  - pg_host: {options.pg_host}
+#  - pg_port: {options.pg_port}
+# """)
+        raise x
+
 
 async def release_pool(pool):
     await pool.close()
@@ -246,48 +257,48 @@ if __name__ == "__main__":
 
     try:
         # Check system before startup
-        try:
-            ioloop.run_until_complete(
-                system_check(application.pool)
-            )
+#         try:
+#             ioloop.run_until_complete(
+#                 system_check(application.pool)
+#             )
 
-            if options.pg_upgrade:
-                raise DatabaseAlreadyUpgraded(__version__)
+#             if options.pg_upgrade:
+#                 raise DatabaseAlreadyUpgraded(__version__)
 
-        except DatabaseVersionMissmatch as dvm:
+#         except DatabaseVersionMissmatch as dvm:
 
-            # Upgrade the database automatically
-            if options.pg_upgrade:
-                answer = input("""
-You are going to upgrade your PostgreSQL schema.
-Be aware that this operation is not reversible.
-Before upgrading make sure you backup all your data.
+#             # Upgrade the database automatically
+#             if options.pg_upgrade:
+#                 answer = input("""
+# You are going to upgrade your PostgreSQL schema.
+# Be aware that this operation is not reversible.
+# Before upgrading make sure you backup all your data.
 
-Do you wish to continue? [yes/no] """)
+# Do you wish to continue? [yes/no] """)
 
-                if answer != "yes":
-                    raise dvm
+#                 if answer != "yes":
+#                     raise dvm
 
-                ioloop.run_until_complete(
-                    upgrade_database(application.pool)
-                )
+#                 ioloop.run_until_complete(
+#                     upgrade_database(application.pool)
+#                 )
 
-                raise DatabaseUpgraded(__version__)
+#                 raise DatabaseUpgraded(__version__)
 
-            else:
-                raise dvm
+#             else:
+#                 raise dvm
 
         http_server = HTTPServer(application)
         http_server.listen(options.port)
         ioloop.run_forever()
 
-    except DatabaseVersionMissmatch as dvm:
-        print(f"""
-\033[91m{dvm}\033[0m
+#     except DatabaseVersionMissmatch as dvm:
+#         print(f"""
+# \033[91m{dvm}\033[0m
 
-Run this script with --pg-upgrade parameter
-to upgrade your database automatically.
-""")
+# Run this script with --pg-upgrade parameter
+# to upgrade your database automatically.
+# """)
 
     except BmsDatabaseException as du:
         print(f"\n 😃 \033[92m{du}\033[0m\n")
