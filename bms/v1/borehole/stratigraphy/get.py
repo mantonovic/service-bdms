@@ -28,7 +28,10 @@ class GetStratigraphy(Action):
                         ) t
                     ) as borehole,
                     id_sty as id,
-                    stratigraphy.kind_id_cli as kind,
+                    -- stratigraphy.kind_id_cli as kind,
+                    COALESCE(
+                        kind, '{{}}'::int[]
+                    ) AS kinds,
                     COALESCE(name_sty, '') as name,
                     primary_sty as primary,
                     to_char(
@@ -38,6 +41,17 @@ class GetStratigraphy(Action):
 
                 FROM
                     bdms.stratigraphy
+
+                LEFT JOIN (
+                    SELECT
+                        id_sty_fk, array_agg(id_cli_fk) as kind
+                    FROM
+                        bdms.stratigraphy_codelist
+                    WHERE
+                        code_cli = 'layer_kind'
+                    GROUP BY id_sty_fk
+                ) lk
+                ON lk.id_sty_fk = id_sty
 
                 INNER JOIN bdms.borehole
                     ON stratigraphy.id_bho_fk = id_bho

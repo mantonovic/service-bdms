@@ -104,6 +104,20 @@ class ListEditingBorehole(Action):
 
             FROM
                 bdms.borehole
+
+            LEFT JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_agg(id_cli_fk) as borehole_identifier,
+                    array_agg(value_bco) as identifier_value
+                FROM
+                    bdms.borehole_codelist
+                WHERE
+                    code_cli = 'borehole_identifier'
+                    GROUP BY id_bho_fk
+            ) as ids
+            ON
+                ids.id_bho_fk = id_bho
                 
             INNER JOIN bdms.workgroups
             ON id_wgp = id_wgp_fk
@@ -167,7 +181,7 @@ class ListEditingBorehole(Action):
                         array_agg(
                             json_build_object(
                                 'id', id,
-                                'kind', kind,
+                                'kinds', kinds,
                                 'layers', layers,
                                 'date', date
                             )
@@ -177,18 +191,28 @@ class ListEditingBorehole(Action):
                     SELECT
                         id_bho_fk,
                         id_sty AS id,
-                        id_cli AS kind,
+                        COALESCE(
+                            kind, '{{}}'::int[]
+                        ) AS kinds,
                         to_char(
                             date_sty, 'YYYY-MM-DD'
                         ) AS date,
                         COUNT(id_lay) AS layers
                     FROM
                         bdms.stratigraphy
-                    INNER JOIN bdms.codelist
-                        ON kind_id_cli = id_cli
+                    LEFT JOIN (
+                        SELECT
+                            id_sty_fk, array_agg(id_cli_fk) as kind
+                        FROM
+                            bdms.stratigraphy_codelist as scl
+                        WHERE
+                            code_cli = 'layer_kind'
+                        GROUP BY id_sty_fk
+                    ) lk
+                        ON lk.id_sty_fk = id_sty
                     LEFT JOIN bdms.layer
-                        ON id_sty_fk = id_sty
-                    GROUP BY id_bho_fk, id_sty, id_cli, date_sty
+                        ON layer.id_sty_fk = id_sty
+                    GROUP BY id_bho_fk, id_sty, kind, date_sty
                     ORDER BY date_sty DESC, id_sty DESC
                 ) t
                 GROUP BY id_bho_fk
@@ -239,6 +263,20 @@ class ListEditingBorehole(Action):
             ) as v
             ON
                 v.id_bho_fk = id_bho
+
+            LEFT JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_agg(id_cli_fk) as borehole_identifier,
+                    array_agg(value_bco) as identifier_value
+                FROM
+                    bdms.borehole_codelist
+                WHERE
+                    code_cli = 'borehole_identifier'
+                    GROUP BY id_bho_fk
+            ) as ids
+            ON
+                ids.id_bho_fk = id_bho
 
             INNER JOIN
                 bdms.completness

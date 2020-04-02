@@ -112,6 +112,7 @@ class GetBorehole(Action):
                         SELECT row_to_json(t)
                         FROM (
                             SELECT
+                                identifiers,
                                 COALESCE(
                                     project_name_bho, ''
                                 ) as project_name,
@@ -161,6 +162,28 @@ class GetBorehole(Action):
 
                 INNER JOIN bdms.workgroups
                 ON id_wgp = id_wgp_fk
+
+                LEFT JOIN (
+                    SELECT
+                        id_bho_fk,
+                        array_to_json(array_agg(j)) as identifiers
+                    FROM (
+                        SELECT
+                            id_bho_fk,
+                            json_build_object(
+                                'id', id_cli_fk,
+                                'value', value_bco
+                            ) as j
+                        FROM
+                            bdms.borehole_codelist
+                        WHERE
+                            code_cli = 'borehole_identifier'
+                    ) t
+                    GROUP BY
+                        id_bho_fk
+                ) as idf
+                ON
+                    idf.id_bho_fk = id_bho
 
                 INNER JOIN (
                     SELECT
@@ -217,19 +240,6 @@ class GetBorehole(Action):
                 LEFT JOIN bdms.municipalities
                     ON municipalities.gid = city_bho
 
-                /*
-                LEFT JOIN (
-                    SELECT
-                        id_bho_fk, array_agg(id_cli_fk) as ate
-                    FROM
-                        bdms.borehole_codelist
-                    WHERE
-                        code_cli = 'madm404'
-                    GROUP BY id_bho_fk
-                ) tmadm404
-                    ON tmadm404.id_bho_fk = borehole.id_bho
-                */
-
                 LEFT JOIN (
                     SELECT
                         id_bho_fk,
@@ -237,7 +247,7 @@ class GetBorehole(Action):
                             array_agg(
                                 json_build_object(
                                     'id', id,
-                                    'kind', kind,
+                                    'kinds', kinds,
                                     'name', "name",
                                     'primary', "primary",
                                     'layers', layers,
@@ -249,20 +259,35 @@ class GetBorehole(Action):
                         SELECT
                             id_bho_fk,
                             id_sty AS id,
-                            id_cli AS kind,
+                            COALESCE(
+                                kind, '{{}}'::int[]
+                            ) AS kinds,
                             name_sty AS "name",
                             primary_sty as "primary",
                             to_char(
                                 date_sty, 'YYYY-MM-DD'
                             ) AS date,
                             COUNT(id_lay) AS layers
+
                         FROM
                             bdms.stratigraphy
-                        INNER JOIN bdms.codelist
-                            ON kind_id_cli = id_cli
+                        
+                        LEFT JOIN (
+                            SELECT
+                                id_sty_fk, array_agg(id_cli_fk) as kind
+                            FROM
+                                bdms.stratigraphy_codelist
+                            WHERE
+                                code_cli = 'layer_kind'
+                            GROUP BY id_sty_fk
+                        ) lk
+                        ON lk.id_sty_fk = id_sty
+                        
                         LEFT JOIN bdms.layer
-                            ON id_sty_fk = id_sty
-                        GROUP BY id_bho_fk, id_sty, id_cli, date_sty
+                            ON layer.id_sty_fk = id_sty
+
+                        GROUP BY id_bho_fk, id_sty, date_sty, kind
+
                         ORDER BY date_sty DESC, id_sty DESC
                     ) t
                     GROUP BY id_bho_fk

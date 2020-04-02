@@ -89,7 +89,7 @@ async def upgrade_database(pool):
                         now(), 'YYYY-MM-DD"T"HH24:MI:SSOF'
                     )
                 WHERE
-                    name_cfg = 'PG-UPGRADE';
+                    name_cfg = 'PG_UPGRADE';
             """)
 
             # Update previous version
@@ -163,6 +163,11 @@ if __name__ == "__main__":
         # BoreholeExporterHandler,
         ExportHandler,
 
+        # Identifier handlers
+        IdentifierAdminHandler,
+        IdentifierProducerHandler,
+        IdentifierViewerHandler,
+
         # Stratigraphy handlers
         StratigraphyViewerHandler,
         StratigraphyProducerHandler,
@@ -208,6 +213,11 @@ if __name__ == "__main__":
         (r'/api/v1/borehole/edit', BoreholeProducerHandler),
         (r'/api/v1/borehole/download', ExportHandler),
         (r'/api/v1/borehole/upload', BoreholeProducerHandler),
+
+        # Stratigraphy handlers
+        (r'/api/v1/borehole/identifier', IdentifierViewerHandler),
+        (r'/api/v1/borehole/identifier/edit', IdentifierProducerHandler),
+        (r'/api/v1/borehole/identifier/admin', IdentifierAdminHandler),
 
         # Workflow handlers
         (r'/api/v1/workflow/edit', WorkflowProducerHandler),

@@ -41,7 +41,9 @@ class ListStratigraphies(Action):
             SELECT
                 id_sty as id,
                 stratigraphy.id_bho_fk as borehole,
-                stratigraphy.kind_id_cli as kind,
+                COALESCE(
+                    lk1.kind, '{}'::int[]
+                ) AS kinds,
                 name_sty as name,
                 primary_sty as primary,
                 to_char(
@@ -50,6 +52,17 @@ class ListStratigraphies(Action):
                 ) as date
             FROM
                 bdms.stratigraphy
+
+            LEFT JOIN (
+                SELECT
+                    id_sty_fk, array_agg(id_cli_fk) as kind
+                FROM
+                    bdms.stratigraphy_codelist
+                WHERE
+                    code_cli = 'layer_kind'
+                GROUP BY id_sty_fk
+            ) lk1
+            ON lk1.id_sty_fk = id_sty
 
             INNER JOIN bdms.borehole
             ON stratigraphy.id_bho_fk = id_bho
@@ -91,8 +104,6 @@ class ListStratigraphies(Action):
             ON
                 v.id_bho_fk = id_bho
 
-            INNER JOIN bdms.codelist AS lk
-            ON lk.id_cli = stratigraphy.kind_id_cli
         """
 
         cntSql = """
@@ -174,7 +185,7 @@ class ListStratigraphies(Action):
                 ), 0)
             FROM (
                 %s
-            ORDER BY order_cli, date_sty desc
+            ORDER BY date_sty desc
                 %s
             ) AS t
         """ % (cntSql, rowsSql, paging)

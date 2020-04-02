@@ -177,6 +177,21 @@ class Action():
                     id_wgp_fk = %s
                 """ % self.getIdx())
 
+            if 'borehole_identifier' in keys and filter['borehole_identifier'] != None:
+                params.append(int(filter['borehole_identifier']))
+                where.append("""(
+                    borehole_identifier IS NOT NULL 
+                    AND
+                    %s = ANY (borehole_identifier)
+                )
+                """ % self.getIdx())
+
+            if 'identifier_value' in keys and filter['identifier_value'] != '':
+                params.append("%%%s%%" % filter['identifier_value'])
+                where.append("""
+                    array_to_string(identifier_value, ',') ILIKE %s
+                """ % self.getIdx())
+
             if 'identifier' in keys and filter['identifier'] != '':
                 if filter['identifier'] == '$null':
                     where.append("""
