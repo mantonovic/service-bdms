@@ -49,8 +49,8 @@ And then:
 ```bash
 psql -U postgres -d bdms -h localhost -p 9432 -f db/1_schema.sql
 psql -U postgres -d bdms -h localhost -p 9432 -f db/2_data.sql
-psql -U postgres -d bdms -h localhost -p 9432 -f db/4_municipalities.sql
 psql -U postgres -d bdms -h localhost -p 9432 -f db/3_cantons.sql
+psql -U postgres -d bdms -h localhost -p 9432 -f db/4_municipalities.sql
 ```
 
 ## Run Server
