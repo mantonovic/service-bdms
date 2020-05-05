@@ -217,9 +217,7 @@ class BaseHandler(web.RequestHandler):
 
             self.write(
                 {
-                    **{
-                        "success": True
-                    },
+                    **{"success": True},
                     **response
                 }
             )
