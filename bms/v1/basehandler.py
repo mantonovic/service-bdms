@@ -94,7 +94,7 @@ class BaseHandler(web.RequestHandler):
                             value_cfg::json
                         ) as setting,
                         COALESCE(
-                            w.ws, '{}'::json
+                            w.ws, '[]'::json
                         ) AS workgroups,
                         COALESCE(
                             w.wgps, '{}'::int[]
@@ -215,12 +215,10 @@ class BaseHandler(web.RequestHandler):
             if response is None:
                 response = {}
 
-            self.write(
-                {
-                    **{"success": True},
-                    **response
-                }
-            )
+            self.write({
+                **{"success": True},
+                **response
+            })
 
         except BmsException as bex:
             print(traceback.print_exc())
