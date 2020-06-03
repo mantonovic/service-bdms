@@ -43,3 +43,19 @@
    CSV importer API path has been changed from '/api/v1/borehole/upload' to
    '/api/v1/borehole/edit/import' and the POST-ed action param changed from
    'UPLOAD' to 'IMPORTCSV'
+
+### Update from 1.0.0 to 1.0.0-RC1
+
+Install boto3 in your python virtual env
+
+```bash
+source venv/bin/activate
+```
+
+Upgrade the postgresql schema by running this SQL script:
+
+```bash
+psql -U postgres -d bdms \
+ -h localhost -p 9432 \
+ -f assets/sql/1.0.0_to_1.0.1-RC1.sql
+```
