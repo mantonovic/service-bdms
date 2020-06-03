@@ -24,7 +24,6 @@ CREATE TABLE bdms.files (
     id_fil serial,
     id_usr_fk integer,
     name_fil character varying NOT NULL,
-    description_fil character varying NOT NULL,
     hash_fil character varying NOT NULL,
     type_fil character varying NOT NULL,
     uploaded_fil timestamp with time zone DEFAULT now(),
