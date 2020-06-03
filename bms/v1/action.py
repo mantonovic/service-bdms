@@ -81,7 +81,7 @@ class Action():
                     )
 
         # If user is a viewer then he/she can see all published boreholes
-        if user['viewer'] == True:
+        if user['viewer'] is True:
             where.append(f"""
                 borehole.public_bho IS TRUE
             """)
@@ -90,23 +90,6 @@ class Action():
         # the belonging boreholes with his role active
         if user['workgroups'] is not None:
             for workgroup in user['workgroups']:
-
-                # role_filter = ""
-                # if len(workgroup['roles']) == 1:
-                #     role_filter = f" = '{workgroup['roles'][0]}'"
-                # else:
-                #     role_filter = f"""
-                #         IN ('{ "', '".join(workgroup['roles'])}')
-                #     """
-
-                # where.append(f"""
-                #     id_wgp_fk = {workgroup['id']}
-                #     AND (
-                #         status[
-                #             array_length(status, 1)
-                #         ]  ->> 'role'
-                #     ) {role_filter}
-                # """)
 
                 # User can see not finished data belonging to his workgroups 
                 where.append(f"""

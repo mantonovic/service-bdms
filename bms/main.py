@@ -12,6 +12,8 @@ import asyncio
 import asyncpg
 from tornado.httpserver import HTTPServer
 import sys
+from pathlib import Path
+import configparser
 
 sys.path.append('.')
 
@@ -23,9 +25,21 @@ define("pg_port", default="5432", help="PostgrSQL database port")
 define("pg_database", default="bms", help="PostgrSQL database name")
 define("pg_upgrade", default=False, help="Upgrade PostgrSQL schema", type=bool)
 
+define("file_repo", default='local', help="Select the file repository", type=str)
+
+# Local storage for files configuration
+define("local_path", default=str(Path.home()), help="Select local path", type=str)
+
+# AWS S3 stzorage for files configuration
+define("aws_bucket", default='bdms', help="Select AWS Bucket name", type=str)
+define("aws_credentials", default=None, help="AWS S3 credential file location (overwrite aws_access_key_id and aws_secret_access_key)", type=str)
+define("aws_access_key_id", default=None, help="AWS S3 access key id", type=str)
+define("aws_secret_access_key", default=None, help="AWS S3 secret access key", type=str)
+
 # Ordered list of available versions
 versions = [
-    "1.0.0"
+    "1.0.0",
+    "1.0.1-RC1"
 ]
 
 # SQL upgrades directory
@@ -33,7 +47,7 @@ udir = "./bms/assets/sql/"
 
 # SQL to execute for upgrades
 sql_files = {
-    "1.0.0": f"{udir}1.0.0_to_1.0.1.sql"
+    "1.0.0": f"{udir}1.0.0_to_1.0.1-RC1.sql"
 }
 
 async def get_conn():
@@ -47,12 +61,6 @@ async def get_conn():
         )
     except Exception as x:
         red("Connection to db failed.")
-#         print(f""" - pg_user: {options.pg_user}
-#  - pg_password: {options.pg_password}
-#  - pg_database: {options.pg_database}
-#  - pg_host: {options.pg_host}
-#  - pg_port: {options.pg_port}
-# """)
         raise x
 
 
@@ -173,6 +181,7 @@ if __name__ == "__main__":
         BoreholeProducerHandler,
         # BoreholeExporterHandler,
         ExportHandler,
+        FileHandler,
 
         # Identifier handlers
         IdentifierAdminHandler,
@@ -223,7 +232,8 @@ if __name__ == "__main__":
         (r'/api/v1/borehole', BoreholeViewerHandler),
         (r'/api/v1/borehole/edit', BoreholeProducerHandler),
         (r'/api/v1/borehole/download', ExportHandler),
-        (r'/api/v1/borehole/upload', BoreholeProducerHandler),
+        (r'/api/v1/borehole/edit/import', BoreholeProducerHandler),
+        (r'/api/v1/borehole/edit/files', FileHandler),
 
         # Stratigraphy handlers
         (r'/api/v1/borehole/identifier', IdentifierViewerHandler),
@@ -254,6 +264,24 @@ if __name__ == "__main__":
     ], **settings)
 
     application.pool = ioloop.run_until_complete(get_conn())
+
+    if options.file_repo == 's3':
+
+        if options.aws_credentials is None:
+            raise Exception("AWS Credential file missing")
+        
+        config = configparser.ConfigParser()
+        config.read(options.aws_credentials)
+
+        if (
+            'default' not in config or
+            'aws_access_key_id' not in config['default'] or
+            'aws_secret_access_key' not in config['default']
+        ):
+            raise Exception("AWS Credential wrong")
+
+        options.aws_access_key_id = config['default']['aws_access_key_id']
+        options.aws_secret_access_key = config['default']['aws_secret_access_key']
 
     try:
         # Check system before startup

@@ -9,3 +9,4 @@ pyshp
 svglib
 svg2rlg
 spatialite
+boto3

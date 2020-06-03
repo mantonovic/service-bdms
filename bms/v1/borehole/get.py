@@ -7,6 +7,8 @@ class GetBorehole(Action):
     async def execute(self, id, with_lock = True, user=None):
 
         permission = ''
+        file_permission = ''
+        
 
         if user is not None:
             permission = """
@@ -14,6 +16,37 @@ class GetBorehole(Action):
             """.format(
                 self.filterPermission(user)
             )
+        
+        if (
+            user['workgroups'] is None or
+            len(user['workgroups']) == 0
+        ):
+            file_permission = ' WHERE public_bfi IS TRUE '
+
+        else:
+            where = []
+            for workgroup in user['workgroups']:
+                where.append(f"""
+                    id_wgp_fk = {workgroup['id']}
+                """)
+
+            exists = await self.conn.fetchval(
+                """
+                    SELECT EXISTS(
+                        SELECT 1
+                        FROM bdms.borehole
+                        WHERE
+                            id_bho = $1
+                        AND
+                            ({})
+                    ) AS exists
+                """.format(
+                    ' OR '.join(where)
+                ), id
+            )
+
+            if exists is False:
+                file_permission = ' WHERE public_bfi IS TRUE '
 
         sql_lock = ""
         if with_lock:
@@ -155,8 +188,8 @@ class GetBorehole(Action):
                         ) t
                     ) as workgroup,
                     status[array_length(status, 1)] as workflow,
-                    status[array_length(status, 1)]  ->> 'role' as "role"
-
+                    status[array_length(status, 1)]  ->> 'role' as "role",
+                    COALESCE(atc.attachments, 0) as attachments
                 FROM
                     bdms.borehole
 
@@ -184,6 +217,25 @@ class GetBorehole(Action):
                 ) as idf
                 ON
                     idf.id_bho_fk = id_bho
+
+                LEFT JOIN (
+                    SELECT
+                        id_bho_fk,
+                        count(id_fil) as attachments
+                    FROM
+                        bdms.files
+                    INNER JOIN
+                        bdms.borehole_files
+                    ON
+                        id_fil_fk = id_fil
+
+                    {file_permission}
+                    
+                    GROUP BY
+                        id_bho_fk
+                ) AS atc
+                ON
+                    atc.id_bho_fk = id_bho
 
                 INNER JOIN (
                     SELECT

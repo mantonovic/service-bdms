@@ -33,8 +33,8 @@ class UserHandler(Viewer):
                     "admin": self.user['admin'],
                     "viewer": self.user['viewer'],
                     "username": self.user['username'],
-                    "roles": roles,  # self.user['roles'],
-                    "workgroups": workgroups, #  self.user['workgroups'],
+                    "roles": roles,
+                    "workgroups": workgroups,
                     "name": self.user['name']
                 }
             }

@@ -2,6 +2,7 @@
 from bms.v1.handlers import Viewer
 from bms.v1.borehole import (
     ListBorehole,
+    ListFilesBorehole,
     GetBorehole,
     ListGeojson
 )
@@ -15,16 +16,18 @@ class BoreholeViewerHandler(Viewer):
         action = request.pop('action', None)
 
         if action in [
-                'LIST',
-                'GET',
-                'GEOJSON']:
+            'LIST',
+            'LISTFILES',
+            'GET',
+            'GEOJSON',
+        ]:
 
             async with self.pool.acquire() as conn:
 
                 exe = None
 
                 request['user'] = self.user
-                
+
                 if action == 'LIST':
                     exe = ListBorehole(conn)
 
@@ -64,6 +67,9 @@ class BoreholeViewerHandler(Viewer):
                         request['direction'] = self.user[
                             'setting'
                         ]['boreholetable']['direction']
+
+                elif action == 'LISTFILES':
+                    exe = ListFilesBorehole(conn)
 
                 elif action == 'GET':
                     exe = GetBorehole(conn)
