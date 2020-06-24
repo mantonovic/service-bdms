@@ -35,6 +35,22 @@
    To handle the new attachments feature, two new tables were added to the
    schema bdms: **files** and **borehole_files**
 
+ - **Simple Import with CSV**:
+   
+   As editor, importing new data using csv now handles more fields. In particular you can import easily a list of boreholes using this columns descriptors:
+
+   - **location_east** (*numeric*): **mandatory**
+   - **location_north** (*numeric*): **mandatory**
+   - **public_name** (*text*): **mandatory**
+   - location_z (*numeric*): *optional*
+   - original_name (*text*): optional
+   - project_name (*text*): optional
+   - drilling_date (*text*): optional
+   - total_depth (*numeric*): optional
+   - top_bedrock (*numeric*): optional
+   - remarks (*text*): optional
+
+   Note: The column order can be exchanged.
 
 ### Backwards incompatible changes
 

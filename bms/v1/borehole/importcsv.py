@@ -10,14 +10,20 @@ from bms.v1.borehole.check import CheckBorehole
 
 The CSV file shall have this structure, without the header:
 
-location_east;location_north;original_name
-2679500;1177500;prova1
-2669940;1209820;prova2
-
+location_east;location_north;original_name;public_name;project_name;elevation_z;drillend_date;total_depth;top_bedrock;remarks
+2719603;1081038.5;"test001";"foo";"bar";"foobar";273.7;"2020-06-16";28.2;18.7;"lorem ipsum"
+2719603;1081038.5;"test002";"foo";"bar";"foobar";273.7;"2020-06-16";28.2;18.7;"lorem ipsum"
+2719603;1081038.5;"test002";"foo";"bar";"foobar";273.7;"2020-06-16";28.2;18.7;"lorem ipsum"
 
 """
 
 class ImportCsv(Action):
+
+    mandatory_columns = [
+        "location_east",
+        "location_north",
+        "public_name"
+    ]
 
     async def execute(self, file, id, user):
 
@@ -25,60 +31,143 @@ class ImportCsv(Action):
         reader = csv.reader(file, delimiter=';', quotechar='"')
         rows = list(reader)
         line = 1
-        for row in rows[1:]:
-            line += 1
-            if len(row) != 3:
-                raise Exception("Columns number wrong")
 
-            location_x = float(row[0])
-            location_y = float(row[1])
-            if (
-                location_x < 2485869.5728 or
-                location_x > 2837076.5648
-            ) or (
-                location_y < 1076443.1884 or
-                location_y > 1299941.7864
-            ):
-                raise Exception(f"Line {line}: coordinates outside Switzerland")
+        # Check optional / mandatory columns
 
-            data = await check.execute(
-                'extended.original_name', row[2]
-            )
+        columns = {
+            "location_east": {
+                "col_num": None,
+                "field": "location_x"
+            },
+            "location_north": {
+                "col_num": None,
+                "field": "location_y"
+            },
+            "elevation_z": {
+                "col_num": None,
+                "field": "elevation_z"
+            },
+            "public_name": {
+                "col_num": None,
+                "field": "custom.public_name"
+            },
+            "original_name": {
+                "col_num": None,
+                "field": "extended.original_name"
+            },
+            "project_name": {
+                "col_num": None,
+                "field": "custom.project_name"
+            },
+            "drillend_date": {
+                "col_num": None,
+                "field": "drilling_date"
+            },
+            "total_depth": {
+                "col_num": None,
+                "field": "length"
+            },
+            "top_bedrock": {
+                "col_num": None,
+                "field": "extended.top_bedrock"
+            },
+            "remarks": {
+                "col_num": None,
+                "field": "custom.remarks"
+            }
+        }
 
-            if data['check'] is False:
-                raise Exception(f'Line {line}: Borehole "{row[2]}" already exists')
+        keys = columns.keys()
 
-        create = CreateBorehole(self.conn)
-        patch = PatchBorehole(self.conn)
+        for index, column in enumerate(rows[0]):
+            if column in keys:
+                # Check if already set (duplicate columns error)
+                if columns[column]['col_num'] is not None:
+                    raise Exception(f"Duplicate column '{column}' found.")
 
-        for row in rows[1:]:
+                columns[column]['col_num'] = index
 
-            location_x = float(row[0])
-            location_y = float(row[1])
+        # Check mandatory columns
+        for column in self.mandatory_columns:
+            if columns[column]['col_num'] is None:
+                mc = ','.join(self.mandatory_columns)
+                raise Exception(
+                    f"Missing one or more mandatory columns ({mc})"
+                )
 
-            # Creating a new borehole
-            bid = await create.execute(id, user)
+        try:
+            await self.conn.execute("BEGIN;")
 
-            # Setting the coordinates
-            await patch.execute(
-                bid['id'],
-                'location_x',
-                location_x,
-                user
-            )
+            # Skipping header
+            for row in rows[1:]:
+                line += 1
 
-            await patch.execute(
-                bid['id'],
-                'location_y',
-                location_y,
-                user
-            )
+                location_x = float(row[columns['location_east']['col_num']])
+                location_y = float(row[columns['location_north']['col_num']])
 
-            await patch.execute(
-                bid['id'],
-                'extended.original_name',
-                row[2],
-                user
-            )
+                if (
+                    location_x < 2485869.5728 or
+                    location_x > 2837076.5648
+                ) or (
+                    location_y < 1076443.1884 or
+                    location_y > 1299941.7864
+                ):
+                    raise Exception(
+                        f"Line {line}: coordinates outside Switzerland"
+                    )
+
+                # Check borehole original_name duplicates
+                if columns['original_name']['col_num'] is not None:
+                    original_name = row[columns['original_name']['col_num']]
+                    data = await check.execute(
+                        'extended.original_name',
+                        original_name
+                    )
+                    if data['check'] is False:
+                        raise Exception(
+                            f'Line {line}: Borehole "{original_name}" already exists'
+                        )
+
+            create = CreateBorehole(self.conn)
+            patch = PatchBorehole(self.conn)
+
+            for row in rows[1:]:
+
+                # Creating a new borehole
+                bid = await create.execute(id, user)
+
+                for column in columns:
+
+                    # Get user defined column index
+                    col_num = columns[column]['col_num']
+
+                    if col_num is not None:
+
+                        value = None
+                        field = columns[column]['field']
+
+                        # Cast numeric values to float
+                        if column in [
+                            'location_east',
+                            'location_north',
+                            'elevation_z',
+                            'top_bedrock',
+                            'total_depth'
+                        ]:
+                            value = float(row[col_num])
+
+                        else:
+                            value = row[col_num]
+
+                        # Patch borehole
+                        await patch.execute(
+                            bid['id'], field, value, user
+                        )
+
+            await self.conn.execute("COMMIT;")
+
+        except Exception as ex:
+            await self.conn.execute("ROLLBACK;")
+            raise ex
 
         return None
