@@ -191,7 +191,7 @@ class ExportHandler(Viewer):
                                 raise ValueError("id parameters are {berehole id}:{stratigraphy id}")
 
                             if sid is not None:
-                                res = await conn.fetchval("""
+                                res = await conn.fetchval(f"""
                                     SELECT
                                         row_to_json(t2)
                                     FROM (
@@ -201,24 +201,24 @@ class ExportHandler(Viewer):
                                             cant_j.name as canton,
                                             mun_j.name as city,
                                             address_bho as address,
-                                            cli_kind.text_cli_{} as kind,
+                                            cli_kind.text_cli_{lan} as kind,
                                             location_x_bho as location_e,
                                             location_y_bho as location_n,
                                             COALESCE(elevation_z_bho, 0) as elevation_z,
-                                            cli_srs.text_cli_{} as srs,
-                                            cli_hrs.text_cli_{} as hrs,
+                                            cli_srs.text_cli_{lan} as srs,
+                                            cli_hrs.text_cli_{lan} as hrs,
                                             length_bho as length,
                                             drilling_date_bho as drilling_date,
-                                            cli_restriction.text_cli_{} as restriction,
+                                            cli_restriction.text_cli_{lan} as restriction,
                                             to_char(
                                                 restriction_until_bho,
                                                 'YYYY-MM-DD'
                                             ) as restrictoin_until,
-                                            cli_purpose.text_cli_{} as purpose,
-                                            cli_landuse.text_cli_{} as landuse,
-                                            cli_cuttings.text_cli_{} as cuttings,
-                                            cli_method.text_cli_{} as method,
-                                            cli_status.text_cli_{} as status,
+                                            cli_purpose.text_cli_{lan} as purpose,
+                                            cli_landuse.text_cli_{lan} as landuse,
+                                            cli_cuttings.text_cli_{lan} as cuttings,
+                                            cli_method.text_cli_{lan} as method,
+                                            cli_status.text_cli_{lan} as status,
                                             drill_diameter_bho as drill_diameter,
                                             bore_inc_bho as bore_inc,
                                             bore_inc_dir_bho as bore_inc_dir,
@@ -254,23 +254,23 @@ class ExportHandler(Viewer):
                                                             THEN 0 - depth_to_lay
                                                             ELSE elevation_z_bho - depth_to_lay
                                                         END AS msm_to,
-                                                        cli_lithostra.text_cli_{} as lithostratigraphy,
+                                                        cli_lithostra.text_cli_{lan} as lithostratigraphy,
                                                         cli_lithostra.conf_cli as conf_lithostra,
                                                         cli_lithostra.geolcode as geolcode_lithostra,
-                                                        cli_lithology.text_cli_{} as lithology,
+                                                        cli_lithology.text_cli_{lan} as lithology,
                                                         cli_lithology.conf_cli as conf_lithology,
                                                         description_lay as layer_desc,
                                                         geology_lay as geol_desc,
                                                         name_sty as name_st,
                                                         notes_lay as notes
                                                     FROM
-                                                        {}.layer
-                                                            LEFT JOIN {}.codelist as cli_lithostra
+                                                        {schema}.layer
+                                                            LEFT JOIN {schema}.codelist as cli_lithostra
                                                                 ON cli_lithostra.id_cli = lithostratigraphy_id_cli
-                                                            LEFT JOIN {}.codelist as cli_lithology
+                                                            LEFT JOIN {schema}.codelist as cli_lithology
                                                                 ON cli_lithology.id_cli = lithology_id_cli,
-                                                        {}.stratigraphy,
-                                                        {}.borehole
+                                                        {schema}.stratigraphy,
+                                                        {schema}.borehole
                                                     WHERE
                                                         id_sty_fk = id_sty
                                                     AND
@@ -284,32 +284,32 @@ class ExportHandler(Viewer):
                                             ) AS t
                                         ) AS layers 
                                         FROM 
-                                            {}.borehole
-                                        LEFT JOIN {}.codelist as cli_kind
+                                            {schema}.borehole
+                                        LEFT JOIN {schema}.codelist as cli_kind
                                             ON cli_kind.id_cli = kind_id_cli
-                                        LEFT JOIN {}.codelist as cli_srs
+                                        LEFT JOIN {schema}.codelist as cli_srs
                                             ON cli_srs.id_cli = srs_id_cli
-                                        LEFT JOIN {}.codelist as cli_hrs
+                                        LEFT JOIN {schema}.codelist as cli_hrs
                                             ON cli_hrs.id_cli = hrs_id_cli
-                                        LEFT JOIN {}.codelist as cli_restriction
+                                        LEFT JOIN {schema}.codelist as cli_restriction
                                             ON cli_restriction.id_cli = restriction_id_cli
-                                        LEFT JOIN {}.codelist as cli_purpose
+                                        LEFT JOIN {schema}.codelist as cli_purpose
                                             ON cli_purpose.id_cli = purpose_id_cli
-                                        LEFT JOIN {}.codelist as cli_method
+                                        LEFT JOIN {schema}.codelist as cli_method
                                             ON cli_method.id_cli = method_id_cli
-                                        LEFT JOIN {}.codelist as cli_landuse
+                                        LEFT JOIN {schema}.codelist as cli_landuse
                                             ON cli_landuse.id_cli =landuse_id_cli
-                                        LEFT JOIN {}.codelist as cli_status
+                                        LEFT JOIN {schema}.codelist as cli_status
                                             ON cli_status.id_cli =status_id_cli
-                                        LEFT JOIN {}.codelist as cli_cuttings
+                                        LEFT JOIN {schema}.codelist as cli_cuttings
                                             ON cli_cuttings.id_cli = cuttings_id_cli
-                                        LEFT JOIN {}.municipalities as mun_j
+                                        LEFT JOIN {schema}.municipalities as mun_j
                                             ON mun_j.gid = city_bho
-                                        LEFT JOIN {}.cantons as cant_j
+                                        LEFT JOIN {schema}.cantons as cant_j
                                             ON cant_j.gid = canton_bho
                                         LEFT JOIN (
                                             SELECT id_sty, date_sty, name_sty, id_bho_fk 
-                                            FROM {}.stratigraphy
+                                            FROM {schema}.stratigraphy
                                             --WHERE primary_sty = true
                                         ) as strat_j ON strat_j.id_sty = $2
                                                 
@@ -318,9 +318,9 @@ class ExportHandler(Viewer):
                                         AND
                                             strat_j.id_sty = $3
                                     ) AS t2
-                                """.format(*((lan,)*11 + (schema,)*18)), sid, sid, sid)
+                                """, sid, sid, sid)
 
-                                a = bdms.bdmsPdf( json.loads(res))
+                                a = bdms.bdmsPdf(json.loads(res))
                                 a.renderProfilePDF(
                                     arguments['lang'] if 'lang' in arguments else 'en',
                                     int(arguments['scale']) if 'scale' in arguments else 200
