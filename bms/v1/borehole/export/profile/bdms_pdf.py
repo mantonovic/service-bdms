@@ -609,16 +609,15 @@ class bdmsPdf():
             'content', '{}'.format(self.profile['project_name'] or '-')
         )
 
-        for identifier in self.profile['identifiers']:
-
-            current_y += box_height
-
-            self.drawLeftTextBox2(
-                column_width, current_y,
-                column_width, box_height,
-                'none', 'contentB',  identifier['identifier'],
-                'content', '{}'.format(identifier['value'] or '-')
-            )
+        if self.profile['identifiers'] is not None:
+            for identifier in self.profile['identifiers']:
+                current_y += box_height
+                self.drawLeftTextBox2(
+                    column_width, current_y,
+                    column_width, box_height,
+                    'none', 'contentB',  identifier['identifier'],
+                    'content', '{}'.format(identifier['value'] or '-')
+                )
 
         current_y += box_height
 
