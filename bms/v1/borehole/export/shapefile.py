@@ -86,11 +86,21 @@ class ExportShapefile(Action):
             keys = data[0].keys()
             for key in keys:
                 # Excluding identifiers column and coordinates
+
+                print(
+                    (
+                        shp_header[key][language]['text']
+                        if key in shp_header
+                        else key
+                    ).upper()
+                )
+
                 if key in [
                     'location_x',
                     'location_y',
                     'identifiers'
                 ]:
+                    print("  > skip")
                     continue
 
                 w.field(
@@ -101,10 +111,18 @@ class ExportShapefile(Action):
                     ).upper(), 'C'
                 )
             
+            print("")
             extra_col = []
             for identifier in identifiers['data']['borehole_identifier']:
                 extra_col.append(
                     identifier[language]['text']
+                )
+
+                print(
+                    identifier[language]['text'].upper()
+                )
+                w.field(
+                    identifier[language]['text'].upper(), 'C'
                 )
 
             for row in data:
@@ -119,26 +137,29 @@ class ExportShapefile(Action):
                         continue
 
                     if col == 'identifiers':
-                        for xc in shp_header:
-                            if row[col] is None:
-                                r.append(None)
-                            else:
+                        print("\nWorking on identifier:")
+                        for xc in extra_col:
+                            val = None
+                            if row[col] is not None:
                                 for identifier in row[col]:
                                     if identifier[
                                         'borehole_identifier'
                                     ] ==  xc:
-                                        r.append(
-                                            identifier[
-                                                'identifier_value'
-                                            ]
-                                        )
+                                        print(f" > {identifier['identifier_value']}")
+                                        val =  identifier[
+                                            'identifier_value'
+                                        ]
                                         break
+                            
+                            r.append(val)
 
                     else:
                         if isinstance(row[col], list):
                             r.append(",".join(str(x) for x in row[col]))
                         else:
                             r.append(row[col])
+
+                print(r)
 
                 w.record(*r)
 

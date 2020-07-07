@@ -108,19 +108,18 @@ class ExportCsvFull(Action):
                 for col in keys:
                     if col == 'identifiers':
                         for xc in extra_geol:
-                            if row[col] is None:
-                                r.append(None)
-                            else:
+                            val = None
+                            if row[col] is not None:
                                 for identifier in row[col]:
                                     if identifier[
                                         'borehole_identifier'
                                     ] ==  xc:
-                                        r.append(
-                                            identifier[
-                                                'identifier_value'
-                                            ]
-                                        )
+                                        val = identifier[
+                                            'identifier_value'
+                                        ]
                                         break
+                            
+                            r.append(val)
 
                     else:
                         if isinstance(row[col], list):
