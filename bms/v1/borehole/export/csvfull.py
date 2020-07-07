@@ -59,10 +59,19 @@ class ExportCsvFull(Action):
 
         if len(data) > 0:
 
-            cl = await ListCodeList(self.conn).execute('borehole_form')
+            cl = await ListCodeList(
+                self.conn
+            ).execute('borehole_form')
 
             csv_header = {}
             for c in cl['data']['borehole_form']:
+                csv_header[c['code']] = c
+
+            identifiers = await ListCodeList(
+                self.conn
+            ).execute('borehole_identifier')
+
+            for c in identifiers['data']['borehole_identifier']:
                 csv_header[c['code']] = c
 
             csvfile = StringIO()
@@ -75,19 +84,49 @@ class ExportCsvFull(Action):
             keys = data[0].keys()
             cols = []
             for key in keys:
-                cols.append(
-                    csv_header[key][language]['text']
-                    if key in csv_header else key
+                # Excluding identifiers column
+                if key != 'identifiers':
+                    cols.append(
+                        csv_header[key][language]['text']
+                        if key in csv_header else key
+                    )
+
+            extra_col = []
+            extra_geol = []
+            for identifier in identifiers['data']['borehole_identifier']:
+                extra_col.append(
+                    identifier[language]['text']
                 )
-            cw.writerow(cols)
+                extra_geol.append(
+                    identifier['id']
+                )
+
+            cw.writerow(cols + extra_col)
 
             for row in data:
                 r = []
                 for col in keys:
-                    if isinstance(row[col], list):
-                        r.append(",".join(str(x) for x in row[col]))
+                    if col == 'identifiers':
+                        for xc in extra_geol:
+                            if row[col] is None:
+                                r.append(None)
+                            else:
+                                for identifier in row[col]:
+                                    if identifier[
+                                        'borehole_identifier'
+                                    ] ==  xc:
+                                        r.append(
+                                            identifier[
+                                                'identifier_value'
+                                            ]
+                                        )
+                                        break
+
                     else:
-                        r.append(row[col])
+                        if isinstance(row[col], list):
+                            r.append(",".join(str(x) for x in row[col]))
+                        else:
+                            r.append(row[col])
                 cw.writerow(r)
 
         return csvfile
@@ -178,10 +217,40 @@ class ExportCsvFull(Action):
                 sty.lit_pet_deb,
                 sty.lithok,
                 sty.kirost,
-                sty.notes
+                sty.notes,
+
+                identifiers
 
             FROM
                 bdms.borehole
+
+            LEFT JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_to_json(array_agg(j)) as identifiers
+                FROM (
+                    SELECT
+                        id_bho_fk,
+                        json_build_object(
+                            'borehole_identifier', 
+                            geolcode,
+                            'identifier_value',
+                            value_bco
+                        ) as j
+                    FROM
+                        bdms.borehole_codelist
+                    INNER JOIN
+                        bdms.codelist
+                    ON
+                        id_cli_fk = id_cli
+                    WHERE
+                        borehole_codelist.code_cli = 'borehole_identifier'
+                ) t
+                GROUP BY
+                    id_bho_fk
+            ) as idf
+            ON
+                idf.id_bho_fk = id_bho
 
             INNER JOIN (
 

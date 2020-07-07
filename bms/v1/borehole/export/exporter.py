@@ -37,9 +37,15 @@ class ExportHandler(Viewer):
                         coords = self.get_argument(key).split(',')
                         for idx in range(0, len(coords)):
                             coords[idx] = float(coords[idx])
+
                         arguments[key] = coords
+                    
                     elif key == 'format':
                         arguments[key] = self.get_argument(key).split(',')
+
+                    elif key == 'lang':
+                        arguments['language'] = self.get_argument(key)
+
                     else:
                         arguments[key] = self.get_argument(key)
 
@@ -98,7 +104,6 @@ class ExportHandler(Viewer):
                             filter=arguments,
                             user=self.user
                         )
-
 
                     if output_stream is not None:
                         output_stream.writestr(
@@ -159,8 +164,7 @@ class ExportHandler(Viewer):
 
                 if 'pdf' in arguments['format']:
 
-                    lan = arguments['lang'] if 'lang' in arguments else 'en'
-                    idsty =6
+                    lan = arguments['language'] if 'language' in arguments else 'en'
                     schema ='bdms'
 
                     if 'id' in arguments:
@@ -232,8 +236,35 @@ class ExportHandler(Viewer):
                                             'swisstopo' as checked_by,
                                             groundwater_bho as groundwater,
 
-                                            (SELECT
-                                                array_to_json(
+                                            (
+                                                SELECT array_to_json(
+                                                    array_agg(
+                                                        row_to_json(t)
+                                                    )
+                                                )
+                                                FROM (
+                                                    SELECT
+                                                        value_bco as value,
+                                                        COALESCE(
+                                                            text_cli_{lan},
+                                                            text_cli_en
+                                                        ) as identifier
+                                                    FROM
+                                                        bdms.borehole_codelist
+                                                    INNER JOIN
+                                                        bdms.codelist
+                                                    ON
+                                                        id_cli_fk = id_cli
+                                                    WHERE
+                                                        borehole_codelist.code_cli = 'borehole_identifier'
+                                                    AND
+                                                        borehole_codelist.id_bho_fk = $1
+
+                                                ) AS t
+                                            ) AS identifiers,
+
+                                            (
+                                                SELECT array_to_json(
                                                     array_agg(
                                                         row_to_json(t)
                                                     )
@@ -274,15 +305,15 @@ class ExportHandler(Viewer):
                                                     WHERE
                                                         id_sty_fk = id_sty
                                                     AND
-                                                        id_sty = $1
+                                                        id_sty = $2
                                                     AND
                                                         id_bho_fk = id_bho
                                                     AND
                                                         id_bho = strat_j.id_bho_fk
                                                     ORDER BY depth_from_lay, id_lay
 
-                                            ) AS t
-                                        ) AS layers 
+                                                ) AS t
+                                            ) AS layers 
                                         FROM 
                                             {schema}.borehole
                                         LEFT JOIN {schema}.codelist as cli_kind
@@ -311,16 +342,18 @@ class ExportHandler(Viewer):
                                             SELECT id_sty, date_sty, name_sty, id_bho_fk 
                                             FROM {schema}.stratigraphy
                                             --WHERE primary_sty = true
-                                        ) as strat_j ON strat_j.id_sty = $2
+                                        ) as strat_j ON strat_j.id_sty = $3
                                                 
                                         WHERE
                                             id_bho = id_bho_fk
                                         AND
-                                            strat_j.id_sty = $3
+                                            strat_j.id_sty = $4
                                     ) AS t2
-                                """, sid, sid, sid)
+                                """, bid, sid, sid, sid)
 
-                                a = bdms.bdmsPdf(json.loads(res))
+                                d = json.loads(res)
+
+                                a = bdms.bdmsPdf(d)
                                 a.renderProfilePDF(
                                     arguments['lang'] if 'lang' in arguments else 'en',
                                     int(arguments['scale']) if 'scale' in arguments else 200
