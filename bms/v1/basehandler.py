@@ -17,37 +17,17 @@ class BaseHandler(web.RequestHandler):
         super(BaseHandler, self).__init__(*args, **kwargs)
         self.user = {
             'id': 0,
-            'username': 'anonymous',
-            'roles': [
-                'VIEW', 'EDIT'
-            ],
-            'group': {
-                'id': 0,
-                'name': 'SUPSI'
-            },
-            'name': 'IST SUPSI',
+            'username': 'guest',
+            'viewer': True,
+            'admin': False,
+            'roles': ['VIEW'],
+            'name': 'Guest User',
             'setting': {
-                "filter": {
-                    "custom": {
-                        "project_name": True,
-                        "landuse": True,
-                        "public_name": True,
-                        "canton": True,
-                        "city": True
-                    },
-                    "restriction": True,
-                    "mapfilter": True,
-                    "restriction_until": True,
-                    "extended": {
-                        "original_name": True,
-                        "method": True,
-                        "status": True
-                    },
-                    "kind": True,
-                    "elevation_z": True,
-                    "length": True,
-                    "drilling_date": True
+                "defaults": {
+                    "stratigraphy": 3002
                 },
+                "filter": {},
+                "efilter": {},
                 "boreholetable": {
                     "orderby": "original_name",
                     "direction": "ASC"
@@ -55,8 +35,18 @@ class BaseHandler(web.RequestHandler):
                 "eboreholetable": {
                     "orderby": "creation",
                     "direction": "DESC"
+                },
+                "map": {
+                    "explorer": {},
+                    "editor": {}
+                },
+                "appearance": {
+                    "explorer": 1
                 }
-            }
+            },
+            'workgroups': [],
+            'wid': []
+
         }
 
     async def prepare(self):
@@ -71,127 +61,136 @@ class BaseHandler(web.RequestHandler):
             self.finish()
             return
 
-        async with self.pool.acquire() as conn:
+        auth_decoded = base64.decodestring(auth_header[6:].encode('utf-8'))
+        username, password = auth_decoded.decode('utf-8').split(':', 2)
 
-            auth_decoded = base64.decodestring(auth_header[6:].encode('utf-8'))
-            username, password = auth_decoded.decode('utf-8').split(':', 2)
+        # Permit guest login
+        if (
+            username == 'guest'
+            and password == 'MeiSe0we1Oowief'
+        ):
+            pass
 
-            val = await conn.fetchval("""
-                SELECT row_to_json(t)
-                FROM (
-                    SELECT
-                        id_usr as "id",
-                        username,
-                        COALESCE(
-                            viewer_usr, FALSE
-                        ) as viewer,
-                        COALESCE(
-                            admin_usr, FALSE
-                        ) as admin,
-                        firstname || ' ' || lastname as "name",
-                        COALESCE(
-                            settings_usr::json,
-                            value_cfg::json
-                        ) as setting,
-                        COALESCE(
-                            w.ws, '[]'::json
-                        ) AS workgroups,
-                        COALESCE(
-                            w.wgps, '{}'::int[]
-                        ) AS wid,
-                        COALESCE(
-                            rl.roles, '{}'::character varying[]
-                        ) AS roles
-                    FROM
-                        bdms.users
+        else:
 
-                    INNER JOIN bdms.config
-                    ON name_cfg = 'SETTINGS'
+            async with self.pool.acquire() as conn:
 
-                    LEFT JOIN (
+                val = await conn.fetchval("""
+                    SELECT row_to_json(t)
+                    FROM (
                         SELECT
-                            r.id_usr_fk,
-                            array_agg(r.name_rol) AS roles
+                            id_usr as "id",
+                            username,
+                            COALESCE(
+                                viewer_usr, FALSE
+                            ) as viewer,
+                            COALESCE(
+                                admin_usr, FALSE
+                            ) as admin,
+                            firstname || ' ' || lastname as "name",
+                            COALESCE(
+                                settings_usr::json,
+                                value_cfg::json
+                            ) as setting,
+                            COALESCE(
+                                w.ws, '[]'::json
+                            ) AS workgroups,
+                            COALESCE(
+                                w.wgps, '{}'::int[]
+                            ) AS wid,
+                            COALESCE(
+                                rl.roles, '{}'::character varying[]
+                            ) AS roles
                         FROM
-                        (
-                            SELECT distinct
-                                id_usr_fk,
-                                name_rol
-                            FROM
-                                bdms.users_roles,
-                                bdms.roles,
-                                bdms.workgroups
-                            WHERE
-                                id_rol = id_rol_fk
-                            AND
-                                id_wgp = id_wgp_fk
-                        ) r
-                        GROUP BY id_usr_fk
-                    ) as rl
-                    ON rl.id_usr_fk = id_usr
+                            bdms.users
 
-                    LEFT JOIN (
-                        SELECT
-                            id_usr_fk,
-                            array_agg(id_wgp) as wgps,
-                            array_to_json(array_agg(j)) as ws
-                        FROM (
+                        INNER JOIN bdms.config
+                        ON name_cfg = 'SETTINGS'
+
+                        LEFT JOIN (
+                            SELECT
+                                r.id_usr_fk,
+                                array_agg(r.name_rol) AS roles
+                            FROM
+                            (
+                                SELECT distinct
+                                    id_usr_fk,
+                                    name_rol
+                                FROM
+                                    bdms.users_roles,
+                                    bdms.roles,
+                                    bdms.workgroups
+                                WHERE
+                                    id_rol = id_rol_fk
+                                AND
+                                    id_wgp = id_wgp_fk
+                            ) r
+                            GROUP BY id_usr_fk
+                        ) as rl
+                        ON rl.id_usr_fk = id_usr
+
+                        LEFT JOIN (
                             SELECT
                                 id_usr_fk,
-                                id_wgp,
-                                json_build_object(
-                                    'id', id_wgp,
-                                    'workgroup', name_wgp,
-                                    'roles', array_agg(name_rol),
-                                    'disabled', disabled_wgp
-                                ) as j
-                            FROM
-                                bdms.users_roles,
-                                bdms.workgroups,
-                                bdms.roles
-                            WHERE
-                                id_rol = id_rol_fk
-                            AND
-                                id_wgp_fk = id_wgp
-                            GROUP BY
-                                id_usr_fk,
-                                id_wgp
-                            ORDER BY
-                                name_wgp
-                        ) AS t
-                        GROUP BY id_usr_fk
-                    ) as w
-                    ON w.id_usr_fk = id_usr
+                                array_agg(id_wgp) as wgps,
+                                array_to_json(array_agg(j)) as ws
+                            FROM (
+                                SELECT
+                                    id_usr_fk,
+                                    id_wgp,
+                                    json_build_object(
+                                        'id', id_wgp,
+                                        'workgroup', name_wgp,
+                                        'roles', array_agg(name_rol),
+                                        'disabled', disabled_wgp
+                                    ) as j
+                                FROM
+                                    bdms.users_roles,
+                                    bdms.workgroups,
+                                    bdms.roles
+                                WHERE
+                                    id_rol = id_rol_fk
+                                AND
+                                    id_wgp_fk = id_wgp
+                                GROUP BY
+                                    id_usr_fk,
+                                    id_wgp
+                                ORDER BY
+                                    name_wgp
+                            ) AS t
+                            GROUP BY id_usr_fk
+                        ) as w
+                        ON w.id_usr_fk = id_usr
 
-                    WHERE
-                        username = $1
-                    AND
-                        password = crypt($2, password)
-                    AND
-                        disabled_usr IS NULL
-                ) as t
-            """, username, password)
+                        WHERE
+                            username = $1
+                        AND
+                            password = crypt($2, password)
+                        AND
+                            disabled_usr IS NULL
+                    ) as t
+                """, username, password)
 
-            if val is None:
+                if val is None:
 
-                if auth_type == 'bdms-v1':
-                    self.write({
-                        "success": False,
-                        "message": "Authentication error",
-                        "error": "E-102"
-                    })
+                    if auth_type == 'bdms-v1':
+                        self.write({
+                            "success": False,
+                            "message": "Authentication error",
+                            "error": "E-102"
+                        })
 
-                else:
-                    self.set_header(
-                        'WWW-Authenticate',
-                        'Basic realm=BDMS'
-                    )
-                    self.set_status(401)
+                    else:
+                        self.set_header(
+                            'WWW-Authenticate',
+                            'Basic realm=BDMS'
+                        )
+                        self.set_status(401)
 
-                self.finish()
-                return
+                    self.finish()
+                    return
 
-            self.user = json.loads(val)
+                self.user = json.loads(val)
 
     @property
     def pool(self):

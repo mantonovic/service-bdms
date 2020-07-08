@@ -4,6 +4,10 @@
 
 ### New features
 
+ - **Login as guest**: 
+   
+   Guest user can now access with the VIEW role.
+
  - **Attachments**: 
    
    You can now upload files attachments for each borehole on a AWS S3 Bucket.

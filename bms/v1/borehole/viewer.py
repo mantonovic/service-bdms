@@ -31,42 +31,44 @@ class BoreholeViewerHandler(Viewer):
                 if action == 'LIST':
                     exe = ListBorehole(conn)
 
-                    # update only if ordering changed
-                    if 'orderby' in request and (
-                        request['orderby'] is not None
-                    ) and (
-                        self.user[
-                            'setting'
-                        ]['boreholetable']['orderby'] != request['orderby']
-                    ):
-                        await (PatchSetting(conn)).execute(
-                            self.user['id'],
-                            'boreholetable.orderby',
-                            request['orderby']
-                        )
+                    if self.user['id'] != 0:
 
-                    else:
-                        request['orderby'] = self.user[
-                            'setting'
-                        ]['boreholetable']['orderby']
+                        # update only if ordering changed
+                        if 'orderby' in request and (
+                            request['orderby'] is not None
+                        ) and (
+                            self.user[
+                                'setting'
+                            ]['boreholetable']['orderby'] != request['orderby']
+                        ):
+                            await (PatchSetting(conn)).execute(
+                                self.user['id'],
+                                'boreholetable.orderby',
+                                request['orderby']
+                            )
 
-                    if self.user['id'] != 0 and 'direction' in request and (
-                        request['direction'] is not None
-                    ) and (
-                        self.user[
-                            'setting'
-                        ]['boreholetable']['direction'] != request['direction']
-                    ):
-                        await (PatchSetting(conn)).execute(
-                            self.user['id'],
-                            'boreholetable.direction',
-                            request['direction']
-                        )
+                        else:
+                            request['orderby'] = self.user[
+                                'setting'
+                            ]['boreholetable']['orderby']
 
-                    else:
-                        request['direction'] = self.user[
-                            'setting'
-                        ]['boreholetable']['direction']
+                        if 'direction' in request and (
+                            request['direction'] is not None
+                        ) and (
+                            self.user[
+                                'setting'
+                            ]['boreholetable']['direction'] != request['direction']
+                        ):
+                            await (PatchSetting(conn)).execute(
+                                self.user['id'],
+                                'boreholetable.direction',
+                                request['direction']
+                            )
+
+                        else:
+                            request['direction'] = self.user[
+                                'setting'
+                            ]['boreholetable']['direction']
 
                 elif action == 'LISTFILES':
                     exe = ListFilesBorehole(conn)
