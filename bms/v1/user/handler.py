@@ -31,11 +31,12 @@ class UserHandler(Viewer):
             return {
                 "data": {
                     "admin": self.user['admin'],
-                    "viewer": self.user['viewer'],
-                    "username": self.user['username'],
+                    "name": self.user['name'],
                     "roles": roles,
-                    "workgroups": workgroups,
-                    "name": self.user['name']
+                    "terms": self.user['terms'],
+                    "username": self.user['username'],
+                    "viewer": self.user['viewer'],
+                    "workgroups": workgroups
                 }
             }
 

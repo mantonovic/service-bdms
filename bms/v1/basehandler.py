@@ -44,6 +44,7 @@ class BaseHandler(web.RequestHandler):
                     "explorer": 1
                 }
             },
+            'terms': False,
             'workgroups': [],
             'wid': []
 
@@ -81,6 +82,7 @@ class BaseHandler(web.RequestHandler):
                         SELECT
                             id_usr as "id",
                             username,
+                            COALESCE(tr.terms, FALSE) terms,
                             COALESCE(
                                 viewer_usr, FALSE
                             ) as viewer,
@@ -111,8 +113,7 @@ class BaseHandler(web.RequestHandler):
                             SELECT
                                 r.id_usr_fk,
                                 array_agg(r.name_rol) AS roles
-                            FROM
-                            (
+                            FROM (
                                 SELECT distinct
                                     id_usr_fk,
                                     name_rol
@@ -128,6 +129,24 @@ class BaseHandler(web.RequestHandler):
                             GROUP BY id_usr_fk
                         ) as rl
                         ON rl.id_usr_fk = id_usr
+
+                        LEFT JOIN (
+                            SELECT
+                                id_usr_fk,
+                                TRUE as terms
+                            FROM
+                                bdms.terms_accepted
+                            INNER JOIN
+                                bdms.terms
+                            ON
+                                id_tes_fk = id_tes
+                            WHERE
+                                expired_tes IS NULL
+                            AND
+                                draft_tes IS FALSE
+                        ) as tr
+                        ON
+                            tr.id_usr_fk = id_usr
 
                         LEFT JOIN (
                             SELECT

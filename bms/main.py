@@ -199,6 +199,10 @@ if __name__ == "__main__":
         # Workflow handlers
         WorkflowProducerHandler,
 
+        # Terms handlers
+        TermsHandler,
+        TermsAdminHandler,
+
         # Other handlers
         GeoapiHandler,
         ProjectHandler,
@@ -242,6 +246,10 @@ if __name__ == "__main__":
 
         # Workflow handlers
         (r'/api/v1/workflow/edit', WorkflowProducerHandler),
+
+        # Terms handlers
+        (r'/api/v1/terms', TermsHandler),
+        (r'/api/v1/terms/admin', TermsAdminHandler),
 
         # Stratigraphy handlers
         (r'/api/v1/borehole/stratigraphy', StratigraphyViewerHandler),

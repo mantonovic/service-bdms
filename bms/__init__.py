@@ -58,6 +58,10 @@ from bms.v1.geoapi.canton.handler import CantonHandler
 # Workflows's handlers
 from bms.v1.workflow.producer import WorkflowProducerHandler
 
+# Terms's handlers
+from bms.v1.terms.handler import TermsHandler
+from bms.v1.terms.admin import TermsAdminHandler
+
 # Actions
 from bms.v1.borehole import CreateBorehole
 from bms.v1.borehole import ListBorehole

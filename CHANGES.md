@@ -4,6 +4,10 @@
 
 ### New features
 
+ - **Terms of service**: 
+   
+   Added new REST actions to handle user agreements on *terms of service*.
+
  - **Login as guest**: 
    
    Guest user can now access with the VIEW role.
@@ -18,6 +22,17 @@
    the AWS S3 Bucket (file_repo, aws_bucket, aws_credentials)
 
  - **New REST API**:
+
+   */api/v1/terms*
+
+   - ACTION=ACCEPT logged-in user accept the current *terms of service*
+   - ACTION=GET get the currently valid *terms of service*.
+
+   */api/v1/terms/admin* (admin users only)
+
+   - ACTION=GET Get the current draft *terms of service*.
+   - ACTION=DRAFT Admins can update the current *terms of service* flagging it as *draft*.
+   - ACTION=PUBLISH Promote the draft of *terms of service* to go public.
 
    */api/v1/borehole*
 

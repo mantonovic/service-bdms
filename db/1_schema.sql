@@ -13,6 +13,20 @@ CREATE TABLE bdms.config
     PRIMARY KEY (name_cfg)
 );
 
+CREATE TABLE bdms.terms
+(
+    id_tes serial NOT NULL,
+    draft_tes boolean NOT NULL DEFAULT TRUE,
+    text_tes_en character varying NOT NULL,
+    text_tes_de character varying,
+    text_tes_fr character varying,
+    text_tes_it character varying,
+    text_tes_ro character varying,
+    creation_tes timestamp with time zone NOT NULL DEFAULT now(),
+    expired_tes timestamp with time zone,
+    PRIMARY KEY (id_tes)
+);
+
 CREATE TABLE bdms.cantons
 (
     gid serial NOT NULL,
@@ -108,16 +122,31 @@ CREATE TABLE bdms.users (
     CONSTRAINT users_username_key UNIQUE (username)
 );
 
-CREATE TABLE bdms.roles
-(
+CREATE TABLE bdms.terms_accepted (
+    id_usr_fk integer NOT NULL,
+    id_tes_fk integer NOT NULL,
+    accepted_tea timestamp with time zone DEFAULT now(),
+    PRIMARY KEY (id_usr_fk, id_tes_fk),
+    FOREIGN KEY (id_usr_fk)
+        REFERENCES bdms.users (id_usr) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+        NOT VALID,
+    FOREIGN KEY (id_tes_fk)
+        REFERENCES bdms.terms (id_tes) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+        NOT VALID
+);
+
+CREATE TABLE bdms.roles (
     id_rol serial NOT NULL,
     name_rol character varying NOT NULL,
     config_rol json,
     CONSTRAINT roles_pkey PRIMARY KEY (id_rol)
 );
 
-CREATE TABLE bdms.workgroups
-(
+CREATE TABLE bdms.workgroups (
     id_wgp serial NOT NULL,
     created_wgp timestamp with time zone DEFAULT now(),
     disabled_wgp timestamp with time zone,
@@ -127,8 +156,7 @@ CREATE TABLE bdms.workgroups
     CONSTRAINT workgroups_name_wgp_key UNIQUE (name_wgp)
 );
 
-CREATE TABLE bdms.users_roles
-(
+CREATE TABLE bdms.users_roles (
     id_usr_fk integer NOT NULL,
     id_rol_fk integer NOT NULL,
     id_wgp_fk integer NOT NULL,

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import asyncio
 import json
 from bms import (
     PUBLIC,
@@ -17,6 +18,15 @@ class Action():
 
     def decode(self, text):
         return json.loads(text)
+
+    def run_until_complete(self, tasks):
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(
+            asyncio.wait(
+                [loop.create_task(x) for x in tasks]
+            )
+        )
+        # loop.close()
 
     async def execute(self, *arg, **args):
         pass

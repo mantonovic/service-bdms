@@ -25,14 +25,6 @@ class IdentifierAdminHandler(Admin):
 
                 exe = None
 
-                if action in [
-                    'CREATE',
-                    'DELETE',
-                    'UPDATE'
-                ]:
-                    if self.user['admin'] is False: 
-                        raise AuthorizationException()
-
                 if action == 'CREATE':
                     exe = CreateIdentifier(conn)
 
