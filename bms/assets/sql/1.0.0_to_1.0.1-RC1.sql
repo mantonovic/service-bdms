@@ -84,3 +84,14 @@ CREATE TABLE bdms.terms_accepted (
         ON DELETE CASCADE
         NOT VALID
 );
+
+CREATE TABLE bdms.feedbacks
+(
+    id_feb serial NOT NULL,
+    created_feb timestamp with time zone DEFAULT now(),
+    user_feb character varying NOT NULL,
+    message_feb character varying,
+    tag_feb character varying,
+    frw_feb boolean DEFAULT false,
+    PRIMARY KEY (id_feb)
+);

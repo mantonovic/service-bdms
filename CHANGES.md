@@ -1,8 +1,12 @@
-# List of all changes
+# Changelog
 
-## What's new in service-bdms 1.0.1-RC1
+## 1.0.1
 
 ### New features
+
+ - **Feedback**: 
+   
+   Added new REST actions to handle user feedbacks.
 
  - **Terms of service**: 
    
@@ -18,10 +22,15 @@
 
  - **New configuration options**:
    
-   To configure the file repository some options have been added to configure
-   the AWS S3 Bucket (file_repo, aws_bucket, aws_credentials)
+   - To configure the file repository some options have been added to configure the AWS S3 Bucket (file_repo, aws_bucket, aws_credentials)
+
+   - feedback can be send throught and SMTP server to a configured email address.
 
  - **New REST API**:
+
+   */api/v1/feedback*
+
+   - ACTION=CREATE logged-in user can send a feedback message
 
    */api/v1/terms*
 

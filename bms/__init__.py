@@ -55,12 +55,15 @@ from bms.v1.geoapi.handler import GeoapiHandler
 from bms.v1.geoapi.municipality.handler import MunicipalityHandler
 from bms.v1.geoapi.canton.handler import CantonHandler
 
-# Workflows's handlers
+# Workflows handlers
 from bms.v1.workflow.producer import WorkflowProducerHandler
 
-# Terms's handlers
+# Terms handlers
 from bms.v1.terms.handler import TermsHandler
 from bms.v1.terms.admin import TermsAdminHandler
+
+# Feedback handlers
+from bms.v1.feedback.handler import FeedbackHandler
 
 # Actions
 from bms.v1.borehole import CreateBorehole

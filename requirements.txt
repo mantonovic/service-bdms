@@ -10,3 +10,4 @@ svglib
 svg2rlg
 spatialite
 boto3
+aiosmtplib

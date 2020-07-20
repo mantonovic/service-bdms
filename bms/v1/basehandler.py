@@ -8,7 +8,6 @@ from bms.v1.exceptions import (
     AuthenticationException,
     ActionEmpty
 )
-# from bms.v1 import coroutine
 
 
 class BaseHandler(web.RequestHandler):
