@@ -64,16 +64,29 @@ class BaseHandler(web.RequestHandler):
         auth_decoded = base64.decodestring(auth_header[6:].encode('utf-8'))
         username, password = auth_decoded.decode('utf-8').split(':', 2)
 
-        # Permit guest login
-        if (
-            username == 'guest'
-            and password == 'MeiSe0we1Oowief'
-        ):
-            pass
+        async with self.pool.acquire() as conn: 
 
-        else:
+            # Permit guest login
+            if (
+                username == 'guest'
+                and password == 'MeiSe0we1Oowief'
+            ):
+                # If terms are not present and published
+                # handle user terms as accepted
+                self.user['terms'] = await conn.fetchval("""
+                    SELECT NOT EXISTS (
+                        SELECT *
+                        FROM
+                            bdms.terms
+                        WHERE
+                            draft_tes IS FALSE
+                        AND
+                            expired_tes IS NULL
+                        LIMIT 1
+                    )
+                """)
 
-            async with self.pool.acquire() as conn:
+            else:
 
                 val = await conn.fetchval("""
                     SELECT row_to_json(t)
@@ -81,7 +94,28 @@ class BaseHandler(web.RequestHandler):
                         SELECT
                             id_usr as "id",
                             username,
-                            COALESCE(tr.terms, FALSE) terms,
+                            CASE
+                                WHEN (
+                                    -- If terms not present and published
+                                    -- handle user terms as accepted
+                                    SELECT EXISTS (
+                                        SELECT *
+                                        FROM
+                                            bdms.terms
+                                        WHERE
+                                            draft_tes IS FALSE
+                                        AND
+                                            expired_tes IS NULL
+                                        LIMIT 1
+                                    )
+                                )
+                                THEN COALESCE(
+                                    tr.terms,
+                                    FALSE
+                                )
+                                ELSE
+                                    TRUE
+                            END AS terms,
                             COALESCE(
                                 viewer_usr, FALSE
                             ) as viewer,
