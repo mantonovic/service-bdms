@@ -352,10 +352,10 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
 
     # Configuring S3 credentials
-    if options.file_repo == 's3':
+    if options.file_repo == 's3' and options.aws_credentials is not None:
 
-        if options.aws_credentials is None:
-            raise Exception("AWS Credential file missing")
+        # if options.aws_credentials is None:
+        #     raise Exception("AWS Credential file missing")
         
         config.read(options.aws_credentials)
 
