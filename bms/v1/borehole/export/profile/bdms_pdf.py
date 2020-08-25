@@ -280,6 +280,7 @@ class bdmsPdf():
         scale: scale factor (denominator)
         dw: description width
         """
+
         self.c.setLineWidth(
             self.settings['boxStyles']['thin'][0]
         )
@@ -365,10 +366,22 @@ class bdmsPdf():
                     'content', '{:+.2f} m'.format(label_depth) #l['msm_to'])
                 )
                 paratext = '<br/>'.join([
-                    '<u>{}</u>: {}'.format(_('description'),l['layer_desc'] or '-'),
-                    '<u>{}</u>: {}'.format(_('lithology'), l['lithology'] or '-'),
-                    '<u>{}</u>: {}'.format(_('lithostratigraphy'),l['lithostratigraphy'] or '-'),
-                    '<u>{}</u>: {}'.format(_('notes'),l['notes'] or '-')
+                    '<u>{}</u>: {}'.format(
+                        _('description'),
+                        l['layer_desc'] or '-'
+                    ),
+                    '<u>{}</u>: {}'.format(
+                        _('lithology'),
+                        l['lithology'] or '-'
+                    ),
+                    '<u>{}</u>: {}'.format(
+                        _('lithostratigraphy'),
+                        l['lithostratigraphy'] or '-'
+                    ),
+                    '<u>{}</u>: {}'.format(
+                        _('notes'),
+                        l['notes'] or '-'
+                    )
                 ])
                 self.createParagraph(
                     paratext,
@@ -429,36 +442,39 @@ class bdmsPdf():
             top_elev = self.profile['elevation_z']
             top_dep = 0
 
-
         # major tics
         for i in frange(
-            major_tics,
+            10 - int(str(top_dep)[-1:]),
             min(self.profile['length'], h * scale / 1000), 
-            major_tics):
-                self.drawLine(
-                    x + w - 2, y + (i * 1000 / scale), 2, 0, 'thin')
-                
-                if rtype == 'elev':
-                    self.drawRightText(
-                        x + w - 3, y + 1 + (i * 1000 / scale), 
-                        'content', '{:+.2f} m'.format(top_elev - i)
-                    )
-                elif rtype == 'depth':
-                    self.drawRightText(
-                        x + w - 3, y + 1 + (i * 1000 / scale), 
-                        'content', '{:.0f} m'.format(top_dep + i)
-                    )
-                else:
-                    raise ValueError("rtype can only be \'elev\' or \'depth\'")
+            major_tics
+        ):
+            self.drawLine(
+                x + w - 2, y + (i * 1000 / scale), 2, 0, 'thin')
+            
+            if rtype == 'elev':
+                self.drawRightText(
+                    x + w - 3, y + 1 + (i * 1000 / scale), 
+                    'content', '{:+.2f} m'.format(top_elev - i)
+                )
+
+            elif rtype == 'depth':
+                self.drawRightText(
+                    x + w - 3, y + 1 + (i * 1000 / scale), 
+                    'content', '{:.0f} m'.format(top_dep + i)
+                )
+
+            else:
+                raise ValueError("rtype can only be \'elev\' or \'depth\'")
 
         # minor tics
         for i in frange(
             minor_tics, 
             min(self.profile['length'], h * scale / 1000), 
-            minor_tics):
-                self.drawLine(
-                    x + w -1, y + (i * 1000 / scale) , 1, 0, 'thin'
-                )
+            minor_tics
+        ):
+            self.drawLine(
+                x + w -1, y + (i * 1000 / scale) , 1, 0, 'thin'
+            )
     
     def close(self):
         self.c.save()
@@ -485,17 +501,18 @@ class bdmsPdf():
         self.drawTextBox(0, 0, 140, 15, 'bold', 
             'title', _('Geological_Profile'), 'center'
         )
-        
+
         #vers. & date boxes
         self.drawLeftTextBox2(140, 0, 50, 12, 'bold',
             'contentB',  _('Scale'),
             'content', '1:{}'.format(scale)
         )
-        
+
         self.drawLeftTextBox2(140, 12, 25, 3, 'bold',
             'contentB',  _('Vers'),
             'content', '{}'.format(self.profile['strataname'])
         )
+
         self.drawLeftTextBox2(165, 12, 25, 3, 'bold',
             'contentB',  _('Date'),
             'content', '{}'.format(self.profile['stratadate'])
@@ -791,28 +808,26 @@ class bdmsPdf():
         profile_y += box_height
 
         self.drawProfile(
-            0, profile_y,
-            page_width, page_height - profile_y,
-            scale
+            0, profile_y, page_width, page_height - profile_y, scale
         )
 
         pages = int(
-            ((self.profile['length'] * 1000 / scale) + 70 ) / page_height
+            (
+                (self.profile['length'] * 1000 / scale) + 70 
+            ) / page_height
         ) + 1
         i = 1
 
         # Add page number
         self.drawRightText(
             page_width, 265,
-            'content', 'p. {}/{}'.format(i,pages)
+            'content', 'p. {}/{}'.format(i, pages)
         )
         self.c.showPage()
 
         while self.lastPlotElev > (self.profile['elevation_z']-self.profile['length']):
             self.drawProfile(
-                0, 0,
-                page_width, page_height,
-                scale
+                0, 0, page_width, page_height, scale
             )
             i = i + 1
 
@@ -825,6 +840,7 @@ class bdmsPdf():
             self.c.showPage()
 
     def drawProfile(self, x, y, w, h, scale):
+
         # PROFILE PLOT
         # ==============
         self.drawBox(x, y, w, h, 'bold')
@@ -843,12 +859,11 @@ class bdmsPdf():
         # ruler depth
         self.drawRuler(x+20, y+10, 20, h-10, scale, 'depth')
 
-        
         # description header
         self.drawTextBox(x+70, y, w-70, 10, 'bold',
             'subtitle', _('material description'), 'center'
         )
-        
+
         # stratigraphy & description
         self.drawStatigraphy(x+40, y+10, 30, h-10, scale, w-70)
 
