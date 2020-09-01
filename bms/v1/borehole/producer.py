@@ -221,6 +221,7 @@ class BoreholeProducerHandler(Producer):
                     if 'orderby' in request and (
                         request['orderby'] is not None
                     ) and (
+                        'orderby' in self.user['setting']['eboreholetable'] and
                         self.user[
                             'setting'
                         ]['eboreholetable']['orderby'] != request['orderby']
