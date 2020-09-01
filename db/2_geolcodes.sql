@@ -1,40 +1,3 @@
-SET client_encoding = 'UTF8';
-
-INSERT INTO bdms.config(
-    name_cfg, value_cfg
-)
-VALUES
-    ('VERSION', '1.0.0'),
-    ('PREVIOUS', NULL),
-    ('GEOLCODES', '1.0.0'),
-    ('INSTALLATION', to_char(now(), 'YYYY-MM-DD"T"HH24:MI:SSOF')),
-    ('PG_UPGRADE', NULL),
-    (
-        'SETTINGS',
-        '{'
-        '   "defaults": {'
-        '       "stratigraphy": 3002'
-        '   },'
-        '   "filter": {},'
-        '   "efilter": {},'
-        '   "boreholetable": {'
-        '        "orderby": "original_name",'
-        '        "direction": "ASC"'
-        '    },'
-        '    "eboreholetable": {'
-        '        "orderby": "creation",'
-        '        "direction": "DESC"'
-        '    },'
-        '   "map": {'
-        '       "explorer": {},'
-        '       "editor": {}'
-        '   },'
-        '   "appearance": {'
-        '       "explorer": 1'
-        '   }'
-        '}'
-    );
-
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
     schema_cli, code_cli,
@@ -3733,10 +3696,10 @@ INSERT INTO bdms.codelist (
 ) VALUES (
     15103053, 15103053,
     'custom.lit_pet_top_bedrock', 'Iep',
-    'Pyroklasitsches Gestein (vulkanischer Tuff; >75% pyroklast. Komp.)', '',
-    'roche pyroclastique (tuf volcanique; > 75 % comp. pyrocl.)', '',
-    'piroclastite, roccia piroclastica (tufo vulcanico; > 75% comp. pirocl.)', '',
-    'pyroclastic rock (volcanic tuff; >75% pyroclastic components)', '',
+    'Pyroklasitsches Gestein (vulkanischer Tuff, >75% pyroklast. Komp.)', '',
+    'roche pyroclastique (tuf volcanique, > 75 % comp. pyrocl.)', '',
+    'piroclastite, roccia piroclastica (tufo vulcanico, > 75% comp. pirocl.)', '',
+    'pyroclastic rock (volcanic tuff, >75% pyroclastic components)', '',
     195, NULL,
     false, '15103001.15103037.15103053'
 );
@@ -3847,10 +3810,10 @@ INSERT INTO bdms.codelist (
 ) VALUES (
     15103060, 15103060,
     'custom.lit_pet_top_bedrock', 'Iet',
-    'Tuffit (pyroklast. + nicht-vulkan. Sedimente; 75-25% pyroklast. Komp.)', '',
-    'tuffite (roche volcano-sédimentaire ; 75–25 % comp. pyrocl.)', '',
-    'tufite (roccia vulcano-sedimentaria; 75–25% comp. pirocl.)', '',
-    'tuffite (pyroclastic and non-volcanic sediments; 75-25% pyroclastic components)', '',
+    'Tuffit (pyroklast. + nicht-vulkan. Sedimente, 75-25% pyroklast. Komp.)', '',
+    'tuffite (roche volcano-sédimentaire , 75–25 % comp. pyrocl.)', '',
+    'tufite (roccia vulcano-sedimentaria, 75–25% comp. pirocl.)', '',
+    'tuffite (pyroclastic and non-volcanic sediments, 75-25% pyroclastic components)', '',
     201, NULL,
     false, '15103001.15103037.15103060'
 );
@@ -32257,7 +32220,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Permo-Karbon der Urseren-Garvera-Zone', '',
     1342, '{"color": [175,150,125]}',
-    false, '15202142'
+    false, '15202142.15202464.15202266'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32270,13 +32233,13 @@ INSERT INTO bdms.codelist (
     default_cli, path_cli
 ) VALUES (
     15202465, 15202465,
-    'custom.lit_str_top_bedrock', '#REF!',
+    'custom.lit_str_top_bedrock', 'Permo-Karbon des Aiguilles-Rouges-Massivs',
     NULL, '',
     NULL, '',
     NULL, '',
-    '#REF!', '',
+    'Permo-Karbon des Aiguilles-Rouges-Massivs', '',
     1343, '{"color": [175,150,125]}',
-    false, '15202142'
+    false, '15202142.15202464.15202465'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32295,7 +32258,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Vernayaz-Formation', '',
     1344, '{"color": [160,180,150]}',
-    false, '15202142'
+    false, '15202142.15202464.15202465.15202154'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32314,7 +32277,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Dzéman-Member', '',
     1345, '{"color": [200,175,150]}',
-    false, '15202142'
+    false, '15202142.15202464.15202465.15202154.15202325'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32333,7 +32296,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Salvan-Member', '',
     1346, '{"color": [160,180,150]}',
-    false, '15202142'
+    false, '15202142.15202464.15202465.15202154.15202155'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32352,7 +32315,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Au-d''Arbignon-Schiefer', '',
     1347, '{"color": [160,180,150]}',
-    false, '15202142'
+    false, '15202142.15202464.15202465.15202154.15202155.15202358'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32371,7 +32334,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Vallorcine-Konglomerat', '',
     1348, '{"color": [160,180,150]}',
-    false, '15202142'
+    false, '15202142.15202464.15202465.15202154.15202155.15202156'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32390,7 +32353,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Dorénaz-Konglomerat', '',
     1349, '{"color": [160,180,150]}',
-    false, '15202142'
+    false, '15202142.15202464.15202465.15202154.15202155.15202359'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32409,7 +32372,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Plex-Aboyeu-Rhyolith', '',
     1350, '{"color": [200,90,80]}',
-    false, '15202142'
+    false, '15202142.15202464.15202465.15202154.15202155.15202203'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32428,7 +32391,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Spät- bis postvariszische Sedimente und Vulkanite des Aar-Massivs', '',
     1351, '{"color": [165,185,165]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32447,7 +32410,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Wendenjoch-Formation', '',
     1352, '{"color": [165,185,165]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202165'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32466,7 +32429,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Goltschenried-Formation', '',
     1353, '{"color": [165,185,165]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202256'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32485,7 +32448,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Windgällen-Formation', '',
     1354, '{"color": [165,185,165]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202166'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32504,7 +32467,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Windgällen-Rhyolith', '',
     1355, '{"color": [200,90,80]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202166.15202327'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32523,7 +32486,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Trift-Formation', '',
     1356, '{"color": [165,185,165]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202167'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32542,7 +32505,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Intschi-Formation', '',
     1357, '{"color": [165,185,165]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202168'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32561,7 +32524,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Bifertengrätli-Formation', '',
     1358, '{"color": [165,185,165]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202169'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32580,7 +32543,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Lakustrisches Member', '',
     1359, '{"color": [165,185,165]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202169.15202170'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32599,7 +32562,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Estuarisches Member', '',
     1360, '{"color": [165,185,165]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202169.15202171'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32618,7 +32581,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Grünhorn-Member («Vulkanisches Member»)', '',
     1361, '{"color": [165,185,165]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202169.15202173'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32637,7 +32600,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Basaler Konglomerat', '',
     1362, '{"color": [165,185,165]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202169.15202173.15202172'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32656,7 +32619,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Diechtergletscher-Formation', '',
     1363, '{"color": [160,180,140]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202174'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32675,7 +32638,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Maasplanggstock-Metaandesit', '',
     1364, '{"color": [160,180,140]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202174.15202448'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32694,7 +32657,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Tscharren-Formation', '',
     1365, '{"color": [160,180,140]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202175'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32713,7 +32676,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Rinderbiel-Mikrogranit', '',
     1366, '{"color": [200,90,80]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202175.15202489'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -32732,7 +32695,7 @@ INSERT INTO bdms.codelist (
     NULL, '',
     'Val-Lumpegna-Formation', '',
     1367, '{"color": [160,180,140]}',
-    false, '15202142'
+    false, '15202142.15202464.15202164.15202176'
 );
 INSERT INTO bdms.codelist (
     id_cli, geolcode,
@@ -44298,7 +44261,7 @@ INSERT INTO bdms.codelist (
 ) VALUES (
     1004, 1004,
     'borehole_form', 'restriction',
-    'Restriktion', '',
+    'Beschränkung', '',
     'Restriction', '',
     'restrizione', '',
     'Restriction', '',
@@ -44317,7 +44280,7 @@ INSERT INTO bdms.codelist (
 ) VALUES (
     1005, 1005,
     'borehole_form', 'restriction_until',
-    'Restriktion Datum', '',
+    'Datum Beschränkung', '',
     'Date de restriction', '',
     'data di restrizione', '',
     'Restriction date', '',
@@ -44925,9 +44888,9 @@ INSERT INTO bdms.codelist (
 ) VALUES (
     1037, 1037,
     'borehole_form', 'identifier_value',
+    'Code', '',
+    'Code', '',
     'Codice', '',
-    'Code', '',
-    'Code', '',
     'Code', '',
     38, NULL,
     false, ''
@@ -44963,7 +44926,7 @@ INSERT INTO bdms.codelist (
 ) VALUES (
     2001, 2001,
     'layer_form', 'depth_to',
-    'Base MD [m]', '',
+    'Basis MD [m]', '',
     'Base MD [m]', '',
     'Base MD [m]', '',
     'Base MD [m]', '',
@@ -45001,10 +44964,10 @@ INSERT INTO bdms.codelist (
 ) VALUES (
     2003, 2003,
     'layer_form', 'geology',
-    'Geologie (original)', '',
-    'Géologie (originale)', '',
-    'Geologia (originale)', '',
-    'Geology (original)', '',
+    'Geologische Beschreibung', '',
+    'Description géologique', '',
+    'Descrizione geologia', '',
+    'Geology description', '',
     4, NULL,
     false, ''
 );
@@ -45020,7 +44983,7 @@ INSERT INTO bdms.codelist (
 ) VALUES (
     2004, 2004,
     'layer_form', 'last',
-    'Bohrendtiefe', '',
+    'Bohrlochende', '',
     'Fin du forage', '',
     'profondità perforazione', '',
     'End of borehole', '',
@@ -45556,89 +45519,33 @@ INSERT INTO bdms.codelist (
     'Géologie', '',
     'Geologia', '',
     'Geology', '',
-    1, 
-    '{"color": "lithostratigraphy", "colorNS": "custom.lit_str_top_bedrock", "pattern": "lithology", "patternNS": "custom.lit_pet_top_bedrock", "fields": {"color": false, "notes": true, "debris": false, "striae": false, "uscs_1": false, "uscs_2": false, "uscs_3": false, "geology": false, "cohesion": false, "humidity": false, "jointing": false, "lithology": true, "alteration": false, "plasticity": false, "soil_state": false, "compactness": false, "consistance": false, "description": true, "grain_shape": false, "lit_pet_deb": false, "grain_size_1": false, "grain_size_2": false, "tectonic_unit": false, "uscs_original": false, "qt_description": false, "grain_granularity": false, "lithostratigraphy": true, "organic_component": false, "chronostratigraphy": true, "further_properties": false, "uscs_determination": false}}',
-    TRUE, ''
-);
-
-INSERT INTO bdms.codelist (
-    id_cli, geolcode,
-    schema_cli, code_cli,
-    text_cli_de, description_cli_de,
-    text_cli_fr, description_cli_fr,
-    text_cli_it, description_cli_it,
-    text_cli_en, description_cli_en,
-    order_cli, conf_cli,
-    default_cli, path_cli
-) VALUES (
-    3001, 3001,
-    'layer_kind', 'GTec',
-    'Geotechnische', '',
-    'Géotechnique', '',
-    'Geotecnica', '',
-    'Geotechnical', '',
-    2,
-    '{"color": null, "colorNS": null, "pattern": "uscs_1", "patternNS": "mcla101", "fields": {"color": false, "notes": true, "debris": false, "striae": false, "uscs_1": false, "uscs_2": false, "uscs_3": false, "geology": false, "cohesion": false, "humidity": false, "jointing": false, "lithology": true, "alteration": false, "plasticity": false, "soil_state": false, "compactness": false, "consistance": false, "description": true, "grain_shape": false, "lit_pet_deb": false, "grain_size_1": false, "grain_size_2": false, "tectonic_unit": false, "uscs_original": false, "qt_description": false, "grain_granularity": false, "lithostratigraphy": true, "organic_component": false, "chronostratigraphy": true, "further_properties": false, "uscs_determination": false}}',
-    FALSE, ''
-);
-
-INSERT INTO bdms.codelist (
-    id_cli, geolcode,
-    schema_cli, code_cli,
-    text_cli_de, description_cli_de,
-    text_cli_fr, description_cli_fr,
-    text_cli_it, description_cli_it,
-    text_cli_en, description_cli_en,
-    order_cli, conf_cli,
-    default_cli, path_cli
-) VALUES (
-    100000000, 100000000,
-    'borehole_identifier', '',
-    'Eindeutige ID', '',
-    'Identifiant unique', '',
-    'ID univoco', '',
-    'Unique id', '',
     1, NULL,
-    FALSE, ''
+    false, ''
 );
-
-SELECT setval('bdms.codelist_id_cli_seq', 100000001, true);
-
-INSERT INTO bdms.roles VALUES (0, 'VIEW', '{}');
-INSERT INTO bdms.roles VALUES (1, 'EDIT', '{}');
-INSERT INTO bdms.roles VALUES (2, 'CONTROL', '{}');
-INSERT INTO bdms.roles VALUES (3, 'VALID', '{}');
-INSERT INTO bdms.roles VALUES (4, 'PUBLIC', '{}');
-SELECT pg_catalog.setval('bdms.roles_id_rol_seq', 4, false);
-
-INSERT INTO bdms.workgroups (id_wgp, name_wgp, settings_wgp)
-VALUES (1, 'Default', '{}');
-
-SELECT pg_catalog.setval('bdms.workgroups_id_wgp_seq', 2, false);
-
-INSERT INTO bdms.users VALUES (
-    1, NULL, true, true, 'admin', crypt('admin', gen_salt('md5')),
-'{"filter": {"custom": {"borehole_identifier": true, "project_name": true, "landuse": true, "public_name": true, "canton": true, "city": true}, "restriction": true, "mapfilter": true, "restriction_until": true, "extended": {"original_name": true, "method": true, "status": true}, "kind": true, "elevation_z": true, "length": true, "drilling_date": true, "zoom2selected": true}, "boreholetable": {"orderby": "original_name", "direction": "ASC"}, "eboreholetable": {"orderby": "creation", "direction": "DESC"}, "map": {"explorer": {}, "editor": {}}, "appearance": {"explorer": 1}}',
-'admin', NULL, 'user');
-SELECT pg_catalog.setval('bdms.users_id_usr_seq', 1, true);
-
-INSERT INTO bdms.users_roles(
-    id_usr_fk, id_rol_fk, id_wgp_fk)
-    VALUES (1, 0, 1),(1, 1, 1),(1, 2, 1),(1, 3, 1),(1, 4, 1);
-
-INSERT INTO bdms.users (id_usr, admin_usr, viewer_usr, username, password, firstname, lastname)
-VALUES
-(2, false, true, 'editor', crypt('editor', gen_salt('md5')),'editor', 'user'),
-(3, false, true, 'controller',crypt('controller', gen_salt('md5')), 'controller', 'user'),
-(4, false, true, 'validator', crypt('validator', gen_salt('md5')), 'validator', 'user'),
-(5, false, true, 'publisher', crypt('publisher', gen_salt('md5')), 'publisher', 'user');
-
-SELECT pg_catalog.setval('bdms.users_id_usr_seq', 5, true);
-
-INSERT INTO bdms.users_roles(id_usr_fk, id_rol_fk, id_wgp_fk)
-VALUES
-(2, 1, 1),
-(3, 2, 1),
-(4, 3, 1),
-(5, 4, 1);
-
+-- INSERT INTO bdms.codelist (
+--     id_cli, geolcode,
+--     schema_cli, code_cli,
+--     text_cli_de, description_cli_de,
+--     text_cli_fr, description_cli_fr,
+--     text_cli_it, description_cli_it,
+--     text_cli_en, description_cli_en,
+--     order_cli, conf_cli,
+--     default_cli, path_cli
+-- ) VALUES (
+--     3001, 3001,
+--     'layer_kind', 'GTec',
+--     'Geotechnische', '',
+--     'Géotechnique', '',
+--     'Geotecnica', '',
+--     'Geotechnical', '',
+--     2, NULL,
+--     false, ''
+-- );
+UPDATE bdms.codelist
+    SET conf_cli = '{"color": "lithostratigraphy", "colorNS": "custom.lit_str_top_bedrock", "pattern": "lithology", "patternNS": "custom.lit_pet_top_bedrock", "fields": {"color": false, "notes": true, "debris": false, "striae": false, "uscs_1": false, "uscs_2": false, "uscs_3": false, "geology": false, "cohesion": false, "humidity": false, "jointing": false, "lithology": true, "alteration": false, "plasticity": false, "soil_state": false, "compactness": false, "consistance": false, "description": true, "grain_shape": false, "lit_pet_deb": false, "grain_size_1": false, "grain_size_2": false, "tectonic_unit": false, "uscs_original": false, "qt_description": false, "grain_granularity": false, "lithostratigraphy": true, "organic_component": false, "chronostratigraphy": true, "further_properties": false, "uscs_determination": false}}', default_cli = TRUE
+WHERE
+    id_cli = 3000;
+-- UPDATE bdms.codelist
+--     SET conf_cli = '{"color": null, "colorNS": null, "pattern": "uscs_1", "patternNS": "mcla101", "fields": {"color": false, "notes": true, "debris": false, "striae": false, "uscs_1": false, "uscs_2": false, "uscs_3": false, "geology": false, "cohesion": false, "humidity": false, "jointing": false, "lithology": true, "alteration": false, "plasticity": false, "soil_state": false, "compactness": false, "consistance": false, "description": true, "grain_shape": false, "lit_pet_deb": false, "grain_size_1": false, "grain_size_2": false, "tectonic_unit": false, "uscs_original": false, "qt_description": false, "grain_granularity": false, "lithostratigraphy": true, "organic_component": false, "chronostratigraphy": true, "further_properties": false, "uscs_determination": false}}'
+-- WHERE
+--     id_cli = 3001;
