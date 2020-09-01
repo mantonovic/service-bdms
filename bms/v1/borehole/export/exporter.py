@@ -510,10 +510,12 @@ class ExportHandler(Viewer):
                 "message": str(bex),
                 "error": bex.code
             })
+
         except Exception as ex:
             print(traceback.print_exc())
             self.write({
                 "success": False,
                 "message": str(ex)
             })
+
         self.finish()

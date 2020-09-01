@@ -61,10 +61,6 @@ class FileHandler(Producer):
 
                         borehole_id = int(self.get_body_argument('id'))
 
-                        # print(borehole_id)
-
-                        # print(self.request.files)
-
                         for files in self.request.files.items():
 
                             for info in files[1]:
@@ -106,7 +102,7 @@ class FileHandler(Producer):
                                         conf['key'] = "{}.{}".format(
                                             str(uuid.uuid1()), extension
                                         )
-                                        
+
                                         try:
                                             s3.Bucket(
                                                 options.aws_bucket
