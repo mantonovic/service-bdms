@@ -416,7 +416,7 @@ class bdmsPdf():
         """ 
         x: top left box coordinate in mm
         y: top left box coordinate in mm
-        w: box wiodth in mm 
+        w: box width in mm 
         h: box height in mm
         scale: scale factor (denominator)
         rtype: 'elev' (m.a.s.l) or 'depth' (meter from surface)
@@ -444,9 +444,12 @@ class bdmsPdf():
 
         # major tics
         for i in frange(
-            10 - int(str(top_dep)[-1:]),
-            min(self.profile['length'], h * scale / 1000), 
-            major_tics
+            10 - int(str(int(top_dep))[-1:]),
+            min(
+                self.profile['length'],
+                h * scale / 1000
+            ),
+            10
         ):
             self.drawLine(
                 x + w - 2, y + (i * 1000 / scale), 2, 0, 'thin')
@@ -825,7 +828,9 @@ class bdmsPdf():
         )
         self.c.showPage()
 
-        while self.lastPlotElev > (self.profile['elevation_z']-self.profile['length']):
+        while self.lastPlotElev > (
+            self.profile['elevation_z'] - self.profile['length']
+        ):
             self.drawProfile(
                 0, 0, page_width, page_height, scale
             )
@@ -871,9 +876,3 @@ class bdmsPdf():
         self.drawTextBox(x+40, y, 30, 10, 'bold',
             'subtitle', _('stratigraphy'), 'center'
         )
-
-
-        
-    
-
-        
