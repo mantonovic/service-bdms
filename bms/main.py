@@ -33,7 +33,7 @@ define("file_repo", default='s3', help="Select the file repository", type=str)
 define("local_path", default=str(Path.home()), help="Select local path", type=str)
 
 # AWS S3 storage for files configuration
-define("aws_bucket", default='bdms', help="Select AWS Bucket name", type=str)
+define("aws_bucket", default=None, help="Select AWS Bucket name", type=str)
 define("aws_credentials", default=None, help="AWS S3 credential file location (overwrite aws_access_key_id and aws_secret_access_key)", type=str)
 define("aws_access_key_id", default=None, help="AWS S3 access key id", type=str)
 define("aws_secret_access_key", default=None, help="AWS S3 secret access key", type=str)
@@ -352,22 +352,29 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
 
     # Configuring S3 credentials
-    if options.file_repo == 's3' and options.aws_credentials is not None:
+    if options.file_repo == 's3': # and options.aws_credentials is not None:
 
         # if options.aws_credentials is None:
         #     raise Exception("AWS Credential file missing")
+
+        # File with credentials
+        if options.aws_credentials is not None:
         
-        config.read(options.aws_credentials)
+            config.read(options.aws_credentials)
 
-        if (
-            'default' not in config or
-            'aws_access_key_id' not in config['default'] or
-            'aws_secret_access_key' not in config['default']
-        ):
-            raise Exception("AWS Credential wrong")
+            if (
+                'default' not in config or
+                'aws_access_key_id' not in config['default'] or
+                'aws_secret_access_key' not in config['default']
+            ):
+                raise Exception("AWS Credential wrong")
 
-        options.aws_access_key_id = config['default']['aws_access_key_id']
-        options.aws_secret_access_key = config['default']['aws_secret_access_key']
+            options.aws_access_key_id = config['default']['aws_access_key_id']
+            options.aws_secret_access_key = config['default']['aws_secret_access_key']
+
+        # Validate mandatory Bucket name
+        if options.aws_bucket is None:
+            raise Exception("AWS Bucket name (--aws_bucket) is missing")
 
     # Configuring SMTP credentials
     if options.smtp_config is not None:
