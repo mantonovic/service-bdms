@@ -180,6 +180,8 @@ class ExportHandler(Viewer):
                                 # else raise error
                             elif len(cid)==1:
                                 bid = int(cid[0])
+
+                                # Get primary stratigrafy
                                 sid = await conn.fetchval("""
                                     SELECT
                                         id_sty
@@ -190,8 +192,25 @@ class ExportHandler(Viewer):
                                     AND
                                         primary_sty IS TRUE
                                 """, bid)
+
+                                # If there is no primary stratigrafy find the latest
+                                if sid is None:
+                                    sid = await conn.fetchval("""
+                                        SELECT
+                                            id_sty
+                                        FROM
+                                            bdms.stratigraphy
+                                        WHERE
+                                            id_bho_fk = $1
+                                        ORDER BY
+                                            date_sty DESC
+                                        LIMIT 1;
+                                    """, bid)
+
                             else:
                                 raise ValueError("id parameters are {berehole id}:{stratigraphy id}")
+
+                            print("sid: ", sid)
 
                             if sid is not None:
                                 fallback = 'en'
@@ -394,6 +413,9 @@ class ExportHandler(Viewer):
                                 """, bid, sid, sid, sid)
 
                                 d = json.loads(res)
+
+                                print("d:")
+                                print(d)
 
                                 a = bdms.bdmsPdf(d)
                                 a.renderProfilePDF(
