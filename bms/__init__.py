@@ -23,6 +23,7 @@ from bms.v1.exceptions import DuplicateException
 # Borehole's ACTION Handlers
 from bms.v1.borehole.producer import BoreholeProducerHandler
 from bms.v1.borehole.viewer import BoreholeViewerHandler
+from bms.v1.borehole.filehandler import FileHandler
 
 # Identifiers's ACTION Handlers
 from bms.v1.borehole.identifier import CreateIdentifier
@@ -54,8 +55,15 @@ from bms.v1.geoapi.handler import GeoapiHandler
 from bms.v1.geoapi.municipality.handler import MunicipalityHandler
 from bms.v1.geoapi.canton.handler import CantonHandler
 
-# Workflows's handlers
+# Workflows handlers
 from bms.v1.workflow.producer import WorkflowProducerHandler
+
+# Terms handlers
+from bms.v1.terms.handler import TermsHandler
+from bms.v1.terms.admin import TermsAdminHandler
+
+# Feedback handlers
+from bms.v1.feedback.handler import FeedbackHandler
 
 # Actions
 from bms.v1.borehole import CreateBorehole

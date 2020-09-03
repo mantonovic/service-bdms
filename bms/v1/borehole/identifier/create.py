@@ -37,7 +37,9 @@ class CreateIdentifier(Action):
 
         await self.conn.fetchval("""
             UPDATE bdms.codelist
-                SET code_cli = id_cli
+                SET
+                    code_cli = id_cli,
+                    geolcode = id_cli
             WHERE
                 id_cli = $1
         """, bid)

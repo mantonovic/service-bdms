@@ -15,6 +15,11 @@ class SettingHandler(Viewer):
 
             async with self.pool.acquire() as conn:
 
+                if self.user['id'] == 0:
+                    return {
+                        "data": self.user['setting']
+                    }
+
                 exe = None
                 request['user_id'] = self.user['id']
 

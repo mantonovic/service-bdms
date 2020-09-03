@@ -6,10 +6,7 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-COPY ./db.zip /app/
-
-RUN unzip db.zip && \ 
-		rm db.zip
+COPY ./*.sql /app/
 
 # Postgis-Postgresql 
 FROM postgis/postgis:12-2.5-alpine

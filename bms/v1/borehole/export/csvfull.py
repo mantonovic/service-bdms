@@ -59,10 +59,19 @@ class ExportCsvFull(Action):
 
         if len(data) > 0:
 
-            cl = await ListCodeList(self.conn).execute('borehole_form')
+            cl = await ListCodeList(
+                self.conn
+            ).execute('borehole_form')
 
             csv_header = {}
             for c in cl['data']['borehole_form']:
+                csv_header[c['code']] = c
+
+            identifiers = await ListCodeList(
+                self.conn
+            ).execute('borehole_identifier')
+
+            for c in identifiers['data']['borehole_identifier']:
                 csv_header[c['code']] = c
 
             csvfile = StringIO()
@@ -75,19 +84,48 @@ class ExportCsvFull(Action):
             keys = data[0].keys()
             cols = []
             for key in keys:
-                cols.append(
-                    csv_header[key][language]['text']
-                    if key in csv_header else key
+                # Excluding identifiers column
+                if key != 'identifiers':
+                    cols.append(
+                        csv_header[key][language]['text']
+                        if key in csv_header else key
+                    )
+
+            extra_col = []
+            extra_geol = []
+            for identifier in identifiers['data']['borehole_identifier']:
+                extra_col.append(
+                    identifier[language]['text']
                 )
-            cw.writerow(cols)
+                extra_geol.append(
+                    identifier['id']
+                )
+
+            cw.writerow(cols + extra_col)
 
             for row in data:
                 r = []
                 for col in keys:
-                    if isinstance(row[col], list):
-                        r.append(",".join(str(x) for x in row[col]))
+                    if col == 'identifiers':
+                        for xc in extra_geol:
+                            val = None
+                            if row[col] is not None:
+                                for identifier in row[col]:
+                                    if identifier[
+                                        'borehole_identifier'
+                                    ] ==  xc:
+                                        val = identifier[
+                                            'identifier_value'
+                                        ]
+                                        break
+                            
+                            r.append(val)
+
                     else:
-                        r.append(row[col])
+                        if isinstance(row[col], list):
+                            r.append(",".join(str(x) for x in row[col]))
+                        else:
+                            r.append(row[col])
                 cw.writerow(r)
 
         return csvfile
@@ -117,7 +155,8 @@ class ExportCsvFull(Action):
                 qth.geolcode as qt_elevation,
 
                 lnd.geolcode as landuse,
-                cantons.name as canton,
+                ctn.name as canton,
+                -- cantons.name as canton,
                 municipalities.name as city,
                 address_bho as address,
 
@@ -178,10 +217,40 @@ class ExportCsvFull(Action):
                 sty.lit_pet_deb,
                 sty.lithok,
                 sty.kirost,
-                sty.notes
+                sty.notes,
+
+                identifiers
 
             FROM
                 bdms.borehole
+
+            LEFT JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_to_json(array_agg(j)) as identifiers
+                FROM (
+                    SELECT
+                        id_bho_fk,
+                        json_build_object(
+                            'borehole_identifier', 
+                            geolcode,
+                            'identifier_value',
+                            value_bco
+                        ) as j
+                    FROM
+                        bdms.borehole_codelist
+                    INNER JOIN
+                        bdms.codelist
+                    ON
+                        id_cli_fk = id_cli
+                    WHERE
+                        borehole_codelist.code_cli = 'borehole_identifier'
+                ) t
+                GROUP BY
+                    id_bho_fk
+            ) as idf
+            ON
+                idf.id_bho_fk = id_bho
 
             INNER JOIN (
 
@@ -534,8 +603,17 @@ class ExportCsvFull(Action):
             LEFT JOIN bdms.municipalities
                 ON municipalities.gid = city_bho
 
-            LEFT JOIN bdms.cantons
-                ON cantons.kantonsnum = canton_bho
+            --LEFT JOIN bdms.cantons
+            --    ON cantons.kantonsnum = canton_bho
+
+            LEFT JOIN (
+                SELECT DISTINCT
+                    cantons.kantonsnum,
+                    cantons.name
+				FROM
+                    bdms.cantons
+			) as ctn
+                ON ctn.kantonsnum = canton_bho
 
             LEFT JOIN bdms.codelist as lnd
                 ON lnd.id_cli = landuse_id_cli

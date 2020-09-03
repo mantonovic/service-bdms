@@ -1,0 +1,8 @@
+[SMTP]
+smtp_recipients = milan.antonovic@supsi.ch
+smtp_username = feedback@swissforages.ch
+smtp_password = 1234
+smtp_server = smtp.gmail.com
+smtp_port = 587
+smtp_tls = 0
+smtp_starttls = 1

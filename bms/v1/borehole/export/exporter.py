@@ -37,9 +37,15 @@ class ExportHandler(Viewer):
                         coords = self.get_argument(key).split(',')
                         for idx in range(0, len(coords)):
                             coords[idx] = float(coords[idx])
+
                         arguments[key] = coords
+                    
                     elif key == 'format':
                         arguments[key] = self.get_argument(key).split(',')
+
+                    elif key == 'lang':
+                        arguments['language'] = self.get_argument(key)
+
                     else:
                         arguments[key] = self.get_argument(key)
 
@@ -98,7 +104,6 @@ class ExportHandler(Viewer):
                             filter=arguments,
                             user=self.user
                         )
-
 
                     if output_stream is not None:
                         output_stream.writestr(
@@ -159,9 +164,7 @@ class ExportHandler(Viewer):
 
                 if 'pdf' in arguments['format']:
 
-                    lan = arguments['lang'] if 'lang' in arguments else 'en'
-                    idsty =6
-                    schema ='bdms'
+                    lan = arguments['language'] if 'language' in arguments else 'en'
 
                     if 'id' in arguments:
 
@@ -177,6 +180,8 @@ class ExportHandler(Viewer):
                                 # else raise error
                             elif len(cid)==1:
                                 bid = int(cid[0])
+
+                                # Get primary stratigrafy
                                 sid = await conn.fetchval("""
                                     SELECT
                                         id_sty
@@ -187,11 +192,27 @@ class ExportHandler(Viewer):
                                     AND
                                         primary_sty IS TRUE
                                 """, bid)
+
+                                # If there is no primary stratigrafy find the latest
+                                if sid is None:
+                                    sid = await conn.fetchval("""
+                                        SELECT
+                                            id_sty
+                                        FROM
+                                            bdms.stratigraphy
+                                        WHERE
+                                            id_bho_fk = $1
+                                        ORDER BY
+                                            date_sty DESC
+                                        LIMIT 1;
+                                    """, bid)
+
                             else:
                                 raise ValueError("id parameters are {berehole id}:{stratigraphy id}")
 
                             if sid is not None:
-                                res = await conn.fetchval("""
+                                fallback = 'en'
+                                res = await conn.fetchval(f"""
                                     SELECT
                                         row_to_json(t2)
                                     FROM (
@@ -201,24 +222,59 @@ class ExportHandler(Viewer):
                                             cant_j.name as canton,
                                             mun_j.name as city,
                                             address_bho as address,
-                                            cli_kind.text_cli_{} as kind,
+                                            COALESCE(
+                                                cli_kind.text_cli_{lan},
+                                                cli_kind.text_cli_{fallback}
+                                            ) as kind,
                                             location_x_bho as location_e,
                                             location_y_bho as location_n,
                                             COALESCE(elevation_z_bho, 0) as elevation_z,
-                                            cli_srs.text_cli_{} as srs,
-                                            cli_hrs.text_cli_{} as hrs,
+                                            COALESCE(
+                                                cli_srs.text_cli_{lan},
+                                                cli_srs.text_cli_{fallback}
+                                            ) as srs,
+                                            -- cli_srs.text_cli_{lan} as srs,
+                                            COALESCE(
+                                                cli_hrs.text_cli_{lan},
+                                                cli_hrs.text_cli_{fallback}
+                                            ) as hrs,
+                                            -- cli_hrs.text_cli_{lan} as hrs,
                                             length_bho as length,
                                             drilling_date_bho as drilling_date,
-                                            cli_restriction.text_cli_{} as restriction,
+                                            COALESCE(
+                                                cli_restriction.text_cli_{lan},
+                                                cli_restriction.text_cli_{fallback}
+                                            ) as restriction,
+                                            -- cli_restriction.text_cli_{lan} as restriction,
                                             to_char(
                                                 restriction_until_bho,
                                                 'YYYY-MM-DD'
                                             ) as restrictoin_until,
-                                            cli_purpose.text_cli_{} as purpose,
-                                            cli_landuse.text_cli_{} as landuse,
-                                            cli_cuttings.text_cli_{} as cuttings,
-                                            cli_method.text_cli_{} as method,
-                                            cli_status.text_cli_{} as status,
+                                            COALESCE(
+                                                cli_purpose.text_cli_{lan},
+                                                cli_purpose.text_cli_{fallback}
+                                            ) as purpose,
+                                            -- cli_purpose.text_cli_{lan} as purpose,
+                                            COALESCE(
+                                                cli_landuse.text_cli_{lan},
+                                                cli_landuse.text_cli_{fallback}
+                                            ) as landuse,
+                                            -- cli_landuse.text_cli_{lan} as landuse,
+                                            COALESCE(
+                                                cli_cuttings.text_cli_{lan},
+                                                cli_cuttings.text_cli_{fallback}
+                                            ) as cuttings,
+                                            -- cli_cuttings.text_cli_{lan} as cuttings,
+                                            COALESCE(
+                                                cli_method.text_cli_{lan},
+                                                cli_method.text_cli_{fallback}
+                                            ) as method,
+                                            -- cli_method.text_cli_{lan} as method,
+                                            COALESCE(
+                                                cli_status.text_cli_{lan},
+                                                cli_status.text_cli_{fallback}
+                                            ) as status,
+                                            -- cli_status.text_cli_{lan} as status,
                                             drill_diameter_bho as drill_diameter,
                                             bore_inc_bho as bore_inc,
                                             bore_inc_dir_bho as bore_inc_dir,
@@ -232,8 +288,35 @@ class ExportHandler(Viewer):
                                             'swisstopo' as checked_by,
                                             groundwater_bho as groundwater,
 
-                                            (SELECT
-                                                array_to_json(
+                                            (
+                                                SELECT array_to_json(
+                                                    array_agg(
+                                                        row_to_json(t)
+                                                    )
+                                                )
+                                                FROM (
+                                                    SELECT
+                                                        value_bco as value,
+                                                        COALESCE(
+                                                            text_cli_{lan},
+                                                            text_cli_en
+                                                        ) as identifier
+                                                    FROM
+                                                        bdms.borehole_codelist
+                                                    INNER JOIN
+                                                        bdms.codelist
+                                                    ON
+                                                        id_cli_fk = id_cli
+                                                    WHERE
+                                                        borehole_codelist.code_cli = 'borehole_identifier'
+                                                    AND
+                                                        borehole_codelist.id_bho_fk = $1
+
+                                                ) AS t
+                                            ) AS identifiers,
+
+                                            (
+                                                SELECT array_to_json(
                                                     array_agg(
                                                         row_to_json(t)
                                                     )
@@ -254,73 +337,93 @@ class ExportHandler(Viewer):
                                                             THEN 0 - depth_to_lay
                                                             ELSE elevation_z_bho - depth_to_lay
                                                         END AS msm_to,
-                                                        cli_lithostra.text_cli_{} as lithostratigraphy,
+                                                        COALESCE(
+                                                            cli_lithostra.text_cli_{lan},
+                                                            cli_lithostra.text_cli_{fallback}
+                                                        ) as lithostratigraphy,
+                                                        -- cli_lithostra.text_cli_{lan} as lithostratigraphy,
                                                         cli_lithostra.conf_cli as conf_lithostra,
                                                         cli_lithostra.geolcode as geolcode_lithostra,
-                                                        cli_lithology.text_cli_{} as lithology,
+                                                        COALESCE(
+                                                            cli_lithology.text_cli_{lan},
+                                                            cli_lithology.text_cli_{fallback}
+                                                        ) as lithology,
+                                                        -- cli_lithology.text_cli_{lan} as lithology,
                                                         cli_lithology.conf_cli as conf_lithology,
                                                         description_lay as layer_desc,
                                                         geology_lay as geol_desc,
                                                         name_sty as name_st,
                                                         notes_lay as notes
                                                     FROM
-                                                        {}.layer
-                                                            LEFT JOIN {}.codelist as cli_lithostra
-                                                                ON cli_lithostra.id_cli = lithostratigraphy_id_cli
-                                                            LEFT JOIN {}.codelist as cli_lithology
-                                                                ON cli_lithology.id_cli = lithology_id_cli,
-                                                        {}.stratigraphy,
-                                                        {}.borehole
+                                                        bdms.layer
+                                                    LEFT JOIN bdms.codelist as cli_lithostra
+                                                        ON cli_lithostra.id_cli = lithostratigraphy_id_cli
+                                                    LEFT JOIN bdms.codelist as cli_lithology
+                                                        ON cli_lithology.id_cli = lithology_id_cli
+                                                    INNER JOIN bdms.stratigraphy
+                                                        ON id_sty_fk = id_sty
+                                                    INNER JOIN bdms.borehole
+                                                        ON id_bho_fk = id_bho
                                                     WHERE
-                                                        id_sty_fk = id_sty
-                                                    AND
-                                                        id_sty = $1
-                                                    AND
-                                                        id_bho_fk = id_bho
+                                                        id_sty = $2
                                                     AND
                                                         id_bho = strat_j.id_bho_fk
                                                     ORDER BY depth_from_lay, id_lay
 
-                                            ) AS t
-                                        ) AS layers 
+                                                ) AS t
+                                            ) AS layers 
                                         FROM 
-                                            {}.borehole
-                                        LEFT JOIN {}.codelist as cli_kind
+                                            bdms.borehole
+                                        LEFT JOIN bdms.codelist as cli_kind
                                             ON cli_kind.id_cli = kind_id_cli
-                                        LEFT JOIN {}.codelist as cli_srs
+                                        LEFT JOIN bdms.codelist as cli_srs
                                             ON cli_srs.id_cli = srs_id_cli
-                                        LEFT JOIN {}.codelist as cli_hrs
+                                        LEFT JOIN bdms.codelist as cli_hrs
                                             ON cli_hrs.id_cli = hrs_id_cli
-                                        LEFT JOIN {}.codelist as cli_restriction
+                                        LEFT JOIN bdms.codelist as cli_restriction
                                             ON cli_restriction.id_cli = restriction_id_cli
-                                        LEFT JOIN {}.codelist as cli_purpose
+                                        LEFT JOIN bdms.codelist as cli_purpose
                                             ON cli_purpose.id_cli = purpose_id_cli
-                                        LEFT JOIN {}.codelist as cli_method
+                                        LEFT JOIN bdms.codelist as cli_method
                                             ON cli_method.id_cli = method_id_cli
-                                        LEFT JOIN {}.codelist as cli_landuse
+                                        LEFT JOIN bdms.codelist as cli_landuse
                                             ON cli_landuse.id_cli =landuse_id_cli
-                                        LEFT JOIN {}.codelist as cli_status
+                                        LEFT JOIN bdms.codelist as cli_status
                                             ON cli_status.id_cli =status_id_cli
-                                        LEFT JOIN {}.codelist as cli_cuttings
+                                        LEFT JOIN bdms.codelist as cli_cuttings
                                             ON cli_cuttings.id_cli = cuttings_id_cli
-                                        LEFT JOIN {}.municipalities as mun_j
+                                        LEFT JOIN bdms.municipalities as mun_j
                                             ON mun_j.gid = city_bho
-                                        LEFT JOIN {}.cantons as cant_j
-                                            ON cant_j.gid = canton_bho
+                                        
+                                        --LEFT JOIN bdms.cantons as cant_j
+                                        --    ON cant_j.gid = canton_bho
+                                        
+                                        LEFT JOIN (
+                                            SELECT DISTINCT
+                                                cantons.kantonsnum,
+                                                cantons.name
+                                            FROM
+                                                bdms.cantons
+                                        ) as cant_j
+                                            ON cant_j.kantonsnum = canton_bho
+
                                         LEFT JOIN (
                                             SELECT id_sty, date_sty, name_sty, id_bho_fk 
-                                            FROM {}.stratigraphy
+                                            FROM bdms.stratigraphy
                                             --WHERE primary_sty = true
-                                        ) as strat_j ON strat_j.id_sty = $2
+                                        ) as strat_j
+                                        ON strat_j.id_sty = $3
                                                 
                                         WHERE
                                             id_bho = id_bho_fk
                                         AND
-                                            strat_j.id_sty = $3
+                                            strat_j.id_sty = $4
                                     ) AS t2
-                                """.format(*((lan,)*11 + (schema,)*18)), sid, sid, sid)
+                                """, bid, sid, sid, sid)
 
-                                a = bdms.bdmsPdf( json.loads(res))
+                                d = json.loads(res)
+
+                                a = bdms.bdmsPdf(d)
                                 a.renderProfilePDF(
                                     arguments['lang'] if 'lang' in arguments else 'en',
                                     int(arguments['scale']) if 'scale' in arguments else 200
@@ -435,10 +538,12 @@ class ExportHandler(Viewer):
                 "message": str(bex),
                 "error": bex.code
             })
+
         except Exception as ex:
             print(traceback.print_exc())
             self.write({
                 "success": False,
                 "message": str(ex)
             })
+
         self.finish()

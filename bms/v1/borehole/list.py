@@ -102,7 +102,9 @@ class ListBorehole(Action):
                     qt_tbed.text_cli_{language},
                     qt_tbed.text_cli_{fallback}
                 ) as qt_top_bedrock,
-                groundwater_bho as groundwater
+                groundwater_bho as groundwater,
+                
+                identifiers
 
                 {f'{cols}' if cols else ''}
 
@@ -162,6 +164,37 @@ class ListBorehole(Action):
 
             LEFT JOIN bdms.codelist as sts
                 ON sts.id_cli = status_id_cli
+
+            LEFT JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_to_json(array_agg(j)) as identifiers
+                FROM (
+                    SELECT
+                        id_bho_fk,
+                        json_build_object(
+                            'borehole_identifier', 
+                            COALESCE(
+                                text_cli_{language},
+                                text_cli_{fallback}
+                            ),
+                            'identifier_value',
+                            value_bco
+                        ) as j
+                    FROM
+                        bdms.borehole_codelist
+                    INNER JOIN
+                        bdms.codelist
+                    ON
+                        id_cli_fk = id_cli
+                    WHERE
+                        borehole_codelist.code_cli = 'borehole_identifier'
+                ) t
+                GROUP BY
+                    id_bho_fk
+            ) as idf
+            ON
+                idf.id_bho_fk = id_bho
         """
 
     @staticmethod
@@ -214,7 +247,9 @@ class ListBorehole(Action):
                 top_bedrock_bho as top_bedrock,
 
                 qt_tbed.geolcode as qt_top_bedrock,
-                groundwater_bho as groundwater
+                groundwater_bho as groundwater,
+                
+                identifiers
 
                 {f'{cols}' if cols else ''}
 
@@ -234,6 +269,28 @@ class ListBorehole(Action):
             ) as ids
             ON
                 ids.id_bho_fk = id_bho
+            
+            LEFT JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_to_json(array_agg(j)) as identifiers
+                FROM (
+                    SELECT
+                        id_bho_fk,
+                        json_build_object(
+                            'borehole_identifier', id_cli_fk,
+                            'identifier_value', value_bco
+                        ) as j
+                    FROM
+                        bdms.borehole_codelist
+                    WHERE
+                        code_cli = 'borehole_identifier'
+                ) t
+                GROUP BY
+                    id_bho_fk
+            ) as idf
+            ON
+                idf.id_bho_fk = id_bho
 
             LEFT JOIN bdms.codelist as qt_tbed
                 ON qt_tbed.id_cli = qt_top_bedrock_id_cli
@@ -335,7 +392,16 @@ class ListBorehole(Action):
                     ) t
                 ) as extended,
                 status[array_length(status, 1)] as workflow,
-                status[array_length(status, 1)]  ->> 'role' as "role"
+                status[array_length(status, 1)]  ->> 'role' as "role",
+                (
+                    select row_to_json(t)
+                    FROM (
+                        SELECT
+                            identifiers
+                    ) t
+                ) as custom
+
+                
             FROM
                 bdms.borehole
 
@@ -357,6 +423,28 @@ class ListBorehole(Action):
             ) as ids
             ON
                 ids.id_bho_fk = id_bho
+
+            LEFT JOIN (
+                SELECT
+                    id_bho_fk,
+                    array_to_json(array_agg(j)) as identifiers
+                FROM (
+                    SELECT
+                        id_bho_fk,
+                        json_build_object(
+                            'borehole_identifier', id_cli_fk,
+                            'identifier_value', value_bco
+                        ) as j
+                    FROM
+                        bdms.borehole_codelist
+                    WHERE
+                        code_cli = 'borehole_identifier'
+                ) t
+                GROUP BY
+                    id_bho_fk
+            ) as idf
+            ON
+                idf.id_bho_fk = id_bho
 
             INNER JOIN (
                 SELECT

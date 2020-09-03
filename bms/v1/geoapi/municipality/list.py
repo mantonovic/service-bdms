@@ -24,8 +24,11 @@ class ListMunicipality(Action):
                     )::json as geom
                 FROM
                     bdms.municipalities, (
-                        SELECT distinct kantonsnum, name
-                        from bdms.cantons
+                        SELECT DISTINCT
+                            kantonsnum,
+                            name
+                        FROM
+                            bdms.cantons
                     ) as cantons
                 WHERE
                     municipalities.kantonsnum = cantons.kantonsnum

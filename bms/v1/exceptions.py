@@ -82,6 +82,11 @@ class MissingParameter(BmsException):
         super().__init__(f"Missing parameter {parameter}", 'E-203')
 
 
+class WrongParameter(BmsException):
+    def __init__(self, parameter):
+        super().__init__(f"Wrong parameter {parameter}", 'E-204')
+
+
 class Locked(BmsException):
     def __init__(self, id, data):
         super().__init__(

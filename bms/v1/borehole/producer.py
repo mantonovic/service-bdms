@@ -25,7 +25,8 @@ from bms.v1.borehole import (
     ListEditingBorehole,
     MultiPatchBorehole,
     PatchBorehole,
-    BoreholeIds
+    BoreholeIds,
+    EditingListFilesBorehole
 )
 from bms.v1.setting import (
     PatchSetting
@@ -48,10 +49,10 @@ class BoreholeProducerHandler(Producer):
                 action = self.get_argument('action', None)
                 
                 if action in [
-                    'UPLOAD'
+                    'IMPORTCSV'
                 ]:
                     request = {"action": action}
-                    if action == 'UPLOAD':
+                    if action == 'IMPORTCSV':
                         request['id'] = self.get_argument('id', None)
                         if request['id'] is None:
                             raise MissingParameter("id")
@@ -117,13 +118,16 @@ class BoreholeProducerHandler(Producer):
             'CHECK',
             'LIST',
             'IDS',
-            'UPLOAD'
+            'IMPORTCSV',
+            'LISTFILES'
         ]:
 
             async with self.pool.acquire() as conn:
 
                 exe = None
 
+                # Check concurrent lock if an editing action requested for an
+                #  exisitng element
                 if action in [
                     'LOCK',
                     'UNLOCK',
@@ -152,7 +156,7 @@ class BoreholeProducerHandler(Producer):
                 if (
                     action in [
                         'CREATE',
-                        'UPLOAD'
+                        'IMPORTCSV'
                     ]
                 ) :
                     # Check if Workgroup is not freezed
@@ -169,7 +173,7 @@ class BoreholeProducerHandler(Producer):
                     exe = CreateBorehole(conn)
                     request['user'] = self.user
 
-                elif action == 'UPLOAD':
+                elif action == 'IMPORTCSV':
                     exe = ImportCsv(conn)
                     request['user'] = self.user
 
@@ -204,6 +208,10 @@ class BoreholeProducerHandler(Producer):
                 elif action == 'IDS':
                     exe = BoreholeIds(conn)
                     request['user'] = self.user
+
+                elif action == 'LISTFILES':
+                    exe = EditingListFilesBorehole(conn)
+                    request['user'] = self.user
                 
                 elif action == 'LIST':
                     exe = ListEditingBorehole(conn)
@@ -213,6 +221,7 @@ class BoreholeProducerHandler(Producer):
                     if 'orderby' in request and (
                         request['orderby'] is not None
                     ) and (
+                        'orderby' in self.user['setting']['eboreholetable'] and
                         self.user[
                             'setting'
                         ]['eboreholetable']['orderby'] != request['orderby']

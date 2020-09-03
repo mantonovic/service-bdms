@@ -86,15 +86,14 @@ class DeleteStratigraphy(Action):
                 ORDER BY
                     creation_sty DESC
                 LIMIT 1;
-            """, rec[1])
+            """, rec[2])
 
-            self.conn.execute("""
+            await self.conn.execute("""
                 UPDATE bdms.stratigraphy
                 SET
                     primary_sty = True
                 WHERE
                     id_sty = $1
-
             """, id_sty)
 
         return None

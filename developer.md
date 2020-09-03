@@ -112,7 +112,8 @@ step if you prefer a dockerized dbms:
     v-bdms-pgdata:
   ```
 
-* Adjust the image version (e.g 1.0.0), the service-bdms database configuration and save 
+* Adjust the image version (e.g 1.0.0), the service-bdms database
+configuration and save 
 
 * Create a .env file 
   ```bash 

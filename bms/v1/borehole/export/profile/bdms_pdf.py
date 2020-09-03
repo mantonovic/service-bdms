@@ -17,6 +17,8 @@ from os import path
 
 import gettext
 
+import random
+
 pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
 pdfmetrics.registerFont(TTFont('VeraBd', 'VeraBd.ttf'))
 pdfmetrics.registerFont(TTFont('VeraIt', 'VeraIt.ttf'))
@@ -55,7 +57,6 @@ def frange(x, y, jump):
         yield x
         x += jump
 
-import random
 # def random_color():
 #     rgbl=[255,0,255]
 #     random.shuffle(rgbl)
@@ -66,11 +67,11 @@ import random
 #           (0, 0, 139)]
 
 def random_color():
-    return random.choice(
-            [(139, 0, 0), 
-            (0, 100, 0),
-            (0, 0, 139)]
-          )
+    return random.choice([
+        (139, 0, 0), 
+        (0, 100, 0),
+        (0, 0, 139)
+    ])
 
 """
 def coord(x, y, unit=mm):
@@ -91,7 +92,8 @@ class bdmsPdf():
         self.pdf = BytesIO()
         self.c = canvas.Canvas(
             self.pdf, 
-            pagesize=settings['page']['size'])
+            pagesize=settings['page']['size']
+        )
         
         self.c.translate(mm,mm)
         self.width, self.height = settings['page']['size']
@@ -102,10 +104,12 @@ class bdmsPdf():
         
     def setTextStyle(self, style):
         self.c.setFillColorRGB(
-            *(self.settings['textStyles'][style][2]))
+            *(self.settings['textStyles'][style][2])
+        )
         self.c.setFont(
             self.settings['textStyles'][style][0], 
-            self.settings['textStyles'][style][1]*mm)
+            self.settings['textStyles'][style][1]*mm
+        )
         self.fs = self.settings['textStyles'][style][1]
     
     def setParagraphStyle(self, style, align):
@@ -121,14 +125,19 @@ class bdmsPdf():
         
     def setBoxStyle(self, style):
         self.c.setLineWidth(
-            self.settings['boxStyles'][style][0])
+            self.settings['boxStyles'][style][0]
+        )
         self.c.setStrokeColorRGB(
-            *(self.settings['boxStyles'][style][1]))
+            *(self.settings['boxStyles'][style][1])
+        )
         self.c.setFillColorRGB(
-             *(self.settings['boxStyles'][style][2]))
+            *(self.settings['boxStyles'][style][2])
+        )
            
-    def drawLeftTextBox2(self, x, y, width, height, boxStyle,
-                    aTextStyle, atext, bTextStyle=None, btext=None):
+    def drawLeftTextBox2(
+        self, x, y, width, height, boxStyle,
+        aTextStyle, atext, bTextStyle=None, btext=None
+    ):
         
         ulx = settings['page']['left']*mm + x*mm
         uly = self.height - (settings['page']['top']*mm + y*mm)
@@ -137,23 +146,28 @@ class bdmsPdf():
         self.c.rect(ulx, uly, width*mm, -height*mm)
         
         aLen = self.c.stringWidth(
-                        atext + ': ', 
-                        self.settings['textStyles'][aTextStyle][0],
-                        self.settings['textStyles'][aTextStyle][1])
+            atext + ': ', 
+            self.settings['textStyles'][aTextStyle][0],
+            self.settings['textStyles'][aTextStyle][1]
+        )
         
         self.setTextStyle(aTextStyle)
         self.c.drawString(
-                    ulx + settings['page']['pad']*mm,
-                    uly - (height/2)*mm - self.fs,
-                    atext + ': ')
+            ulx + settings['page']['pad']*mm,
+            uly - (height/2)*mm - self.fs,
+            atext + ': '
+        )
         
         self.setTextStyle(bTextStyle)
         self.c.drawString(
-                    ulx + aLen*mm + settings['page']['pad']*mm,
-                    uly - (height/2)*mm - self.fs,
-                    btext)
+            ulx + aLen*mm + settings['page']['pad']*mm,
+            uly - (height/2)*mm - self.fs,
+            btext
+        )
     
-    def drawTextBox(self, x, y, width, height, boxStyle, textStyle, atext, halign):
+    def drawTextBox(
+        self, x, y, width, height, boxStyle, textStyle, atext, halign
+    ):
         
         ulx = settings['page']['left']*mm + x*mm
         uly = self.height - (settings['page']['top']*mm + y*mm)
@@ -167,12 +181,14 @@ class bdmsPdf():
             self.c.drawCentredString(
                 ulx + (width/2)*mm,
                 uly - (height/2)*mm - self.fs,
-                atext)
+                atext
+            )
         elif halign == 'left':
             self.c.drawString(
                 ulx + settings['page']['pad']*mm,
                 uly - (height/2)*mm - self.fs,
-                 atext)
+                atext
+            )
         else:
             raise ValueError('halign only support center')
     
@@ -194,7 +210,8 @@ class bdmsPdf():
         self.c.drawString(
             ulx,
             uly + self.settings['textStyles'][aTextStyle][1]/2,
-            atext)
+            atext
+        )
 
     def drawBox(self, x, y, width, height, boxStyle):
         ulx = settings['page']['left']*mm + x*mm
@@ -220,22 +237,28 @@ class bdmsPdf():
         """ """
         ulx = settings['page']['left']*mm + x*mm
         uly = self.height - (settings['page']['top']*mm + y*mm)
+
         # save current state of canvas
         self.c.saveState()
+
         # set clipping region
         self.clipBox(ulx, uly, width*mm, -depth*mm)
         self.c.setLineWidth(
-                self.settings['boxStyles']['thin'][0])
+            self.settings['boxStyles']['thin'][0]
+        )
         
         if color:
             self.c.setFillColorRGB(color[0]/255, color[1]/255, color[2]/255)
             self.c.rect(ulx, uly, width*mm, -depth*mm,  fill=1)
+
         if pattern and path.isfile(pattern):
             # Opens the pattern
             bg = svg2rlg(pattern)
+
             # The width and height of the pattern
             bg_w = bg.width 
             bg_h = bg.height
+
             # The width and height of the layer
             w = width*mm
             h = depth*mm
@@ -257,8 +280,10 @@ class bdmsPdf():
         scale: scale factor (denominator)
         dw: description width
         """
+
         self.c.setLineWidth(
-                self.settings['boxStyles']['thin'][0])
+            self.settings['boxStyles']['thin'][0]
+        )
         
         if self.lastPlotElev is None:
             self.lastPlotElev = self.profile['elevation_z']
@@ -269,12 +294,14 @@ class bdmsPdf():
         for l in self.profile['layers']:
             if l['conf_lithology'] and 'image' in l['conf_lithology']:
                 pattern = self.settings['svgpath'] + l['conf_lithology']['image']
+
             else:
                 pattern = None
                 pattern = self.settings['svgpath'] +'15101001.svg'
             
             if l['conf_lithostra'] and 'color' in l['conf_lithostra']:
                 color = l['conf_lithostra']['color']
+
             else:
                 color = None
                 color = random_color()
@@ -286,23 +313,35 @@ class bdmsPdf():
                 label_depth = l['msm_to']
             
             # the layer extend to the next the page    
-            elif l['msm_to'] < low_m and l['msm_from'] > low_m and l['msm_from'] <= top_m:
+            elif (
+                l['msm_to'] < low_m and
+                l['msm_from'] > low_m and
+                l['msm_from'] <= top_m
+            ):
                 #ly = y + (l['depth_from'] * 1000 / scale)
                 ly = y + ((top_m - l['msm_from']) * 1000 / scale)
                 d = (l['msm_from'] - low_m) * 1000 / scale
                 label_depth = low_m
 
             # the layer is a continuation of previous page and finish in the current
-            elif l['msm_to'] > low_m and l['msm_from'] > top_m and l['msm_to'] < top_m:
+            elif (
+                l['msm_to'] > low_m and
+                l['msm_from'] > top_m and
+                l['msm_to'] < top_m
+            ):
                 ly = y
                 d = (top_m - l['msm_to']) * 1000 / scale
                 label_depth = l['msm_to']
 
             # the layer is a continuation of previous page and extend in the following
-            elif l['msm_to'] < low_m and l['msm_from'] > top_m:
+            elif (
+                l['msm_to'] < low_m and
+                l['msm_from'] > top_m
+            ):
                 ly = y
                 d = h
                 label_depth = low_m
+
             else:
                 ly = None
                 d = None
@@ -319,7 +358,7 @@ class bdmsPdf():
                 )
 
                 self.drawLine(
-                        x + w, ly + d, dw, 0, 'thin'
+                    x + w, ly + d, dw, 0, 'thin'
                 )
 
                 self.drawLeftText(
@@ -327,11 +366,23 @@ class bdmsPdf():
                     'content', '{:+.2f} m'.format(label_depth) #l['msm_to'])
                 )
                 paratext = '<br/>'.join([
-                        '<u>{}</u>: {}'.format(_('description'),l['layer_desc'] or '-'),
-                        '<u>{}</u>: {}'.format(_('lithology'), l['lithology'] or '-'),
-                        '<u>{}</u>: {}'.format(_('lithostratigraphy'),l['lithostratigraphy'] or '-'),
-                        '<u>{}</u>: {}'.format(_('notes'),l['notes'] or '-')
-                    ])
+                    '<u>{}</u>: {}'.format(
+                        _('description'),
+                        l['layer_desc'] or '-'
+                    ),
+                    '<u>{}</u>: {}'.format(
+                        _('lithology'),
+                        l['lithology'] or '-'
+                    ),
+                    '<u>{}</u>: {}'.format(
+                        _('lithostratigraphy'),
+                        l['lithostratigraphy'] or '-'
+                    ),
+                    '<u>{}</u>: {}'.format(
+                        _('notes'),
+                        l['notes'] or '-'
+                    )
+                ])
                 self.createParagraph(
                     paratext,
                     x + w, 
@@ -365,7 +416,7 @@ class bdmsPdf():
         """ 
         x: top left box coordinate in mm
         y: top left box coordinate in mm
-        w: box wiodth in mm 
+        w: box width in mm 
         h: box height in mm
         scale: scale factor (denominator)
         rtype: 'elev' (m.a.s.l) or 'depth' (meter from surface)
@@ -391,36 +442,42 @@ class bdmsPdf():
             top_elev = self.profile['elevation_z']
             top_dep = 0
 
-
         # major tics
         for i in frange(
-            major_tics,
-            min(self.profile['length'], h * scale / 1000), 
-            major_tics):
-                self.drawLine(
-                    x + w - 2, y + (i * 1000 / scale), 2, 0, 'thin')
-                
-                if rtype == 'elev':
-                    self.drawRightText(
-                        x + w - 3, y + 1 + (i * 1000 / scale), 
-                        'content', '{:+.2f} m'.format(top_elev - i)
-                    )
-                elif rtype == 'depth':
-                    self.drawRightText(
-                        x + w - 3, y + 1 + (i * 1000 / scale), 
-                        'content', '{:.0f} m'.format(top_dep + i)
-                    )
-                else:
-                    raise ValueError("rtype can only be \'elev\' or \'depth\'")
+            10 - int(str(int(top_dep))[-1:]),
+            min(
+                self.profile['length'],
+                h * scale / 1000
+            ),
+            10
+        ):
+            self.drawLine(
+                x + w - 2, y + (i * 1000 / scale), 2, 0, 'thin')
+            
+            if rtype == 'elev':
+                self.drawRightText(
+                    x + w - 3, y + 1 + (i * 1000 / scale), 
+                    'content', '{:+.2f} m'.format(top_elev - i)
+                )
+
+            elif rtype == 'depth':
+                self.drawRightText(
+                    x + w - 3, y + 1 + (i * 1000 / scale), 
+                    'content', '{:.0f} m'.format(top_dep + i)
+                )
+
+            else:
+                raise ValueError("rtype can only be \'elev\' or \'depth\'")
 
         # minor tics
         for i in frange(
             minor_tics, 
             min(self.profile['length'], h * scale / 1000), 
-            minor_tics):
-                self.drawLine(
-                    x + w -1, y + (i * 1000 / scale) , 1, 0, 'thin'
-                )
+            minor_tics
+        ):
+            self.drawLine(
+                x + w -1, y + (i * 1000 / scale) , 1, 0, 'thin'
+            )
     
     def close(self):
         self.c.save()
@@ -430,192 +487,365 @@ class bdmsPdf():
         lan = gettext.translation(
             'messages', 
             localedir= path.abspath(path.dirname(__file__))+'/locale', 
-            languages=[lang])
+            languages=[lang]
+        )
+
+        _ = lan.gettext
+
         lan.install()
 
+        page_width = 190
+        page_height = 260
+
         #draw outer frame
-        self.drawBox(0, 0, 190, 260, 'bold')
+        self.drawBox(0, 0, page_width, page_height, 'bold')
         
         #TITLE BOX
         self.drawTextBox(0, 0, 140, 15, 'bold', 
-                'title', _('Geological_Profile'), 'center'
+            'title', _('Geological_Profile'), 'center'
         )
-        
+
         #vers. & date boxes
         self.drawLeftTextBox2(140, 0, 50, 12, 'bold',
             'contentB',  _('Scale'),
             'content', '1:{}'.format(scale)
         )
-        
+
         self.drawLeftTextBox2(140, 12, 25, 3, 'bold',
             'contentB',  _('Vers'),
             'content', '{}'.format(self.profile['strataname'])
         )
+
         self.drawLeftTextBox2(165, 12, 25, 3, 'bold',
             'contentB',  _('Date'),
             'content', '{}'.format(self.profile['stratadate'])
         )
+
+        start_y = 15
+        current_y = start_y
+        profile_y = current_y
+        box_height = 5
+        column_width = page_width / 3
         
         # POSITION BOX
-        self.drawBox(0, 15, 190/3, 45, 'bold')
 
-        self.drawTextBox(0, 15, 190/3, 5, 'none',
+        self.drawTextBox(
+            0, current_y,
+            column_width, box_height,
+            'none',
             'subtitle', _('location'), 'center'
         )
 
-        self.drawLeftTextBox2(0, 20, 190/3, 5, 'none',
-            'contentB',  _('country'),
-            'content', '{}'.format(self.profile['country'])
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            0, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('country'),
+            'content', f"{self.profile['country']}"
         )
 
-        self.drawLeftTextBox2(0, 25, 190/3, 5, 'none',
-            'contentB',  _('canton'),
-            'content', '{}'.format(self.profile['canton'])
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            0, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('canton'),
+            'content', f"{self.profile['canton']}"
         )
 
-        self.drawLeftTextBox2(0, 30, 190/3, 5, 'none',
-            'contentB',  _('city'),
-            'content', '{}'.format(self.profile['city'])
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            0, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('city'),
+            'content', f"{self.profile['city']}"
         )
 
-        self.drawLeftTextBox2(0, 35, 190/3, 5, 'none',
-            'contentB',  _('address'),
-            'content', '{}'.format(self.profile['address'])
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            0, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('address'),
+            'content', f"{self.profile['address']}"
         )
 
-        self.drawLeftTextBox2(0, 40, 190/3, 5, 'none',
-            'contentB',  _('coordinates'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            0, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('coordinates'),
             'content', '{} E, {} N'.format(
                 self.profile['location_e'],
                 self.profile['location_n']
-                )
+            )
         )
 
-        self.drawLeftTextBox2(0, 45, 190/3, 5, 'none',
-            'contentB',  _('elevation'),
-            'content', '{} '.format(
-                self.profile['elevation_z']
-                ) + _('m.a.s.l')
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            0, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('elevation'),
+            'content', '{} {}'.format(
+                self.profile['elevation_z'],
+                _('m.a.s.l')
+            )
         )
 
-        self.drawLeftTextBox2(0, 50, 190/3, 5, 'none',
-            'contentB',  _('reference systems'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            0, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('reference systems'),
             'content', '{}, {}'.format(
                 self.profile['srs'],
                 self.profile['hrs']
-                )
-        )         
-        
-        # PROJECT BOX
-        self.drawBox(190/3, 15, 190/3, 45, 'bold')
-
-        self.drawTextBox(190/3, 15, 190/3, 5, 'none',
-            'subtitle', _('project'), 'center'
+            )
         )
 
-        self.drawLeftTextBox2(190/3, 20, 190/3, 5, 'none',
-            'contentB',  _('project_name'),
+        profile_y = max(profile_y, current_y)
+        
+        current_y = start_y
+
+        # PROJECT BOX
+
+        self.drawTextBox(
+            column_width, current_y,
+            column_width, box_height,
+            'none', 'subtitle', _('project'), 'center'
+        )
+
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('project_name'),
             'content', '{}'.format(self.profile['project_name'] or '-')
         )
 
-        self.drawLeftTextBox2(190/3, 25, 190/3, 5, 'none',
-            'contentB',  _('auth_n'),
+        if self.profile['identifiers'] is not None:
+            for identifier in self.profile['identifiers']:
+                current_y += box_height
+                self.drawLeftTextBox2(
+                    column_width, current_y,
+                    column_width, box_height,
+                    'none', 'contentB',  identifier['identifier'],
+                    'content', '{}'.format(identifier['value'] or '-')
+                )
+
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('auth_n'),
             'content', '{}'.format(self.profile['auth_n'] or '-')
         )
 
-        self.drawLeftTextBox2(190/3, 30, 190/3, 5, 'none',
-            'contentB',  _('purpose'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('purpose'),
             'content', '{}'.format(self.profile['purpose'] or '-')
         )
 
-        self.drawLeftTextBox2(190/3, 35, 190/3, 5, 'none',
-            'contentB',  _('status'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('status'),
             'content', '{}'.format(self.profile['status'] or '-')
         )
 
-        self.drawLeftTextBox2(190/3, 40, 190/3, 5, 'none',
-            'contentB',  _('drilling_date'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('drilling_date'),
             'content', '{}'.format(self.profile['drilling_date'] or '-')
         )
 
-        self.drawLeftTextBox2(190/3, 45, 190/3, 5, 'none',
-            'contentB',  _('restriction'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('restriction'),
             'content', '{} {}'.format(
                 self.profile['restriction'] or '-',
                 self.profile['restrictoin_until'] or '')
         )
 
-        self.drawLeftTextBox2(190/3, 50, 190/3, 5, 'none',
-            'contentB',  _('logged_by'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('logged_by'),
             'content', '{}'.format(self.profile['logged_by'] or '-')
         )
 
-        self.drawLeftTextBox2(190/3, 55, 190/3, 5, 'none',
-            'contentB',  _('checked_by'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('checked_by'),
             'content', '{}'.format(self.profile['checked_by'] or '-')
         )
 
-        # BOREHOLE BOX
-        self.drawBox(2*190/3, 15, 190/3, 45, 'bold')
+        profile_y = max(profile_y, current_y)
 
-        self.drawTextBox(2*190/3, 15, 190/3, 5, 'none',
-            'subtitle', _('borehole'), 'center'
+        current_y = start_y
+
+        # BOREHOLE BOX
+
+        self.drawTextBox(
+            2*column_width, current_y,
+            column_width, box_height,
+            'none', 'subtitle', _('borehole'), 'center'
         )
 
-        self.drawLeftTextBox2(2*190/3, 20, 190/3, 5, 'none',
-            'contentB',  _('kind'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            2*column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('kind'),
             'content', '{}'.format(self.profile['kind'] or '-')
         )
 
-        self.drawLeftTextBox2(2*190/3, 25, 190/3, 5, 'none',
-            'contentB',  _('drill_diameter'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            2*column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('drill_diameter'),
             'content', '{} m'.format(self.profile['drill_diameter'] or '-')
         )
 
-        self.drawLeftTextBox2(2*190/3, 30, 190/3, 5, 'none',
-            'contentB',  _('length'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            2*column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('length'),
             'content', '{} m'.format(self.profile['length'] or '-')
         )
 
-        self.drawLeftTextBox2(2*190/3, 35, 190/3, 5, 'none',
-            'contentB',  _('groundwater'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            2*column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('groundwater'),
             'content', '{}'.format(self.profile['groundwater'] or '-')
         )
 
-        self.drawLeftTextBox2(2*190/3, 40, 190/3, 5, 'none',
-            'contentB',  _('cuttings'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            2*column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('cuttings'),
             'content', '{}'.format(self.profile['cuttings'] or '-')
         )
 
-        self.drawLeftTextBox2(2*190/3, 45, 190/3, 5, 'none',
-            'contentB',  _('method'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            2*column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('method'),
             'content', '{}'.format(self.profile['method'] or '-')
         )
 
-        self.drawLeftTextBox2(2*190/3, 50, 190/3, 5, 'none',
-            'contentB',  _('bore_inc'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            2*column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('bore_inc'),
             'content', '{} deg'.format(self.profile['bore_inc'] or '-')
         )
 
-        self.drawLeftTextBox2(2*190/3, 55, 190/3, 5, 'none',
-            'contentB',  _('bore_inc_dir'),
+        current_y += box_height
+
+        self.drawLeftTextBox2(
+            2*column_width, current_y,
+            column_width, box_height,
+            'none', 'contentB',  _('bore_inc_dir'),
             'content', '{} deg'.format(self.profile['bore_inc_dir'] or '-')
         )
 
-        self.drawProfile(0, 60, 190, 200, scale)
 
-        pages = int(((self.profile['length'] * 1000 / scale) + 70 ) / 260) + 1
+        profile_y = max(profile_y, current_y)
+
+        # Drawing bold boxes
+        self.drawBox(
+            0, start_y,
+            column_width, profile_y - 2 * box_height,
+            'bold'
+        )
+        self.drawBox(
+            column_width, start_y,
+            column_width, profile_y - 2 * box_height,
+            'bold'
+        )
+        self.drawBox(
+            column_width, start_y,
+            column_width, profile_y - 2 * box_height,
+            'bold'
+        )
+
+        profile_y += box_height
+
+        self.drawProfile(
+            0, profile_y, page_width, page_height - profile_y, scale
+        )
+
+        pages = int(
+            (
+                (self.profile['length'] * 1000 / scale) + 70 
+            ) / page_height
+        ) + 1
         i = 1
-        self.drawRightText(190,265,'content', 'p. {}/{}'.format(i,pages))
+
+        # Add page number
+        self.drawRightText(
+            page_width, 265,
+            'content', 'p. {}/{}'.format(i, pages)
+        )
         self.c.showPage()
 
-        while self.lastPlotElev > (self.profile['elevation_z']-self.profile['length']):
-            self.drawProfile(0, 0, 190, 260, scale)
+        while self.lastPlotElev > (
+            self.profile['elevation_z'] - self.profile['length']
+        ):
+            self.drawProfile(
+                0, 0, page_width, page_height, scale
+            )
             i = i + 1
-            self.drawRightText(190,265,'content', 'p. {}/{}'.format(i,pages))
+
+            # Add page number
+            self.drawRightText(
+                page_width, 265,
+                'content',
+                'p. {}/{}'.format(i,pages)
+            )
             self.c.showPage()
-        
+
     def drawProfile(self, x, y, w, h, scale):
+
         # PROFILE PLOT
         # ==============
         self.drawBox(x, y, w, h, 'bold')
@@ -634,12 +864,11 @@ class bdmsPdf():
         # ruler depth
         self.drawRuler(x+20, y+10, 20, h-10, scale, 'depth')
 
-        
         # description header
         self.drawTextBox(x+70, y, w-70, 10, 'bold',
             'subtitle', _('material description'), 'center'
         )
-        
+
         # stratigraphy & description
         self.drawStatigraphy(x+40, y+10, 30, h-10, scale, w-70)
 
@@ -647,9 +876,3 @@ class bdmsPdf():
         self.drawTextBox(x+40, y, 30, 10, 'bold',
             'subtitle', _('stratigraphy'), 'center'
         )
-
-
-        
-    
-
-        

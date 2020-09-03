@@ -58,10 +58,19 @@ class ExportCsv(Action):
 
         if len(data) > 0:
 
-            cl = await ListCodeList(self.conn).execute('borehole_form')
+            cl = await ListCodeList(
+                self.conn
+            ).execute('borehole_form')
 
             csv_header = {}
             for c in cl['data']['borehole_form']:
+                csv_header[c['code']] = c
+
+            identifiers = await ListCodeList(
+                self.conn
+            ).execute('borehole_identifier')
+
+            for c in identifiers['data']['borehole_identifier']:
                 csv_header[c['code']] = c
 
             csvfile = StringIO()
@@ -74,19 +83,45 @@ class ExportCsv(Action):
             keys = data[0].keys()
             cols = []
             for key in keys:
-                cols.append(
-                    csv_header[key][language]['text']
-                    if key in csv_header else key
+                # Excluding identifiers column
+                if key != 'identifiers':
+                    cols.append(
+                        csv_header[key][language]['text']
+                        if key in csv_header else key
+                    )
+            
+            extra_col = []
+            for identifier in identifiers['data']['borehole_identifier']:
+                extra_col.append(
+                    identifier[language]['text']
                 )
-            cw.writerow(cols)
+
+            cw.writerow(cols + extra_col)
 
             for row in data:
                 r = []
                 for col in keys:
-                    if isinstance(row[col], list):
-                        r.append(",".join(str(x) for x in row[col]))
+                    if col == 'identifiers':
+                        for xc in extra_col:
+                            val = None
+                            if row[col] is not None:
+                                for identifier in row[col]:
+                                    if identifier[
+                                        'borehole_identifier'
+                                    ] ==  xc:
+                                        val = identifier[
+                                            'identifier_value'
+                                        ]
+                                        break
+
+                        r.append(val)
+
                     else:
-                        r.append(row[col])
+                        if isinstance(row[col], list):
+                            r.append(",".join(str(x) for x in row[col]))
+                        else:
+                            r.append(row[col])
+
                 cw.writerow(r)
 
         return csvfile
@@ -534,8 +569,17 @@ class ExportCsv(Action):
             LEFT JOIN bdms.municipalities
                 ON municipalities.gid = city_bho
 
-            LEFT JOIN bdms.cantons
-                ON cantons.kantonsnum = canton_bho
+            LEFT JOIN (
+                SELECT DISTINCT
+                    cantons.kantonsnum,
+                    cantons.name
+				FROM
+                    bdms.cantons
+			) as ctn
+                ON ctn.kantonsnum = canton_bho
+
+            --LEFT JOIN bdms.cantons
+            --    ON cantons.kantonsnum = canton_bho
 
             LEFT JOIN bdms.codelist as lnd
                 ON lnd.id_cli = landuse_id_cli
