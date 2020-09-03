@@ -100,7 +100,6 @@ with open('2-geolcodes.sql', 'w+') as sqlfile:
                 try:
                     conf = f'{{"color": [{row[11]}]}}'
                 except Exception as x:
-                    print(row_number, row[11])
                     raise x
             
             elif schema_name == 'vlit40' and row[11] != '':

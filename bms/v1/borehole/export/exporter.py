@@ -210,8 +210,6 @@ class ExportHandler(Viewer):
                             else:
                                 raise ValueError("id parameters are {berehole id}:{stratigraphy id}")
 
-                            print("sid: ", sid)
-
                             if sid is not None:
                                 fallback = 'en'
                                 res = await conn.fetchval(f"""
@@ -396,8 +394,19 @@ class ExportHandler(Viewer):
                                             ON cli_cuttings.id_cli = cuttings_id_cli
                                         LEFT JOIN bdms.municipalities as mun_j
                                             ON mun_j.gid = city_bho
-                                        LEFT JOIN bdms.cantons as cant_j
-                                            ON cant_j.gid = canton_bho
+                                        
+                                        --LEFT JOIN bdms.cantons as cant_j
+                                        --    ON cant_j.gid = canton_bho
+                                        
+                                        LEFT JOIN (
+                                            SELECT DISTINCT
+                                                cantons.kantonsnum,
+                                                cantons.name
+                                            FROM
+                                                bdms.cantons
+                                        ) as cant_j
+                                            ON cant_j.kantonsnum = canton_bho
+
                                         LEFT JOIN (
                                             SELECT id_sty, date_sty, name_sty, id_bho_fk 
                                             FROM bdms.stratigraphy
@@ -413,9 +422,6 @@ class ExportHandler(Viewer):
                                 """, bid, sid, sid, sid)
 
                                 d = json.loads(res)
-
-                                print("d:")
-                                print(d)
 
                                 a = bdms.bdmsPdf(d)
                                 a.renderProfilePDF(

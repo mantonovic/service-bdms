@@ -155,7 +155,8 @@ class ExportCsvFull(Action):
                 qth.geolcode as qt_elevation,
 
                 lnd.geolcode as landuse,
-                cantons.name as canton,
+                ctn.name as canton,
+                -- cantons.name as canton,
                 municipalities.name as city,
                 address_bho as address,
 
@@ -602,8 +603,17 @@ class ExportCsvFull(Action):
             LEFT JOIN bdms.municipalities
                 ON municipalities.gid = city_bho
 
-            LEFT JOIN bdms.cantons
-                ON cantons.kantonsnum = canton_bho
+            --LEFT JOIN bdms.cantons
+            --    ON cantons.kantonsnum = canton_bho
+
+            LEFT JOIN (
+                SELECT DISTINCT
+                    cantons.kantonsnum,
+                    cantons.name
+				FROM
+                    bdms.cantons
+			) as ctn
+                ON ctn.kantonsnum = canton_bho
 
             LEFT JOIN bdms.codelist as lnd
                 ON lnd.id_cli = landuse_id_cli

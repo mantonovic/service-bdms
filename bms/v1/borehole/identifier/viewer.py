@@ -9,8 +9,6 @@ class IdentifierViewerHandler(Viewer):
     async def execute(self, request):
         action = request.pop('action', None)
 
-        print(action)
-
         if action in ['LIST']:
 
             async with self.pool.acquire() as conn:

@@ -569,8 +569,17 @@ class ExportCsv(Action):
             LEFT JOIN bdms.municipalities
                 ON municipalities.gid = city_bho
 
-            LEFT JOIN bdms.cantons
-                ON cantons.kantonsnum = canton_bho
+            LEFT JOIN (
+                SELECT DISTINCT
+                    cantons.kantonsnum,
+                    cantons.name
+				FROM
+                    bdms.cantons
+			) as ctn
+                ON ctn.kantonsnum = canton_bho
+
+            --LEFT JOIN bdms.cantons
+            --    ON cantons.kantonsnum = canton_bho
 
             LEFT JOIN bdms.codelist as lnd
                 ON lnd.id_cli = landuse_id_cli

@@ -12,9 +12,9 @@
    
    Added new REST actions to handle user agreements on *terms of service*.
 
- - **Login as guest**: 
+ - **Login as viewer**: 
    
-   Guest user can now access with the VIEW role.
+   Guest users can now access with the VIEW role.
 
  - **Attachments**: 
    

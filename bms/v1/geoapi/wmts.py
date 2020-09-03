@@ -14,10 +14,7 @@ class Wmts(Viewer):
                 "https://wmts.geo.admin.ch/EPSG/2056/"
                 "1.0.0/WMTSCapabilities.xml?lang={}"
             ).format(lang)
-            print(f"Fetching WMTS GetCapability: {url}")
             response = await http_client.fetch(url)
-
-            print("Done.")
             self.write(response.body)
 
         except HTTPError as e:

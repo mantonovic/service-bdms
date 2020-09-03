@@ -2,7 +2,7 @@
 UPDATE
   bdms.config
 SET
-  value_cfg = '1.0.1-RC1'
+  value_cfg = '1.0.1'
 WHERE
   name_cfg = 'VERSION';
 
@@ -16,7 +16,7 @@ WHERE
 UPDATE
   bdms.config
 SET
-  value_cfg = '1.0.0-RC1'
+  value_cfg = '1.0.0'
 WHERE
   name_cfg = 'GEOLCODES';
 

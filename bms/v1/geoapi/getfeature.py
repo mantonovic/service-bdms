@@ -24,15 +24,12 @@ class GetFeature(Viewer):
             elif 'lang=' not in url:
                 url = f'{url}&lang={lang}'
 
-            print(f"Fetching WMS GetCapability: {url}")
-
             response = await http_client.fetch(
                 HTTPRequest(
                     url=url
                 )
             )
 
-            print(" > Done.")
             self.write(response.body)
 
         except HTTPError as e:

@@ -286,8 +286,17 @@ class GetBorehole(Action):
                 LEFT JOIN bdms.users as locker
                     ON locked_by = locker.id_usr
 
-                LEFT JOIN bdms.cantons
-                    ON kantonsnum = canton_bho
+                LEFT JOIN (
+                    SELECT DISTINCT
+                        cantons.kantonsnum,
+                        cantons.name
+                    FROM
+                        bdms.cantons
+                ) as ctn
+                    ON ctn.kantonsnum = canton_bho
+
+                --LEFT JOIN bdms.cantons
+                --    ON kantonsnum = canton_bho
 
                 LEFT JOIN bdms.municipalities
                     ON municipalities.gid = city_bho

@@ -87,20 +87,11 @@ class ExportShapefile(Action):
             for key in keys:
                 # Excluding identifiers column and coordinates
 
-                print(
-                    (
-                        shp_header[key][language]['text']
-                        if key in shp_header
-                        else key
-                    ).upper()
-                )
-
                 if key in [
                     'location_x',
                     'location_y',
                     'identifiers'
                 ]:
-                    print("  > skip")
                     continue
 
                 w.field(
@@ -110,17 +101,13 @@ class ExportShapefile(Action):
                         else key
                     ).upper(), 'C'
                 )
-            
-            print("")
+
             extra_col = []
             for identifier in identifiers['data']['borehole_identifier']:
                 extra_col.append(
                     identifier[language]['text']
                 )
 
-                print(
-                    identifier[language]['text'].upper()
-                )
                 w.field(
                     identifier[language]['text'].upper(), 'C'
                 )
@@ -137,7 +124,6 @@ class ExportShapefile(Action):
                         continue
 
                     if col == 'identifiers':
-                        print("\nWorking on identifier:")
                         for xc in extra_col:
                             val = None
                             if row[col] is not None:
@@ -145,7 +131,6 @@ class ExportShapefile(Action):
                                     if identifier[
                                         'borehole_identifier'
                                     ] ==  xc:
-                                        print(f" > {identifier['identifier_value']}")
                                         val =  identifier[
                                             'identifier_value'
                                         ]
@@ -158,8 +143,6 @@ class ExportShapefile(Action):
                             r.append(",".join(str(x) for x in row[col]))
                         else:
                             r.append(row[col])
-
-                print(r)
 
                 w.record(*r)
 
