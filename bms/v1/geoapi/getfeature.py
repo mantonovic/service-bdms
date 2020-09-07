@@ -12,8 +12,8 @@ class GetFeature(Viewer):
     async def get(self):
         http_client = AsyncHTTPClient()
         lang = self.get_argument('lang', 'en')
-        layer = self.get_argument('layer', None)
-        coords = self.get_argument('coordinates', None)
+        # layer = self.get_argument('layer', None)
+        # coords = self.get_argument('coordinates', None)
         
         try:
             self.set_header("Content-Type", "text/xml")
