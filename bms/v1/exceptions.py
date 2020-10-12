@@ -87,6 +87,12 @@ class WrongParameter(BmsException):
         super().__init__(f"Wrong parameter {parameter}", 'E-204')
 
 
+# Raised when trying to delete row from a referecnced table
+class DeleteReferenced(BmsException):
+    def __init__(self):
+        super().__init__("Foreign key constraint violation", 'E-205')
+
+
 class Locked(BmsException):
     def __init__(self, id, data):
         super().__init__(

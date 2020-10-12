@@ -16,12 +16,16 @@ class ListCodeList(Action):
         
         else:
             recs = await self.conn.fetch("""
-                SELECT
-                    DISTINCT schema_cli
+                SELECT DISTINCT
+                    schema_cli,
+                    order_cli,
+                    id_cli
                 FROM
                     bdms.codelist
                 WHERE
                     schema_cli = $1
+                ORDER BY order_cli, id_cli
+
             """, schema)
             
         data = {}
@@ -98,7 +102,7 @@ class ListCodeList(Action):
                     WHERE
                         schema_cli = $1
                     ORDER BY
-                        order_cli
+                        order_cli, id_cli
                 ) AS t
             """, rec[0])
             data[rec[0]] = self.decode(val)
