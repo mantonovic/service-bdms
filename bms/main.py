@@ -263,6 +263,10 @@ if __name__ == "__main__":
         # Workflow handlers
         WorkflowProducerHandler,
 
+        # Content handlers
+        ContentHandler,
+        ContentAdminHandler,
+
         # Terms handlers
         TermsHandler,
         TermsAdminHandler,
@@ -313,6 +317,11 @@ if __name__ == "__main__":
 
         # Workflow handlers
         (r'/api/v1/workflow/edit', WorkflowProducerHandler),
+
+        # Content handlers
+        (r'/api/v1/content/admin', ContentAdminHandler),
+        (r'/api/v1/content', ContentHandler),
+        (r'/api/v1/content/(.*)', ContentHandler),
 
         # Terms handlers
         (r'/api/v1/terms', TermsHandler),
