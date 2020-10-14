@@ -36,8 +36,7 @@ class CreateIdentifier(Action):
                 text_cli_it,
                 description_cli_en,
                 schema_cli
-            )
-            VALUES (
+            ) VALUES (
                 '',
                 $1,
                 $2,
@@ -45,7 +44,9 @@ class CreateIdentifier(Action):
                 $4,
                 ' ',
                 'borehole_identifier'
-            ) RETURNING id_cli
+            )
+            RETURNING
+                id_cli
         """,
             text['en'],
             text['de'],

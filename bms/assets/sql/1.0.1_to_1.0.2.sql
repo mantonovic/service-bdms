@@ -13,6 +13,13 @@ SET
 WHERE
   name_cfg = 'PREVIOUS';
 
+UPDATE
+  bdms.config
+SET
+  value_cfg = to_char(now(), 'YYYY-MM-DD"T"HH24:MI:SSOF')
+WHERE
+  name_cfg = 'PG_UPGRADE';
+
 CREATE TABLE bdms.contents (
     id_cnt serial,
     name_cnt character varying NOT NULL,
@@ -42,6 +49,7 @@ CREATE TABLE bdms.contents (
 
 INSERT INTO bdms.contents(
 	name_cnt,
+	draft_cnt,
     
     title_cnt_en,
     text_cnt_en,
@@ -57,6 +65,7 @@ INSERT INTO bdms.contents(
 
 ) VALUES (
     'login',
+    FALSE,
     
     'Welcome to swissforage.ch',
     'A platform to acquire borehole data according to the Borehole data model defined by the Swiss Geological Survey at swisstopo ([more](https://geoservice.ist.supsi.ch/docs/bdms)).',
