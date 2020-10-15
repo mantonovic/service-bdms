@@ -35,7 +35,6 @@ class ListCodeList(Action):
         # Default language
         dl = 'en'
         for rec in recs:
-            print(rec)
             val = await self.conn.fetchval(f"""
                 SELECT
                     array_to_json(
