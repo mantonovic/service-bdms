@@ -6,6 +6,8 @@ class ListCodeList(Action):
 
     async def execute(self, schema=None):
 
+        data = {}
+
         if schema is None:
             recs = await self.conn.fetch("""
                 SELECT
@@ -27,12 +29,13 @@ class ListCodeList(Action):
                 ORDER BY order_cli, id_cli
 
             """, schema)
-            
-        data = {}
+
+            data[schema] = []
 
         # Default language
         dl = 'en'
         for rec in recs:
+            print(rec)
             val = await self.conn.fetchval(f"""
                 SELECT
                     array_to_json(
