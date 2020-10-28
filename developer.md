@@ -192,7 +192,7 @@ After a code update you should rebuild and push to [service-bdms dockerhub](http
   ```
 * Push image to dockerhub
   ```bash
-  docker push  swisstopo/service-bdms:x.x.x 
+  docker push swisstopo/service-bdms:x.x.x 
   ```
   or
     ```bash
@@ -207,8 +207,3 @@ After a code update you should rebuild and push to [service-bdms dockerhub](http
   ```bash
   @reboot sleep 60 && /usr/local/bin/docker-compose -f </path/docker-compose.yml> up -d
   ```
-
-
-
-
-
